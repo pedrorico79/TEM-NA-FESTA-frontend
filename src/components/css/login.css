@@ -1,0 +1,283 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Inter", sans-serif;
+    font-weight: 300;
+}
+
+/* Fundo página e card */
+.login-pagina {
+    width: 100%;
+    height: 100vh;
+    background: #f9f7f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-card {
+    width: 1200px;
+    min-height: 700px;
+    display: grid;
+    grid-template-columns: 52% 48%;
+    background: #422f24;
+    border-radius: 40px;
+    overflow: hidden;
+}
+
+/* Seção da logo */
+
+.logo-section {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 90px;
+}
+
+.logo-circulo {
+    position: relative;
+    z-index: 2;
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: #422f24;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45), 0 0 100px rgba(0, 0, 0, 0.6);
+}
+
+.logo-circulo img {
+    width: 250px;
+}
+
+.icones-fundo {
+    position: absolute;
+    bottom: -18px;
+    left: -20px;
+    width: 120%;
+    z-index: 1;
+}
+
+.icones-fundo img {
+    width: 100%;
+    display: block;
+    opacity: 0.18;
+}
+
+/* Seção do Formulário */
+
+.form-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 50px;
+}
+
+.input-container {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 50px;
+}
+
+.input-container input {
+    height: 45px;
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: white;
+    font-size: 18px;
+}
+
+.input-container input::placeholder {
+    color: #ffe3e7;
+}
+
+.input-container fieldset {
+    border: 2px solid #d77585;
+    border-radius: 12px;
+    padding: 0 18px 8px 18px;
+    background: #d77585;
+}
+
+.input-container legend {
+    padding: 0 10px;
+    margin-left: 10px;
+    color: white;
+    font-size: 16px;
+    background: #422f24;
+    border-radius: 6px;
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.input-wrapper input {
+  flex: 1;
+}
+
+/* Olho da senha */
+.mostrar-senha {
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  opacity: 0.7;
+  transition: 0.2s;
+}
+
+.mostrar-senha:hover {
+  opacity: 1;
+}
+
+.mostrar-senha ion-icon {
+  font-size: 22px;
+}
+
+.esqueceu-senha {
+    color: white;
+    text-align: right;
+    margin-top: -30px;
+    margin-bottom: 70px;
+}
+
+/* Switch de Lembrar Acesso */
+
+.lembrar-acesso-container {
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 18px;
+    margin-bottom: 30px;
+    margin-left: 15px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 56px;
+    height: 32px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.bolinha {
+    position: absolute;
+    inset: 0;
+    background: #6f5650;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.bolinha::before {
+    content: "";
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    top: 4px;
+    left: 4px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.switch input:checked+.bolinha {
+    background: #d77585;
+}
+
+.switch input:checked+.bolinha::before {
+    transform: translateX(24px);
+}
+
+/* Botão Entrar */
+
+.login-button {
+    border: none;
+    background: #d77585;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+    height: 65px;
+    font-size: 24px;
+    border-radius: 40px;
+}
+
+.login-button:hover {
+    opacity: 0.9;
+}
+
+@media (max-width: 900px) {
+    .login-card {
+        width: 95%;
+        min-height: auto;
+
+        grid-template-columns: 1fr;
+    }
+
+    .logo-section {
+        min-height: 250px;
+        padding: 30px 20px;
+    }
+
+    .logo-circulo {
+        width: 220px;
+        height: 220px;
+    }
+
+    .logo-circulo img {
+        width: 170px;
+    }
+
+    .icones-fundo {
+        font-size: 40px;
+        gap: 15px;
+    }
+
+    .form-section {
+        padding: 30px;
+    }
+
+    .input-group {
+        margin-bottom: 20px;
+    }
+
+    .input-group label {
+        font-size: 16px;
+    }
+
+    .input-group input {
+        height: 50px;
+        font-size: 16px;
+        padding: 12px;
+    }
+
+    .esqueceu-senha {
+        font-size: 14px;
+        margin-bottom: 30px;
+    }
+
+    .remember-container {
+        font-size: 18px;
+        margin-bottom: 30px;
+    }
+
+    .login-button {
+        height: 55px;
+        font-size: 20px;
+    }
+}
