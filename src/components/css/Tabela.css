@@ -1,0 +1,42 @@
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.custom-table thead {
+  background: #2c2421;
+  color: white;
+}
+
+.custom-table th {
+  text-align: left;
+  padding: 18px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.custom-table td {
+  padding: 18px;
+  border-bottom: 1px solid #e9e0da;
+}
+
+.section-row td {
+  padding: 10px 0 0px;
+  border: none;
+}
+
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #594133;
+  font-size: 18px;
+}
+
+.section-divider::before,
+.section-divider::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  background: #594133;
+}

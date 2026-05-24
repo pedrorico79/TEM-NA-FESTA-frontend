@@ -1,0 +1,34 @@
+.botao-adicionar {
+  border: none;
+  background: #6f432a;
+  color: white;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.botao-adicionar:hover {
+  opacity: 0.9;
+}
+
+.botao-adicionar.medium {
+  width: 2000px;
+  height: 52px;
+
+  font-size: 16px;
+}
+
+.botao-adicionar.small {
+  width: 155px;
+  height: 46px;
+
+  font-size: 16px;
+}
+
+.botao-adicionar ion-icon {
+  font-size: 24px;
+}
