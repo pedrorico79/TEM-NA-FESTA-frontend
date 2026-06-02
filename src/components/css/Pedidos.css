@@ -1,0 +1,290 @@
+.pedidos-layout {
+  display: flex;
+}
+
+.pedidos-content {
+  flex: 1;
+  padding: 40px;
+}
+
+.pedidos-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  margin-bottom: 20px;
+}
+
+.titulo-pagina {
+  font-size: 45px;
+  font-family: "DM Serif Display", serif;
+  color: #2e1c16;
+}
+
+.subtitulo-pagina {
+  color: #b6a8a0;
+  font-size: 22px;
+}
+
+.search-container {
+  width: 450px;
+  height: 37px;
+  border: 2px solid #ddd0c7;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 22px;
+}
+
+.search-container ion-icon {
+  font-size: 30px;
+  color: #b8a79d;
+}
+
+.search-container input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 18px;
+  font-weight: 300;
+  background: transparent;
+}
+
+.search-container input::placeholder {
+  color: #b8a79d;
+}
+
+
+.view-buttons,
+.sort-buttons {
+  display: flex;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 2px solid #b6aba5;
+}
+
+.view-buttons button,
+.sort-buttons button {
+  width: 50px;
+  height: 30px;
+  border: none;
+  background: #f7f4f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.view-buttons button ion-icon,
+.sort-buttons button ion-icon {
+  font-size: 28px;
+  color: #6f432a;
+  
+}
+
+.sort-buttons button ion-icon {
+    font-size: 43px;
+}
+
+.view-buttons button.active,
+.sort-buttons button.active {
+  background: #6f432a;
+  color: white;
+}
+
+.view-buttons button.active ion-icon,
+.sort-buttons button.active ion-icon {
+  color: white;
+}
+
+.filtros-card {
+  background: white;
+  border: 1px solid #e7e0da;
+  border-radius: 28px;
+  padding: 18px 22px;
+  margin-bottom: 30px;
+}
+
+.filtros-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.filtros-bottom {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.filtros-left,
+.ordenacao {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.filtro-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  color: #b8a79d;
+
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.filtro-label ion-icon {
+  font-size: 30px;
+}
+
+.filtros-card select {
+  height: 37px;
+  min-width: 200px;
+  padding: 0 20px;
+
+  border-radius: 12px;
+  border: 2px solid #ddd0c7;
+
+  background: white;
+
+  font-size: 15px;
+  font-weight: 400;
+
+  color: #2e1c16;
+
+  cursor: pointer;
+}
+
+.ordenacao {
+  padding-left: 26px;
+  border-left: 2px solid #e6ddd8;
+}
+
+.lista-pedidos {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+}
+
+.pedido-card {
+  background: white;
+  border: 1px solid #ddd0c7;
+  border-radius: 22px;
+  padding: 15px 20px;
+  min-height: 200px;
+}
+
+.pedido-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.pedido-id {
+  color: #7f6c63;
+  font-size: 13px;
+}
+
+.pedido-top-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pedido-top-right ion-icon{
+    font-size: 20px;
+
+}
+
+.pedido-status {
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.pedido-status.naoIniciado {
+  background: #dbeafe;
+  border: 1px solid #93c5fd;
+}
+
+.pedido-status.producao {
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+}
+
+.pedido-status.pronto {
+  background: #dcfce7;
+  border: 1px solid #86efac;
+}
+
+.pedido-status.entregue {
+  background: #e7e5e4;
+  border: 1px solid #a8a29e;
+}
+
+.pedido-status.cancelado {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+}
+
+.pedido-cliente {
+  margin-top: 15px;
+  margin-bottom: 35px;
+  margin-left: 35px;
+
+  font-size: 25px;
+  font-weight: 300;
+
+  max-width: 220px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pedido-infos {
+  display: flex;
+  gap: 18px;
+  color: #9b7d71;
+  font-size: 14px;
+
+  margin-bottom: 10px;
+}
+
+.pedido-infos span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pedido-infos ion-icon {
+  font-size: 18px;
+  color: #d77585;
+}
+
+.pedido-footer {
+  border-top: 1px solid #eee2da;
+  padding-top: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pedido-footer span{
+    font-size: 15px;
+}
+
+.pedido-campanha {
+  max-width: 70px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

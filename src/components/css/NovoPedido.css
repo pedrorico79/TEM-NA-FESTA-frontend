@@ -1,0 +1,370 @@
+.novoPedido-layout {
+    display: flex;
+}
+
+.novoPedido-content {
+    flex: 1;
+    padding: 24px;
+    min-width: 0;
+}
+
+.novoPedido-top {
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 24px;
+
+    margin-top: 25px;
+    margin-bottom: 30px;
+}
+
+.card-padrao {
+    background: white;
+
+    border: 1px solid #e7e0da;
+    border-radius: 24px;
+
+    padding: 24px;
+
+    min-width: 0;
+}
+
+.card-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    margin-bottom: 20px;
+}
+
+.card-title h2 {
+    font-size: 20px;
+    font-family: "DM Serif Display", serif;
+}
+
+.card-title ion-icon {
+    font-size: 24px;
+    color: #2e1c16;
+}
+
+.card-padrao select,
+.card-padrao input,
+.form-group input,
+.form-group textarea {
+    width: 100%;
+
+    border: 1px solid #ddd0c7;
+    border-radius: 14px;
+
+    padding: 14px 16px;
+
+    font-size: 16px;
+
+    background: white;
+
+    outline: none;
+
+    box-sizing: border-box;
+}
+
+.card-padrao select,
+.card-padrao input {
+    height: 48px;
+}
+
+.detalhes-grid {
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 18px;
+}
+
+.input-group,
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    min-width: 0;
+}
+
+.form-group label,
+.input-group label {
+    color: #5f4638;
+}
+
+.adicionar-item {
+    margin-top: 18px;
+
+    height: 46px;
+
+    border: 1px dashed #6f432a;
+    border-radius: 14px;
+
+    background: transparent;
+
+    padding: 0 18px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    cursor: pointer;
+}
+
+.remover-item {
+    border: none;
+    background: transparent;
+
+    cursor: pointer;
+}
+
+.remover-item ion-icon {
+    font-size: 22px;
+    color: #d77585;
+}
+
+/* CLIENTE */
+
+.campo-cliente {
+    position: relative;
+}
+
+.input-cliente {
+    height: 50px;
+
+    border: 2px solid #ddd0c7;
+    border-radius: 16px;
+
+    background: white;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 0 16px;
+}
+
+.input-cliente ion-icon {
+    font-size: 22px;
+    color: #b8a79d;
+}
+
+.input-cliente input {
+    flex: 1;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    font-size: 16px;
+
+    padding: 0;
+}
+
+.lista-clientes {
+    position: absolute;
+
+    top: 60px;
+    left: 0;
+    right: 0;
+
+    background: white;
+
+    border: 1px solid #ddd0c7;
+    border-radius: 16px;
+
+    overflow: hidden;
+
+    max-height: 220px;
+    overflow-y: auto;
+
+    z-index: 10;
+
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.cliente-option {
+    width: 100%;
+
+    padding: 14px 16px;
+
+    border: none;
+
+    background: white;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.cliente-option:hover {
+    background: #f8f4f1;
+}
+
+.sem-clientes {
+    display: block;
+
+    padding: 16px;
+
+    color: #9c8d84;
+}
+
+.cliente-selecionado {
+    height: 50px;
+
+    border: 2px solid #ddd0c7;
+    border-radius: 16px;
+
+    background: #f8f4f1;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 14px;
+}
+
+.cliente-selecionado button {
+    border: none;
+    background: transparent;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+}
+
+.cliente-selecionado ion-icon {
+    font-size: 22px;
+}
+
+.seta-dropdown {
+    cursor: pointer;
+}
+
+.criar-cliente-button {
+    width: 100%;
+    height: 58px;
+
+    border: none;
+    border-top: 1px solid #eee4de;
+
+    background: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    font-size: 18px;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.criar-cliente-button:hover {
+    background: #f8f4f1;
+}
+
+.criar-cliente-button ion-icon {
+    font-size: 24px;
+}
+
+.form-cliente {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.salvar-cliente-button {
+    margin-top: 10px;
+
+    height: 52px;
+
+    border: none;
+    border-radius: 16px;
+
+    background: #6f432a;
+
+    color: white;
+
+    font-size: 18px;
+
+    cursor: pointer;
+}
+
+.novoPedido-footer {
+  position: fixed;
+
+  bottom: 0;
+  left: 280px;
+  right: 0;
+
+  height: 78px;
+
+  background: white;
+
+  border-top: 1px solid #e7e0da;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+
+  padding: 0 40px;
+
+  z-index: 100;
+}
+
+.btn-secundario {
+    height: 48px;
+
+    padding: 0 24px;
+
+    border-radius: 14px;
+
+    border: 1px solid #ddd0c7;
+
+    background: white;
+
+    font-size: 17px;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.btn-secundario:hover {
+    background: #f8f4f1;
+}
+
+.btn-primario {
+    height: 48px;
+
+    padding: 0 28px;
+
+    border: none;
+    border-radius: 14px;
+
+    background: #8b5a3c;
+
+    color: white;
+
+    font-size: 17px;
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.btn-primario:hover {
+    filter: brightness(0.96);
+}
