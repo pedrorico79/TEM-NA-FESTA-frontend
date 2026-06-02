@@ -30,25 +30,8 @@ body {
   gap: 40px;
 }
 
-.pedidos-header {
-  height: 80px;
-  background: white;
-  border: 1px solid #e7e0da;
-  border-radius: 22px;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 30px;
-}
 
-.pedidos-header h2 {
-  font-size: 32px;
-  font-family: "DM Serif Display", serif;
-  color: #2c2421;
-}
-
-.pedidos-header select {
+.retiradas-card select {
   height: 46px;
   border-radius: 14px;
   border: 1px solid #e7e0da;
@@ -231,4 +214,9 @@ body {
 .retiradas-card .custom-table th:nth-child(5),
 .retiradas-card .custom-table td:nth-child(5) {
   width: 50px;
+}
+
+.retiradas-tempo{
+  display: flex;
+  justify-content: space-between;
 }
