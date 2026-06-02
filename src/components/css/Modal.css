@@ -1,0 +1,149 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #f9f7f6; /* Cor de fundo do Modal */
+  border-radius: 24px;
+  padding: 28px;
+  box-sizing: border-box;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.modal-header h2 {
+  font-size: 34px;
+  font-family: "DM Serif Display", serif;
+  color: #2c2421;
+  margin: 0;
+}
+
+.modal-header button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #2c2421;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.modal-header ion-icon {
+  font-size: 34px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px; /* Ajustado sutilmente */
+}
+
+/* CORRIGIDO: Seletor mais amplo e forte. 
+  Garante que TODO input e textarea dentro do .modal-content herde o fundo correto.
+*/
+.modal-content form input,
+.modal-content form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  height: 48px;
+  border-radius: 14px;
+  border: 1px solid #e7e0da; 
+  background: #f9f7f6; /* Mesma cor do fundo do modal */
+  color: #2c2421;
+  padding: 0 16px;
+  font-size: 16px;
+  font-family: inherit;
+}
+
+.modal-content form textarea {
+  min-height: 110px;
+  padding-top: 14px;
+  resize: vertical;
+}
+
+/* Espaçamento extra para a descrição não colar na grid de cima */
+.modal-content form .form-group {
+  margin-bottom: 16px;
+}
+
+.modal-section-title {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-size: 24px;
+  color: #2c2421; 
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 15px;
+  color: #6f432a;
+  font-weight: 500;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.primary-button,
+.secondary-button {
+  height: 46px;
+  padding: 0 24px;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.primary-button {
+  border: none;
+  background: #6f432a;
+  color: white; 
+}
+
+.primary-button:hover {
+  background: #573420;
+}
+
+.secondary-button {
+  border: 1px solid #e7e0da; 
+  background: transparent;
+  color: #6f432a; 
+}
+
+.secondary-button:hover {
+  background: #e7e0da;
+}
+
+.form-grid input:focus,
+.modal-content textarea:focus {
+  outline: none;
+  border-color: #b8aba4; /* A borda fica marrom quando o input está ativo */
+}

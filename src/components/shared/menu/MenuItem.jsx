@@ -1,7 +1,7 @@
 function MenuItem(props) {
 
   return (
-    <button className={`menu-item ${props.active ? "active" : ""} ${props.subItem ? "sub-item" : ""}`}>
+    <button className={`menu-item ${props.active ? "active" : ""} ${props.subItem ? "sub-item" : ""}`} onClick={props.onClick}>
 
       <div className="menu-item-left">
 

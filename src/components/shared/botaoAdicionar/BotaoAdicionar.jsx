@@ -2,7 +2,7 @@ import "../../css/BotaoAdicionar.css";
 
 function BotaoAdicionar(props) {
   return (
-    <button className={`botao-adicionar ${props.size}`} onClick={props.onClick}>
+    <button className={`botao-adicionar ${props.size}`} style={props.style} onClick={props.onClick}>
       <ion-icon name="add-circle-outline"></ion-icon>
       {props.text}
     </button>
