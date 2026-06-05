@@ -210,8 +210,8 @@
 }
 
 .pedido-status.naoIniciado {
-  background: #dbeafe;
-  border: 1px solid #93c5fd;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
 }
 
 .pedido-status.producao {
@@ -225,13 +225,13 @@
 }
 
 .pedido-status.entregue {
-  background: #e7e5e4;
-  border: 1px solid #a8a29e;
+  background: #f4eee6;
+  border: 1px solid #eee7e0;
 }
 
 .pedido-status.cancelado {
-  background: #fee2e2;
-  border: 1px solid #fca5a5;
+  background: #f4eee6;
+  border: 1px solid #eee7e0;
 }
 
 .pedido-cliente {
@@ -287,4 +287,40 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.pedido-card.desativado {
+  background-color: #D1D0CF; /* fundo do card */
+  border: 2px solid #bdb9b6;     /* borda */
+  opacity: 1;
+}
+
+/* textos */
+.pedido-card.desativado,
+.pedido-card.desativado .pedido-id,
+.pedido-card.desativado .pedido-cliente,
+.pedido-card.desativado .pedido-campanha,
+.pedido-card.desativado .pedido-infos,
+.pedido-card.desativado .pedido-footer span,
+.pedido-card.desativado .pedido-footer strong {
+  color: #3E3835 !important;
+}
+
+/* pílula Entregue */
+.pedido-card.desativado .pedido-status.entregue,
+.pedido-card.desativado .pedido-status.cancelado {
+  background-color: #C8C0B9;
+  color: #3E3835;
+  border: none;
+}
+
+/* linha divisória */
+.pedido-card.desativado hr,
+.pedido-card.desativado .divisor {
+  border-color: #BCB4AE;
+}
+
+/* ícones rosados */
+.pedido-card.desativado ion-icon {
+  color: #C3969B !important;
 }

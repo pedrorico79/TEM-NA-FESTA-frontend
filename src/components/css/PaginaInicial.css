@@ -140,33 +140,33 @@ body {
 }
 
 .status.naoIniciado {
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
-  color: #4b5563;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  font-weight: 300;
 }
 
 .status.emProducao {
   background: #fef3c7;
   border: 1px solid #fcd34d;
-  color: #92400e;
+  font-weight: 300;
 }
 
 .status.pronto {
   background: #dcfce7;
   border: 1px solid #86efac;
-  color: #166534;
+  font-weight: 300;
 }
 
 .status.entregue {
   background: #dbeafe;
   border: 1px solid #93c5fd;
-  color: #1d4ed8;
+  font-weight: 300;
 }
 
 .status.cancelado {
   background: #fee2e2;
   border: 1px solid #fca5a5;
-  color: #b91c1c;
+  font-weight: 300;
 }
 
 .custom-table td {

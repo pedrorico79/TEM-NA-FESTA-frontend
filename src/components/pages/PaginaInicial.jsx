@@ -9,7 +9,22 @@ import ProximasRetiradas from "../paginaInicial/ProximasRetiradas";
 import "../css/PaginaInicial.css";
 
 function PaginaInicial() {
-  const proximasRetiradas = [{ title: "Hoje", rows: [["#049", "Sarah Merli", "2x Ovo 200g + 1x Trufas", "EM_PRODUCAO"], ["#050", "Ana Clara", "1x Bento Cake + 6 Brigadeiros", "NAO_INICIADO"], ["#051", "Leonardo Cortez", "3x Cookies Recheados", "PRONTO"],], }, { title: "Amanhã", rows: [["#052", "Mayumi Tanaka", "2x Caixa Premium + 1x Brownie", "ENTREGUE"], ["#053", "Juliana Martins", "1x Ovo 350g Personalizado", "CANCELADO"],], },];
+  const proximasRetiradas = [
+  {
+    title: "Hoje",
+    rows: [
+      ["#25-005", "Igor Felix", "12x Itens Natal", "NAO_INICIADO"],
+      ["#25-004", "Felipe Hideki", "20x Cookies Recheados", "PRONTO"],
+      ["#25-002", "Laura Belinello Buzzato", "12x Doces Festa", "EM_PRODUCAO"]
+    ]
+  },
+  {
+    title: "Amanhã",
+    rows: [
+      ["#25-003", "Kauã Medeiros", "5x Ovos de Páscoa", "NAO_INICIADO"]
+    ]
+  }
+];
   return (
     <div className="paginaInicial-layout">
       <Menu active="paginaInicial" />

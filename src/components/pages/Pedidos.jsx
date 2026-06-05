@@ -14,51 +14,62 @@ function Pedidos() {
 
   }
 
-  const pedidos = [
+// atualizando dados mockados para apresentação da página
+
+  const formatarData = (data) => {
+  const dia = String(data.getDate()).padStart(2, '0');
+  const mes = String(data.getMonth() + 1).padStart(2, '0');
+  return `${dia}/${mes}`;
+};
+
+const hojeObjeto = new Date();
+const amanhaObjeto = new Date();
+amanhaObjeto.setDate(hojeObjeto.getDate() + 1);
+
+const dataHoje = formatarData(hojeObjeto);
+const dataAmanha = formatarData(amanhaObjeto);
+
+const pedidos = [
   {
     id: "#25-005",
     campanha: "Natal",
     cliente: "Igor Felix",
     itens: 12,
-    retirada: "05/06",
-    restante: "18d restantes",
+    retirada: dataHoje,
+    restante: "0d restantes",
     total: "R$780,00",
     status: "NAO_INICIADO"
   },
-
   {
     id: "#25-004",
     campanha: "Halloween",
     cliente: "Felipe Hideki",
     itens: 20,
-    retirada: "23/05",
-    restante: "1d restante",
+    retirada: dataHoje,
+    restante: "0d restante",
     total: "R$200,00",
     status: "PRONTO"
   },
-
   {
     id: "#25-003",
     campanha: "Páscoa",
     cliente: "Kauã Medeiros",
     itens: 5,
-    retirada: "25/06",
-    restante: "3d restantes",
+    retirada: dataAmanha,
+    restante: "1d restante",
     total: "R$125,00",
     status: "NAO_INICIADO"
   },
-
   {
     id: "#25-002",
     campanha: "Aniversario",
     cliente: "Laura Belinello Buzzato",
     itens: 12,
-    retirada: "05/06",
-    restante: "18d restantes",
+    retirada: dataHoje,
+    restante: "0d restantes",
     total: "R$780,00",
     status: "EM_PRODUCAO"
   },
-
   {
     id: "#25-001",
     campanha: "Casamento",
@@ -69,7 +80,6 @@ function Pedidos() {
     total: "R$220,00",
     status: "ENTREGUE"
   },
-
   {
     id: "#25-000",
     campanha: "Formatura",
