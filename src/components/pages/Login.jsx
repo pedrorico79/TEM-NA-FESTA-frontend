@@ -15,10 +15,10 @@ function Login() {
   function logar() {
 
     api.post("/usuarios/login", {
-      emailDigitado,
-      senhaDigitada
+      email: emailDigitado,
+      senha: senhaDigitada
     }).then((res) => {
-      reposta = res.data
+      const resposta = res.data;
 
       console.log("Usuário logado:", resposta);
 
@@ -26,7 +26,9 @@ function Login() {
 
       navigate("/PaginaInicial");
     }).catch((erro) => {
-      console.log(erro);
+      console.log(erro.response?.data);
+      console.log(erro.response?.status);
+
       alert("Email ou senha inválidos");
     })
 
