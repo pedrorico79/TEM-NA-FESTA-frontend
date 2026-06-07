@@ -1,0 +1,147 @@
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.relatorios {
+    flex: 1;
+    padding: 32px;
+    background: #f9f7f6;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    overflow-y: auto;
+    min-width: 0; 
+}
+
+.relatorios h1 {
+    margin: 0;
+    font-size: 45px;
+    font-family: "DM Serif Display", serif;
+    color: #2c2421;
+}
+
+.kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.card-relatorio {
+    background: white;
+    border: 1px solid #e7e0da;
+    border-radius: 12px;
+    padding: 20px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden; 
+}
+
+.card-relatorio h2 {
+    margin: 0 0 20px 0;
+    font-size: 22px;
+    font-weight: 600;
+    color: #422f24;
+}
+
+.graficos-relatorio {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.tabelas-relatorio {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.filtros-relatorio {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: white;
+    border: 1px solid #e7e0da;
+    border-radius: 12px;
+}
+
+.filtros-relatorio button {
+    height: 40px;
+    border: none;
+    border-radius: 10px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    background: #e7e0da;
+    color: #422f24;
+    transition: 0.2s;
+}
+
+.filtros-relatorio button:hover {
+    background: #ffeaea;
+}
+
+.filtros-relatorio button.active {
+    background: #6f432a;
+    color: white;
+}
+
+.filtros-relatorio select,
+.filtros-relatorio input {
+    height: 40px;
+    border: 1px solid #e7e0da;
+    border-radius: 10px;
+    padding: 0 12px;
+    background: white;
+    color: #2c2421;
+    outline: none;
+}
+
+.filtros-relatorio select:focus,
+.filtros-relatorio input:focus {
+    border-color: #6f432a;
+}
+
+.relatorio-tabela-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: 15px;
+    border-radius: 16px; 
+}
+
+.relatorio-tabela-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap; 
+}
+
+@media (max-width: 1200px) {
+    .kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .tabelas-relatorio {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .filtros-relatorio {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 768px) {
+    .kpis {
+        grid-template-columns: 1fr;
+    }
+
+    .relatorios {
+        padding: 16px;
+    }
+}
