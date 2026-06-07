@@ -5,11 +5,12 @@ import LoginButton from "./LoginButton";
 function LoginForm(props) {
   return (
     <div className="form-section">
-      <LoginInput label="E-mail" type="email" placeholder="exemplo@email.com" setEmailDigitado={props.setEmailDigitado} emailDigitado={props.emailDigitado}/>
-      <LoginInput label="Senha" type="password" placeholder="********" setSenhaDigitada={props.setSenhaDigitada} senhaDigitada={props.senhaDigitada}/>
+      <LoginInput label="E-mail" type="email" placeholder="exemplo@email.com" valor={props.emailDigitado} setValor={props.setEmailDigitado} />
+
+      <LoginInput label="Senha" type="password" placeholder="********" valor={props.senhaDigitada} setValor={props.setSenhaDigitada}/>
       <a href="/" className="esqueceu-senha">Esqueci minha senha</a>
-      <LembrarAcesso/>
-      <LoginButton logar={props.logar}/>
+      <LembrarAcesso />
+      <LoginButton logar={props.logar} />
     </div>
   );
 }
