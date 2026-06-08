@@ -7,6 +7,8 @@ import TabelaProdutos from "../produtos/TabelaProdutos";
 import ModalEditarProduto from "../produtos/ModalEditarProduto";
 import ModalNovoProduto from "../produtos/ModalNovoProduto";
 import Paginacao from "../shared/paginacao/Paginacao";
+import { api } from "../../services/api";
+import ModalConfirmacao from "../produtos/ModalConfirmacao";
 
 import "../css/Produtos.css";
 
@@ -20,119 +22,53 @@ function Produtos() {
 
     const [produtoSelecionado, setProdutoSelecionado] = useState(null);
 
+    const [mensagemSucesso, setMensagemSucesso] = useState("");
+
     const [paginaAtual, setPaginaAtual] = useState(1);
 
-    const itensPorPagina = 7;
+    const [totalPaginas, setTotalPaginas] = useState(1);
+
+    const [modalConfirmacaoOpen, setModalConfirmacaoOpen] = useState(false);
+
+    const [produtoConfirmacao, setProdutoConfirmacao] = useState(null);
+
+    function buscarProdutos() {
+
+        api.get("/produtos", {
+            params: {
+                page: paginaAtual - 1,
+                size: 7
+            }
+        })
+            .then((response) => {
+
+                setProdutos(response.data.content);
+
+                setTotalPaginas(response.data.totalPages);
+
+            })
+            .catch((erro) => {
+                console.error(erro);
+            });
+
+    }
 
     useEffect(() => {
         buscarProdutos();
-    }, []);
+    }, [paginaAtual]);
 
-    async function buscarProdutos() {
 
-        const dados = [
-            {
-                id: 1,
-                nome: "Brigadeiro",
-                descricao: "Tradicional",
-                valor: 10,
-                ativo: true,
-            },
-            {
-                id: 2,
-                nome: "Bolacha Recheada",
-                descricao: "Chocolate",
-                valor: 20,
-                ativo: false,
-            },
-            {
-                id: 3,
-                nome: "Cupcake de Morango",
-                descricao: "Com chantilly",
-                valor: 15,
-                ativo: true,
-            },
-            {
-                id: 4,
-                nome: "Trufa de Maracujá",
-                descricao: "Recheio cremoso",
-                valor: 8,
-                ativo: true,
-            },
-            {
-                id: 5,
-                nome: "Bolo de Cenoura",
-                descricao: "Cobertura de chocolate",
-                valor: 55,
-                ativo: false,
-            },
-            {
-                id: 6,
-                nome: "Kit Festa Pequeno",
-                descricao: "Serve 10 pessoas",
-                valor: 120,
-                ativo: true,
-            },
-            {
-                id: 7,
-                nome: "Kit Festa Grande",
-                descricao: "Serve 30 pessoas",
-                valor: 320,
-                ativo: true,
-            },
-            {
-                id: 8,
-                nome: "Mini Donuts",
-                descricao: "Caixa com 12",
-                valor: 25,
-                ativo: false,
-            },
-            {
-                id: 9,
-                nome: "Pirulito de Chocolate",
-                descricao: "Tema infantil",
-                valor: 6,
-                ativo: true,
-            },
-            {
-                id: 10,
-                nome: "Macaron",
-                descricao: "Sabores variados",
-                valor: 12,
-                ativo: true,
-            },
-            {
-                id: 11,
-                nome: "Brownie",
-                descricao: "Com nozes",
-                valor: 14,
-                ativo: false,
-            },
-            {
-                id: 12,
-                nome: "Bolo Red Velvet",
-                descricao: "Cream cheese",
-                valor: 85,
-                ativo: true,
-            },
-        ];
-
-        setProdutos(dados);
-    }
-
-    async function cadastrarProduto(
-        produto
-    ) {
-
-        const response =
-            await api.post(
-                "/produtos",
-                produto
-            );
-
-        buscarProdutos();
-
-        return response.data;
+    function cadastrarProduto(produto) {
+        return api.post("/produtos", produto)
+            .then((response) => {
+                setPaginaAtual(1);
+                buscarProdutos();
+                return response.data;
+            })
+            .catch((erro) => {
+                console.error(erro);
+                throw erro;
+            });
     }
 
     function abrirModalEditar(produto) {
@@ -142,43 +78,44 @@ function Produtos() {
         setModalOpen(true);
     }
 
-    function alterarStatus(id) {
-
-        const novosProdutos = produtos.map((produto) => {
-
-            if (produto.id === id) {
-
-                return {
-                    ...produto,
-                    ativo: !produto.ativo,
-                };
-            }
-
-            return produto;
-        });
-
-        setProdutos(novosProdutos);
+    function alterarStatus(produto) {
+        setProdutoConfirmacao(produto);
+        setModalConfirmacaoOpen(true);
     }
 
-    const indiceInicial =
-        (paginaAtual - 1) * itensPorPagina;
+    function confirmarAlteracaoStatus() {
 
-    const indiceFinal =
-        indiceInicial + itensPorPagina;
+        api.patch(`/produtos/${produtoConfirmacao.id}/ativo`)
+            .then(() => {
 
-    const produtosPaginados =
-        produtos.slice(
-            indiceInicial,
-            indiceFinal
-        );
+                buscarProdutos();
 
-    const totalPaginas =
-        Math.ceil(
-            produtos.length / itensPorPagina
-        );
+                setModalConfirmacaoOpen(false);
+
+                setMensagemSucesso(
+                    produtoConfirmacao.ativo
+                        ? "Produto desativado com sucesso!"
+                        : "Produto ativado com sucesso!"
+                );
+
+                setTimeout(() => {
+                    setMensagemSucesso("");
+                }, 3000);
+
+            })
+            .catch((erro) => {
+                console.error(erro);
+            });
+    }
 
     return (
         <div className="produtos-layout">
+
+            {mensagemSucesso && (
+                <div className="mensagem-sucesso">
+                    {mensagemSucesso}
+                </div>
+            )}
 
             <Menu active="produtos" />
 
@@ -205,7 +142,7 @@ function Produtos() {
                     </div>
 
                     <TabelaProdutos
-                        produtos={produtosPaginados}
+                        produtos={produtos}
                         onEditar={abrirModalEditar}
                         onAlterarStatus={alterarStatus}
                     />
@@ -239,11 +176,28 @@ function Produtos() {
 
             <ModalNovoProduto
                 open={modalNovoOpen}
-                onClose={() =>
-                    setModalNovoOpen(false)
-                }
+                onClose={() => setModalNovoOpen(false)}
                 onSalvar={cadastrarProduto}
+                onSucesso={() => {
+                    setMensagemSucesso("Produto cadastrado com sucesso!");
+
+                    setTimeout(() => {
+                        setMensagemSucesso("");
+                    }, 3000);
+                }}
             />
+
+            <ModalConfirmacao
+                open={modalConfirmacaoOpen}
+                onClose={() => setModalConfirmacaoOpen(false)}
+                onConfirmar={confirmarAlteracaoStatus}
+                mensagem={`Tem certeza que deseja ${produtoConfirmacao?.ativo
+                        ? "desativar"
+                        : "ativar"
+                    } o produto ${produtoConfirmacao?.nome || ""
+                    }?`}
+            />
+
 
         </div>
     );

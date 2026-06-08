@@ -10,12 +10,12 @@ function TabelaProdutos({
     const data = produtos.map((produto) => [
         produto.nome,
         produto.descricao,
-        `R$ ${produto.valor.toFixed(2)}`,
+        `R$ ${produto.precoVenda.toFixed(2)}`,
         <div className="acoes-produto">
             <SwitchStatusProduto
                 ativo={produto.ativo}
                 onClick={() =>
-                    onAlterarStatus(produto.id)
+                    onAlterarStatus(produto)
                 }
             />
 

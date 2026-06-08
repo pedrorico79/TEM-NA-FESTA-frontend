@@ -288,3 +288,16 @@
   gap: 12px;
   width: max-content;
 }
+
+.mensagem-sucesso {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    background: #4caf50;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 9999;
+}

@@ -16,7 +16,7 @@ function ModalNovoProduto(props) {
         });
     }
 
-    async function handleSalvar(e) {
+    function salvar(e) {
         e.preventDefault();
 
         if (!novoProduto.nome.trim() || !novoProduto.precoVenda) {
@@ -24,26 +24,28 @@ function ModalNovoProduto(props) {
             return;
         }
 
-        try {
-            await props.onSalvar({
-                nome: novoProduto.nome,
-                descricao: novoProduto.descricao,
-                precoVenda: Number(novoProduto.precoVenda),
+        props.onSalvar({
+            nome: novoProduto.nome,
+            descricao: novoProduto.descricao,
+            precoVenda: Number(novoProduto.precoVenda),
+            ativo: true
+        })
+            .then(() => {
+
+                setNovoProduto({
+                    nome: "",
+                    descricao: "",
+                    precoVenda: "",
+                });
+
+                props.onClose();
+
+                props.onSucesso();
+            })
+            .catch((erro) => {
+                console.error(erro);
+                alert("Erro ao cadastrar produto.");
             });
-
-            console.log("Produto enviado:", novoProduto);
-
-            setNovoProduto({
-                nome: "",
-                descricao: "",
-                precoVenda: "",
-            });
-
-            props.onClose();
-        } catch (erro) {
-            console.error(erro);
-            alert("Erro ao cadastrar produto.");
-        }
     }
 
     return (
@@ -52,7 +54,7 @@ function ModalNovoProduto(props) {
             onClose={props.onClose}
             title="Novo Produto"
         >
-            <form onSubmit={handleSalvar}>
+            <form onSubmit={salvar}>
 
                 <div className="form-grid">
                     <div className="form-group">
