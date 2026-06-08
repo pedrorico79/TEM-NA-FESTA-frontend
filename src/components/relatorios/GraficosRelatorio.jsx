@@ -2,6 +2,7 @@ import GraficoPedidosSemana from "./GraficoPedidosSemana";
 import GraficoComparativoEventos from "./GraficoComparativoEventos";
 import TabelaPedidosPeriodo from "./TabelaPedidosPeriodo";
 import TabelaProdutosVendidos from "./TabelaProdutosVendidos";
+import TabelaComparativoEventos from "./TabelaComparativoEventos";
 
 function GraficosRelatorio(props) {
 
@@ -34,6 +35,10 @@ function GraficosRelatorio(props) {
                 <h2>Comparativo entre Eventos</h2>
 
                 <GraficoComparativoEventos
+                    dados={props.comparativoEventos}
+                />
+
+                <TabelaComparativoEventos
                     dados={props.comparativoEventos}
                 />
 
