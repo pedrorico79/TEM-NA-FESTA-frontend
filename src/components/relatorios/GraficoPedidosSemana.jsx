@@ -8,30 +8,35 @@ import {
     CartesianGrid
 } from "recharts";
 
-function GraficoPedidosSemana({ dados }) {
+function GraficoPedidosSemana(props) {
 
     return (
         <ResponsiveContainer width="100%" height={250}>
-
-            <LineChart data={dados}>
+            <LineChart data={props.dados}>
 
                 <CartesianGrid strokeDasharray="3 3" />
 
-                <XAxis dataKey="semana" />
+                <XAxis dataKey="rotulo" />
 
                 <YAxis />
 
-                <Tooltip />
+                <Tooltip
+                    formatter={(value) => [value, "Pedidos"]}
+                    labelFormatter={(label, payload) => {
+                        const item = payload?.[0]?.payload;
+
+                        return `${label} (${item?.periodo ?? ""})`;
+                    }}
+                />
 
                 <Line
                     type="monotone"
-                    dataKey="pedidos"
+                    dataKey="quantidade"
                     stroke="#6F4E37"
                     strokeWidth={3}
                 />
 
             </LineChart>
-
         </ResponsiveContainer>
     );
 }

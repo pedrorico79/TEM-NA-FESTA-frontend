@@ -109,22 +109,35 @@
 .relatorio-tabela-wrapper {
     width: 100%;
     overflow-x: auto;
+    overflow-y: auto;
+    max-height: 350px;
     -webkit-overflow-scrolling: touch;
     margin-top: 15px;
     border-radius: 16px; 
+    clip-path: inset(0% round 16px); 
+    padding: 0 !important;
 }
 
 .relatorio-tabela-wrapper table {
-    width: 100%;
+    width: 100% !important; 
+    min-width: 100%;
     border-collapse: collapse;
-    white-space: nowrap; 
+    white-space: normal; 
+    table-layout: fixed; 
+    margin: 0;
+}
+
+.relatorio-tabela-wrapper th,
+.relatorio-tabela-wrapper td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
 }
 
 @media (max-width: 1200px) {
     .kpis {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-
     .tabelas-relatorio {
         grid-template-columns: minmax(0, 1fr);
     }
@@ -140,8 +153,86 @@
     .kpis {
         grid-template-columns: 1fr;
     }
-
     .relatorios {
         padding: 16px;
+    }
+}
+
+.card-relatorio:nth-of-type(1) .relatorio-tabela-wrapper th:nth-child(1),
+.card-relatorio:nth-of-type(1) .relatorio-tabela-wrapper td:nth-child(1) {
+    width: 80px;
+}
+
+.card-relatorio:nth-of-type(1) .relatorio-tabela-wrapper th:nth-child(2),
+.card-relatorio:nth-of-type(1) .relatorio-tabela-wrapper td:nth-child(2) {
+    width: 180px;
+}
+
+.card-relatorio:nth-of-type(1) .relatorio-tabela-wrapper th:nth-child(3),
+.card-relatorio:nth-of-type(1) .relatorio-tabela-wrapper td:nth-child(3) {
+    width: 130px;
+}
+
+.card-relatorio:nth-of-type(1) .relatorio-tabela-wrapper th:nth-child(4),
+.card-relatorio:nth-of-type(1) .relatorio-tabela-wrapper td:nth-child(4) {
+    width: 100px;
+}
+
+.card-relatorio:nth-of-type(1) .relatorio-tabela-wrapper th:nth-child(5),
+.card-relatorio:nth-of-type(1) .relatorio-tabela-wrapper td:nth-child(5) {
+    width: 120px;
+}
+
+.card-relatorio:nth-of-type(2) .relatorio-tabela-wrapper th:nth-child(1),
+.card-relatorio:nth-of-type(2) .relatorio-tabela-wrapper td:nth-child(1) {
+    width: 50px;
+}
+
+.card-relatorio:nth-of-type(2) .relatorio-tabela-wrapper th:nth-child(2),
+.card-relatorio:nth-of-type(2) .relatorio-tabela-wrapper td:nth-child(2) {
+    width: 230px;
+}
+
+.card-relatorio:nth-of-type(2) .relatorio-tabela-wrapper th:nth-child(3),
+.card-relatorio:nth-of-type(2) .relatorio-tabela-wrapper td:nth-child(3) {
+    width: 80px;
+}
+
+.card-relatorio:nth-of-type(2) .relatorio-tabela-wrapper th:nth-child(4),
+.card-relatorio:nth-of-type(2) .relatorio-tabela-wrapper td:nth-child(4) {
+    width: 150px;
+}
+
+.card-relatorio:nth-of-type(2) .relatorio-tabela-wrapper th:nth-child(5),
+.card-relatorio:nth-of-type(2) .relatorio-tabela-wrapper td:nth-child(5) {
+    width: 90px;
+}
+
+.relatorio-tabela-wrapper::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.relatorio-tabela-wrapper::-webkit-scrollbar-track {
+    background: transparent; 
+}
+
+.relatorio-tabela-wrapper::-webkit-scrollbar-thumb {
+    background: #2c2421; 
+    border-radius: 4px;
+}
+
+.relatorio-tabela-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #422f24;
+}
+
+.relatorio-tabela-wrapper::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+@supports (scrollbar-width: thin) {
+    .relatorio-tabela-wrapper {
+        scrollbar-width: thin;
+        scrollbar-color: #2c2421 transparent;
     }
 }

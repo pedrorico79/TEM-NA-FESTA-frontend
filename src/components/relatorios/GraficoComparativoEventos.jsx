@@ -9,7 +9,9 @@ import {
     Cell
 } from "recharts";
 
-function GraficoComparativoEventos({ dados }) {
+function GraficoComparativoEventos(props) {
+
+    const dados = props.dados || [];
 
     const cores = [
         "#4F7DF0",
@@ -32,7 +34,7 @@ function GraficoComparativoEventos({ dados }) {
                 <Tooltip />
 
                 <Bar
-                    dataKey="pedidos"
+                    dataKey="pedidosTotais"
                     radius={[15, 15, 0, 0]}
                 >
                     {dados.map((item, index) => (
