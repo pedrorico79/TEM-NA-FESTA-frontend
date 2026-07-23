@@ -17,20 +17,25 @@ function Login() {
     api.post("/usuarios/login", {
       email: emailDigitado,
       senha: senhaDigitada
-    }).then((res) => {
-      const resposta = res.data;
-
-      console.log("Usuário logado:", resposta);
-
-      localStorage.setItem("token", resposta.token);
-
-      navigate("/PaginaInicial");
-    }).catch((erro) => {
-      console.log(erro.response?.data);
-      console.log(erro.response?.status);
-
-      alert("Email ou senha inválidos");
     })
+      .then((res) => {
+
+        const resposta = res.data;
+
+        console.log("Usuário logado:", resposta);
+
+        localStorage.setItem("userId", resposta.userId);
+        localStorage.setItem("nomeUsuario", resposta.nome);
+
+        navigate("/PaginaInicial");
+
+      })
+      .catch((erro) => {
+        console.log(erro.response?.data);
+        console.log(erro.response?.status);
+
+        alert("Email ou senha inválidos");
+      });
 
   }
 
