@@ -1,9 +1,11 @@
 .kpi-card {
-  background: white;
-  border: 1px solid #eadfd8;
+  background: #FFFFFC;
+  border: 1px solid #E5DCD3;
   border-radius: 24px;
   padding: 20px;
   min-height: 200px;
+  display: flex;
+  flex-direction: column;
 }
 
 .kpi-icon {
@@ -14,6 +16,7 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 10px;
+  flex-shrink: 0;
 }
 
 .kpi-icon ion-icon {
@@ -24,19 +27,19 @@
   font-size: 17px;
   font-weight: 400;
   color: #594133;
-  margin-bottom: 10px;
-
+  margin: 0 0 10px;
+  min-height: 42px;
 }
 
 .kpi-card h2 {
   font-size: 40px;
   font-family: "DM Serif Display", serif;
   color: #2c2421;
-  margin-bottom: 5px;
-
+  margin: 0 0 8px;
 }
 
 .kpi-card p {
   color: #594133;
   font-size: 18px;
+  margin: 0;
 }
