@@ -1,15 +1,14 @@
 import KPI from "../shared/KPI/KPI";
 
-function KpiSection() {
+function KpiSection(props) {
   return (
     <div className="kpis-grid">
       <KPI
         icon="bag-outline"
         iconColor="#3b82f6"
         iconBackground="#dbeafe"
-        title="TOTAL DE PEDIDOS"
-        value="4"
-        description="+12%"
+        title="PEDIDOS ATIVOS"
+        value={props.kpis.pedidosAtivos}
       />
 
       <KPI
@@ -17,7 +16,15 @@ function KpiSection() {
         iconColor="#9a7b6b"
         iconBackground="#f3ebe6"
         title="AGUARDANDO PREPARO"
-        value="2"
+        value={props.kpis.aguardandoPreparo}
+      />
+
+      <KPI
+        icon="restaurant-outline"
+        iconColor="#f59e0b"
+        iconBackground="#fef3c7"
+        title="EM PRODUÇÃO"
+        value={props.kpis.emProducao}
       />
 
       <KPI
@@ -25,7 +32,7 @@ function KpiSection() {
         iconColor="#ef4444"
         iconBackground="#fee2e2"
         title="PAGAMENTOS PENDENTES"
-        value="1"
+        value={props.kpis.pagamentosPendentes}
       />
     </div>
   );

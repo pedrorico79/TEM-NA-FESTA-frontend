@@ -13,7 +13,7 @@
   max-width: 700px;
   max-height: 90vh;
   overflow-y: auto;
-  background: #f9f7f6; /* Cor de fundo do Modal */
+  background: #FFFBF2;
   border-radius: 24px;
   padding: 28px;
   box-sizing: border-box;
@@ -52,12 +52,9 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
-  margin-bottom: 16px; /* Ajustado sutilmente */
+  margin-bottom: 16px;
 }
 
-/* CORRIGIDO: Seletor mais amplo e forte. 
-  Garante que TODO input e textarea dentro do .modal-content herde o fundo correto.
-*/
 .modal-content form input,
 .modal-content form textarea {
   width: 100%;
@@ -65,7 +62,7 @@
   height: 48px;
   border-radius: 14px;
   border: 1px solid #e7e0da; 
-  background: #f9f7f6; /* Mesma cor do fundo do modal */
+  background: #FFFBF2;
   color: #2c2421;
   padding: 0 16px;
   font-size: 16px;
@@ -78,7 +75,7 @@
   resize: vertical;
 }
 
-/* Espaçamento extra para a descrição não colar na grid de cima */
+
 .modal-content form .form-group {
   margin-bottom: 16px;
 }
@@ -145,5 +142,31 @@
 .form-grid input:focus,
 .modal-content textarea:focus {
   outline: none;
-  border-color: #b8aba4; /* A borda fica marrom quando o input está ativo */
+  border-color: #b8aba4;
+}
+
+.modal-content form input,
+.modal-content form textarea,
+.modal-content form select {
+  width: 100%;
+  box-sizing: border-box;
+  height: 48px;
+  border-radius: 14px;
+  border: 1px solid #e7e0da;
+  background: #FFFBF2;
+  color: #2c2421;
+  padding: 0 16px;
+  font-size: 16px;
+  font-family: inherit;
+}
+
+.modal-content form select {
+  cursor: pointer;
+}
+
+.form-grid input:focus,
+.modal-content textarea:focus,
+.modal-content select:focus {
+  outline: none;
+  border-color: #b8aba4;
 }

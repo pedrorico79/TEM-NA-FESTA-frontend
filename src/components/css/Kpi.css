@@ -2,44 +2,52 @@
   background: #FFFFFC;
   border: 1px solid #E5DCD3;
   border-radius: 24px;
-  padding: 20px;
-  min-height: 200px;
+  padding: 18px;
+  min-height: 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .kpi-icon {
-  width: 35px;
-  height: 35px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   flex-shrink: 0;
 }
 
 .kpi-icon ion-icon {
-  font-size: 25px;
+  font-size: 22px;
 }
 
 .kpi-card h3 {
-  font-size: 17px;
+  font-size: 14px;
   font-weight: 400;
   color: #594133;
-  margin: 0 0 10px;
-  min-height: 42px;
+  margin: 0 0 8px;
+  height: 36px;
+  line-height: 1.3;
+  overflow-wrap: break-word;
+  display: flex;
+  align-items: flex-start;
 }
 
 .kpi-card h2 {
-  font-size: 40px;
+  font-size: clamp(24px, 2.2vw, 40px);
   font-family: "DM Serif Display", serif;
   color: #2c2421;
-  margin: 0 0 8px;
+  margin: 0 0 4px;
+  line-height: 1;
 }
 
 .kpi-card p {
   color: #594133;
-  font-size: 18px;
+  font-size: 15px;
   margin: 0;
 }

@@ -6,47 +6,149 @@ import CardAlerta from "../paginaInicial/CardAlerta";
 import CardLembrete from "../paginaInicial/CardLembrete";
 import ProximasRetiradas from "../paginaInicial/ProximasRetiradas";
 
+import { useEffect, useState } from "react";
+import { api } from "../../services/api";
+
 import "../css/PaginaInicial.css";
 
 function PaginaInicial() {
-  const proximasRetiradas = [
-  {
-    title: "Hoje",
-    rows: [
-      ["#25-005", "Igor Felix", "12x Itens Natal", "NAO_INICIADO"],
-      ["#25-004", "Felipe Hideki", "20x Cookies Recheados", "PRONTO"],
-      ["#25-002", "Laura Belinello Buzzato", "12x Doces Festa", "EM_PRODUCAO"]
-    ]
-  },
-  {
-    title: "Amanhã",
-    rows: [
-      ["#25-003", "Kauã Medeiros", "5x Ovos de Páscoa", "NAO_INICIADO"]
-    ]
+
+  const [kpis, setKpis] = useState({
+    pedidosAtivos: 0,
+    aguardandoPreparo: 0,
+    emProducao: 0,
+    pagamentosPendentes: 0
+  });
+
+  const [lembretes, setLembretes] = useState([]);
+
+  const [lembreteSelecionado, setLembreteSelecionado] = useState(null);
+
+
+  function buscarLembretes() {
+
+    const usuarioId = localStorage.getItem("userId");
+
+    api.get(`/lembretes/usuario/${usuarioId}`)
+      .then((res) => {
+        setLembretes(res.data);
+      })
+      .catch((erro) => {
+        console.log("Erro ao buscar lembretes:", erro.response?.data);
+      });
+
   }
-];
+
+
+  function criarLembrete(lembrete) {
+
+    const usuarioId = localStorage.getItem("userId");
+
+    api.post(
+      `/lembretes?usuarioId=${usuarioId}`,
+      lembrete
+    )
+      .then(() => {
+        buscarLembretes();
+      })
+      .catch((erro) => {
+        console.log(erro.response?.data);
+      });
+
+  }
+
+
+  function atualizarLembrete(id, lembrete) {
+
+    const usuarioId = localStorage.getItem("userId");
+
+    api.put(
+      `/lembretes/${id}?usuarioId=${usuarioId}`,
+      lembrete
+    )
+      .then(() => {
+
+        buscarLembretes();
+
+      })
+      .catch((erro) => {
+        console.log("Erro ao atualizar:", erro.response?.data);
+      });
+
+  }
+
+
+  function deletarLembrete(id) {
+
+    api.delete(`/lembretes/${id}`)
+      .then(() => {
+
+        buscarLembretes();
+
+      })
+      .catch((erro) => {
+        console.log("Erro ao deletar:", erro.response?.data);
+      });
+
+  }
+
+
+  useEffect(() => {
+
+    api.get("/pedidos/count-pedidos")
+      .then((res) => {
+
+        setKpis({
+          pedidosAtivos: res.data.pedidosAtivos,
+          aguardandoPreparo: res.data.aguardandoPreparo,
+          emProducao: res.data.emProducao,
+          pagamentosPendentes: res.data.pagamentosPendentes
+        });
+
+      });
+
+
+    buscarLembretes();
+
+
+  }, []);
+
   return (
     <div className="paginaInicial-layout">
+
       <Menu active="paginaInicial" />
 
       <main className="paginaInicial-content">
+
         <PaginaInicialHeader />
 
         <div className="paginaInicial-grid">
+
           <section className="left-content">
 
-            <KpiSection />
+            <KpiSection kpis={kpis} />
 
-            <ProximasRetiradas data={proximasRetiradas} />
+            <ProximasRetiradas />
+
           </section>
 
-          <aside className="right-content">
-            <CardAlerta />
 
-            <CardLembrete />
+          <aside className="right-content">
+
+            <CardLembrete
+              lembretes={lembretes}
+              criarLembrete={criarLembrete}
+              atualizarLembrete={atualizarLembrete}
+              deletarLembrete={deletarLembrete}
+              setLembreteSelecionado={setLembreteSelecionado}
+            />
+
           </aside>
+
         </div>
+
       </main>
+
     </div>
   );
 }
