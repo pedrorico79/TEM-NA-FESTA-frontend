@@ -10,7 +10,7 @@
 .login-pagina {
     width: 100%;
     height: 100vh;
-    background: #f9f7f6;
+    background: #FFFBF2;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -89,19 +89,22 @@
     border: none;
     outline: none;
     background: transparent;
-    color: white;
-    font-size: 18px;
+    color: #422f24;
+    font-size: 18px !important;
+    font-family: "Inter", sans-serif;
+    font-weight: 300;
 }
 
 .input-container input::placeholder {
-    color: #ffe3e7;
+    color: #6f5650;
+    opacity: 0.7;
 }
 
 .input-container fieldset {
-    border: 2px solid #d77585;
+    border: 3px solid #BC5A6C;
     border-radius: 12px;
     padding: 0 18px 8px 18px;
-    background: #d77585;
+    background: #FFFBF2;
 }
 
 .input-container legend {
@@ -111,36 +114,51 @@
     font-size: 16px;
     background: #422f24;
     border-radius: 6px;
+    font-weight: 500;
 }
 
 .input-wrapper {
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
 }
 
 .input-wrapper input {
-  flex: 1;
+    flex: 1;
 }
 
-/* Olho da senha */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0px 1000px #fffbf2 inset !important;
+    -webkit-text-fill-color: #422f24 !important;
+    font-size: 18px !important;
+    font-family: "Inter", sans-serif !important;
+    font-weight: 300 !important;
+    border-radius: 0;
+    box-sizing: border-box;
+    -webkit-text-size-adjust: 100% !important;
+    zoom: 1 !important;
+}
+
 .mostrar-senha {
-  border: none;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: white;
-  opacity: 0.7;
-  transition: 0.2s;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #422f24;
+    opacity: 0.7;
+    transition: 0.2s;
 }
 
 .mostrar-senha:hover {
-  opacity: 1;
+    opacity: 1;
 }
 
 .mostrar-senha ion-icon {
-  font-size: 22px;
+    font-size: 22px;
 }
 
 .esqueceu-senha {
@@ -148,6 +166,9 @@
     text-align: right;
     margin-top: -30px;
     margin-bottom: 70px;
+    font-size: 18px;
+    font-weight: 500;
+    padding-right: 10px;
 }
 
 /* Switch de Lembrar Acesso */
@@ -178,7 +199,7 @@
 .bolinha {
     position: absolute;
     inset: 0;
-    background: #6f5650;
+    background: #9A7A70;
     border-radius: 50px;
     cursor: pointer;
     transition: 0.3s;
@@ -197,7 +218,7 @@
 }
 
 .switch input:checked+.bolinha {
-    background: #d77585;
+    background: #BC5A6C;
 }
 
 .switch input:checked+.bolinha::before {
@@ -208,24 +229,30 @@
 
 .login-button {
     border: none;
-    background: #d77585;
+    background: #BC5A6C;
     color: white;
     cursor: pointer;
-    transition: 0.3s;
     height: 65px;
     font-size: 24px;
     border-radius: 40px;
+    transition: 0.3s;
 }
 
 .login-button:hover {
-    opacity: 0.9;
+    background-color: #A94D5D;
 }
 
 @media (max-width: 900px) {
-    .login-card {
-        width: 95%;
-        min-height: auto;
+    .login-container {
+        background-color: #594133;
+        padding: 0;
+    }
 
+    .login-card {
+        width: 100%;
+        min-height: 100vh;
+        border-radius: 0;
+        box-shadow: none;
         grid-template-columns: 1fr;
     }
 
@@ -267,8 +294,9 @@
     }
 
     .esqueceu-senha {
-        font-size: 14px;
-        margin-bottom: 30px;
+        font-size: 16px;
+        margin-bottom: 60px;
+        padding-right: 5px;
     }
 
     .remember-container {
