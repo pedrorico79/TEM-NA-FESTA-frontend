@@ -40,7 +40,7 @@ function ModalExcluirLembrete(props) {
 
                 <button
                     type="button"
-                    className="primary-button"
+                    className="primary-button delete-button"
                     onClick={excluir}
                 >
                     Excluir

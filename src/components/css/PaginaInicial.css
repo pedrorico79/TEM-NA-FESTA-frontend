@@ -473,12 +473,12 @@ body {
   margin-top: 12px;
 }
 
-.primary-button {
+.delete-button {
   background: #fee2e2;
   color: #dc2626;
 }
 
-.primary-button:hover {
+.delete-button:hover {
   background: #fecaca;
 }
 
