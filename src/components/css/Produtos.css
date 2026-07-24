@@ -3,10 +3,12 @@
 
   min-height: 100vh;
 
-  background: #f9f7f6;
+  background: #FFFBF2;
 }
 
 .produtos-content {
+  width: calc(100% - 280px);
+  margin-left: 280px;
   flex: 1;
   padding: 40px;
   min-width: 0;
@@ -67,7 +69,7 @@
 
   padding: 0 22px;
 
-  background: #d77585;
+  background: #BC5A6C;
 
   color: white;
 
@@ -89,14 +91,14 @@
 .btn-remover {
   height: 42px;
 
-  border: 2px solid #d77585;
+  border: 2px solid #BC5A6C;
   border-radius: 14px;
 
   padding: 0 22px;
 
   background: white;
 
-  color: #d77585;
+  color: #BC5A6C;
 
   font-size: 16px;
 
@@ -206,7 +208,7 @@
 }
 
 .switch-produto.ativo {
-  background: #d77585;
+  background: #BC5A6C;
 }
 
 .switch-bolinha {
@@ -300,4 +302,20 @@
     font-weight: 600;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     z-index: 9999;
+}
+
+.input-valor {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.input-valor span {
+    font-size: 16px;
+    color: #555;
+    font-weight: 500;
+}
+
+.input-valor input {
+    flex: 1;
 }

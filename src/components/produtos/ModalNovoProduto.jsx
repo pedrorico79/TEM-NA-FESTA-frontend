@@ -69,13 +69,17 @@ function ModalNovoProduto(props) {
 
                     <div className="form-group">
                         <label>Preço de Venda *</label>
-                        <input
-                            type="number"
-                            step="0.01"
-                            name="precoVenda"
-                            value={novoProduto.precoVenda}
-                            onChange={handleChange}
-                        />
+
+                        <div className="input-valor">
+                            <span>R$</span>
+                            <input
+                                type="number"
+                                step="0.01"
+                                name="precoVenda"
+                                value={novoProduto.precoVenda}
+                                onChange={handleChange}
+                            />
+                        </div>
                     </div>
                 </div>
 

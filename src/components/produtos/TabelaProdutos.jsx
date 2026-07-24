@@ -4,7 +4,8 @@ import SwitchStatusProduto from "./SwitchStatusProduto";
 function TabelaProdutos({
     produtos,
     onEditar,
-    onAlterarStatus
+    onAlterarStatus,
+    onRemover
 }) {
 
     const data = produtos.map((produto) => [
@@ -26,14 +27,16 @@ function TabelaProdutos({
                 <ion-icon name="pencil-outline"></ion-icon> Editar
             </button>
 
-            <button className="btn-remover">
+            <button
+                className="btn-remover"
+                onClick={() => onRemover(produto)}
+            >
                 <ion-icon name="trash-outline"></ion-icon> Remover
             </button>
         </div>
     ]);
 
     return (
-
         <div className="produtos-tabela-wrapper">
             <Tabela
                 columns={[

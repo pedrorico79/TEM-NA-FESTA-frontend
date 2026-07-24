@@ -78,6 +78,43 @@ function Produtos() {
         setModalOpen(true);
     }
 
+    function editarProduto(produto) {
+        return api.put(`/produtos/${produto.id}`, produto)
+            .then((response) => {
+                buscarProdutos();
+                return response.data;
+            })
+            .catch((erro) => {
+                console.error(erro);
+                throw erro;
+            });
+    }
+
+    const [produtoRemocao, setProdutoRemocao] = useState(null);
+
+    function abrirModalRemover(produto) {
+        setProdutoRemocao(produto);
+    }
+
+    function removerProduto() {
+        api.delete(`/produtos/${produtoRemocao.id}`)
+            .then(() => {
+                buscarProdutos();
+
+                setProdutoRemocao(null);
+
+                setMensagemSucesso("Produto removido com sucesso!");
+
+                setTimeout(() => {
+                    setMensagemSucesso("");
+                }, 3000);
+            })
+            .catch((erro) => {
+                console.error(erro);
+                alert("Erro ao remover produto.");
+            });
+    }
+
     function alterarStatus(produto) {
         setProdutoConfirmacao(produto);
         setModalConfirmacaoOpen(true);
@@ -145,6 +182,7 @@ function Produtos() {
                         produtos={produtos}
                         onEditar={abrirModalEditar}
                         onAlterarStatus={alterarStatus}
+                        onRemover={abrirModalRemover}
                     />
 
                     <Paginacao
@@ -172,6 +210,14 @@ function Produtos() {
                 onClose={() =>
                     setModalOpen(false)
                 }
+                onSalvar={editarProduto}
+                onSucesso={() => {
+                    setMensagemSucesso("Produto editado com sucesso!");
+
+                    setTimeout(() => {
+                        setMensagemSucesso("");
+                    }, 3000);
+                }}
             />
 
             <ModalNovoProduto
@@ -192,10 +238,24 @@ function Produtos() {
                 onClose={() => setModalConfirmacaoOpen(false)}
                 onConfirmar={confirmarAlteracaoStatus}
                 mensagem={`Tem certeza que deseja ${produtoConfirmacao?.ativo
-                        ? "desativar"
-                        : "ativar"
+                    ? "desativar"
+                    : "ativar"
                     } o produto ${produtoConfirmacao?.nome || ""
                     }?`}
+            />
+
+            <ModalConfirmacao
+                open={!!produtoRemocao}
+                onClose={() => setProdutoRemocao(null)}
+                onConfirmar={removerProduto}
+                mensagem={
+                    <>
+                        Tem certeza que deseja remover o produto {produtoRemocao?.nome || ""}?
+                        <br />
+                        <br />
+                        Essa ação não pode ser desfeita.
+                    </>
+                }
             />
 
 
