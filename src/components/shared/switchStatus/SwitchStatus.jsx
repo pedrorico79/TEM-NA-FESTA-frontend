@@ -1,11 +1,13 @@
-function SwitchStatusProduto({
+import "../../css/SwitchStatus.css";
+
+function SwitchStatus({
   ativo,
   onClick,
 }) {
 
   return (
     <button
-      className={`switch-produto ${
+      className={`switch ${
         ativo ? "ativo" : ""
       }`}
 
@@ -16,4 +18,4 @@ function SwitchStatusProduto({
   );
 }
 
-export default SwitchStatusProduto;
+export default SwitchStatus;

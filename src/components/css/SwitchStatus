@@ -1,0 +1,55 @@
+.switch {
+  flex: none;
+
+  width: 64px;
+  min-width: 64px;
+  max-width: 64px;
+
+  height: 36px;
+
+  border: none;
+  border-radius: 999px;
+
+  background: #e7e0da;
+
+  position: relative;
+
+  cursor: pointer;
+
+  transition: 0.25s;
+
+  padding: 0;
+  
+  outline: none;
+}
+
+.switch:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.switch.ativo {
+  background: #BC5A6C;
+}
+
+.switch-bolinha {
+  width: 28px;
+  height: 28px;
+
+  border-radius: 50%;
+
+  background: white;
+
+  position: absolute;
+
+  top: 4px;
+  left: 4px;
+
+  transition: 0.25s;
+
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
+}
+
+.switch.ativo .switch-bolinha {
+  left: 32px;
+}

@@ -1,5 +1,5 @@
 import Tabela from "../shared/tabela/Tabela";
-import SwitchStatusProduto from "./SwitchStatusProduto";
+import SwitchStatus from "../shared/switchStatus/SwitchStatus";
 
 function TabelaProdutos({
     produtos,
@@ -13,7 +13,7 @@ function TabelaProdutos({
         produto.descricao,
         `R$ ${produto.precoVenda.toFixed(2)}`,
         <div className="acoes-produto">
-            <SwitchStatusProduto
+            <SwitchStatus
                 ativo={produto.ativo}
                 onClick={() =>
                     onAlterarStatus(produto)
