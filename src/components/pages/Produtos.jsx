@@ -8,7 +8,7 @@ import ModalEditarProduto from "../produtos/ModalEditarProduto";
 import ModalNovoProduto from "../produtos/ModalNovoProduto";
 import Paginacao from "../shared/paginacao/Paginacao";
 import { api } from "../../services/api";
-import ModalConfirmacao from "../produtos/ModalConfirmacao";
+import ModalConfirmacao from "../shared/modal/ModalConfirmacao";
 
 import "../css/Produtos.css";
 
