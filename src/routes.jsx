@@ -6,6 +6,7 @@ import PaginaInicial from "./components/pages/PaginaInicial";
 import Pedidos from "./components/pages/Pedidos";
 import Produtos from "./components/pages/Produtos";
 import Relatorios from "./components/pages/Relatorios";
+import Clientes from "./components/pages/Clientes";
 
 export const routes = createBrowserRouter([
   {
@@ -32,5 +33,9 @@ export const routes = createBrowserRouter([
   {
     path: "/Relatorios",
     element: <Relatorios />,
+  },
+  {
+    path: "/Clientes",
+    element: <Clientes />,
   },
 ]);
