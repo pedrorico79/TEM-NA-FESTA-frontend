@@ -9,7 +9,7 @@ function LoginForm(props) {
 
       <LoginInput label="Senha" type="password" placeholder="********" valor={props.senhaDigitada} setValor={props.setSenhaDigitada}/>
       <a href="/" className="esqueceu-senha">Esqueci minha senha</a>
-      <LembrarAcesso />
+      <LembrarAcesso lembrarAcesso={props.lembrarAcesso} setLembrarAcesso={props.setLembrarAcesso}/>
       <LoginButton logar={props.logar} />
     </div>
   );

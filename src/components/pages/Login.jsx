@@ -7,8 +7,9 @@ import { api } from "../../services/api";
 
 function Login() {
 
-  const [emailDigitado, setEmailDigitado] = useState('')
-  const [senhaDigitada, setSenhaDigitada] = useState('')
+  const [emailDigitado, setEmailDigitado] = useState("");
+  const [senhaDigitada, setSenhaDigitada] = useState("");
+  const [lembrarAcesso, setLembrarAcesso] = useState(false);
 
   const navigate = useNavigate();
 
@@ -16,7 +17,8 @@ function Login() {
 
     api.post("/usuarios/login", {
       email: emailDigitado,
-      senha: senhaDigitada
+      senha: senhaDigitada,
+      rememberMe: lembrarAcesso
     })
       .then((res) => {
 
@@ -39,15 +41,24 @@ function Login() {
 
   }
 
-
   return (
     <div className="login-pagina">
       <div className="login-card">
         <LogoSection />
-        <LoginForm logar={logar} emailDigitado={emailDigitado} setEmailDigitado={setEmailDigitado} senhaDigitada={senhaDigitada} setSenhaDigitada={setSenhaDigitada} />
+
+        <LoginForm
+          logar={logar}
+          emailDigitado={emailDigitado}
+          setEmailDigitado={setEmailDigitado}
+          senhaDigitada={senhaDigitada}
+          setSenhaDigitada={setSenhaDigitada}
+          lembrarAcesso={lembrarAcesso}
+          setLembrarAcesso={setLembrarAcesso}
+        />
+
       </div>
     </div>
   );
 }
 
-export default Login
+export default Login;

@@ -210,7 +210,7 @@ input:-webkit-autofill:active {
     position: absolute;
     width: 24px;
     height: 24px;
-    top: 4px;
+    top: 6px;
     left: 4px;
     background: white;
     border-radius: 50%;
@@ -222,7 +222,7 @@ input:-webkit-autofill:active {
 }
 
 .switch input:checked+.bolinha::before {
-    transform: translateX(24px);
+    transform: translateX(32px);
 }
 
 /* Botão Entrar */
