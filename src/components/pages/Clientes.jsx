@@ -32,6 +32,21 @@ function Clientes() {
 
     const [clienteConfirmacao, setClienteConfirmacao] = useState(null);
 
+    const [busca, setBusca] = useState("");
+
+    const clientesFiltrados = clientes.filter((cliente) =>
+        cliente.nome
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .includes(
+                busca
+                    .toLowerCase()
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+            )
+    );
+
     function buscarClientes() {
 
         api.get("/clientes", {
@@ -252,12 +267,14 @@ function Clientes() {
 
                         <input
                             placeholder="Buscar cliente"
+                            value={busca}
+                            onChange={(e) => setBusca(e.target.value)}
                         />
 
                     </div>
 
                     <TabelaClientes
-                        clientes={clientes}
+                        clientes={clientesFiltrados}
                         onEditar={abrirModalEditar}
                         onAlterarStatus={alterarStatus}
                         onRemover={abrirModalRemover}

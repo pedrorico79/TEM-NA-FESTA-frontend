@@ -32,6 +32,21 @@ function Produtos() {
 
     const [produtoConfirmacao, setProdutoConfirmacao] = useState(null);
 
+    const [busca, setBusca] = useState("");
+
+    const produtosFiltrados = produtos.filter((produto) =>
+        produto.nome
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .includes(
+                busca
+                    .toLowerCase()
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+            )
+    );
+
     function buscarProdutos() {
 
         api.get("/produtos", {
@@ -174,12 +189,14 @@ function Produtos() {
 
                         <input
                             placeholder="Buscar produto"
+                            value={busca}
+                            onChange={(e) => setBusca(e.target.value)}
                         />
 
                     </div>
 
                     <TabelaProdutos
-                        produtos={produtos}
+                        produtos={produtosFiltrados}
                         onEditar={abrirModalEditar}
                         onAlterarStatus={alterarStatus}
                         onRemover={abrirModalRemover}
