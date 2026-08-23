@@ -1,0 +1,430 @@
+.usuarios-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #FFFBF2;
+}
+
+.usuarios-content {
+  width: calc(100% - 280px);
+  margin-left: 280px;
+  flex: 1;
+  padding: 40px;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.usuarios-content h1 {
+  font-size: 45px;
+  font-family: "DM Serif Display", serif;
+  color: #2c2421;
+  margin-bottom: 30px;
+}
+
+.usuarios-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.usuarios-topo input {
+  width: 100%;
+  max-width: 420px;
+  height: 52px;
+  border: 2px solid #e7e0da;
+  border-radius: 16px;
+  padding: 0 18px;
+  font-size: 17px;
+  background: white;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.usuarios-topo input::placeholder {
+  color: #422f24;
+  opacity: 0.6;
+}
+
+.acoes-usuarios {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: max-content;
+}
+
+.btn-editar {
+  height: 42px;
+  border: none;
+  border-radius: 14px;
+  padding: 0 22px;
+  background: #BC5A6C;
+  color: white;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-editar:hover {
+  filter: brightness(0.94);
+}
+
+.btn-remover {
+  height: 42px;
+  border: 2px solid #BC5A6C;
+  border-radius: 14px;
+  padding: 0 22px;
+  background: white;
+  color: #BC5A6C;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-remover:hover {
+  background: #ffeaea;
+}
+
+.btn-editar ion-icon,
+.btn-remover ion-icon {
+  font-size: 18px;
+}
+
+.form-usuarios {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 10px;
+}
+
+.form-usuarios input,
+.form-usuarios textarea {
+  width: 100%;
+  border: 2px solid #e7e0da;
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-size: 16px;
+  color: #2c2421;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.form-usuarios textarea {
+  min-height: 120px;
+  resize: none;
+}
+
+.form-usuarios button {
+  margin-top: 10px;
+  height: 52px;
+  border: none;
+  border-radius: 16px;
+  background: #6f432a;
+  color: white;
+  font-size: 17px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.form-usuarios button:hover {
+  filter: brightness(0.94);
+}
+
+.paginacao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 26px;
+}
+
+.paginacao button {
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6f432a;
+  cursor: pointer;
+}
+
+.paginacao button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.paginacao ion-icon {
+  font-size: 28px;
+}
+
+.paginacao span {
+  font-size: 18px;
+  color: #422f24;
+}
+
+.usuarios-tabela-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 24px;
+  border-radius: 16px;
+}
+
+.usuarios-tabela-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  white-space: nowrap;
+}
+
+.mensagem-sucesso {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  background: #4caf50;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+}
+
+.input-valor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.input-valor span {
+  font-size: 16px;
+  color: #555;
+  font-weight: 500;
+}
+
+.input-valor input {
+  flex: 1;
+}
+
+.autenticacao-container-rosa {
+  width: calc(100% - 280px);
+  margin-left: 280px;
+  min-height: 100vh;
+  background-color: #BC5A6C;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+.autenticacao-conteudo {
+  width: 100%;
+  max-width: 550px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  box-sizing: border-box;
+  transform: translateY(-50px);
+}
+
+.autenticacao-logo {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.3rem;
+}
+
+.icone-acesso-restrito {
+  width: 100px;
+  height: 100px;
+  overflow: visible;
+}
+
+.autenticacao-conteudo h1 {
+  margin: 0 0 0.6rem;
+  color: #FFFBF2;
+  font-size: 2rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.autenticacao-subtitulo {
+  max-width: 430px;
+  margin: 0 0 1.8rem;
+  color: #FFFBF2;
+  font-size: 0.9rem;
+  font-weight: 300;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.autenticacao-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.autenticacao-form .form-group {
+  width: 100%;
+  position: relative;
+  box-sizing: border-box;
+  padding: 10px 18px 10px;
+  background-color: #FFFBF2;
+  border-radius: 12px;
+  margin: 0;
+}
+
+.autenticacao-form label {
+  position: absolute;
+  top: 0;
+  left: 12px;
+  transform: translateY(-50%);
+  padding: 3px 9px;
+  background-color: #FFFBF2;
+  border-radius: 5px;
+  color: #422f24;
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.autenticacao-form input {
+  width: 100%;
+  height: 30px;
+  box-sizing: border-box;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #422f24;
+  font-family: "Inter", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 400;
+}
+
+.autenticacao-form input::placeholder {
+  color: #6f5650;
+  opacity: 0.75;
+}
+
+.autenticacao-form input:-webkit-autofill,
+.autenticacao-form input:-webkit-autofill:hover,
+.autenticacao-form input:-webkit-autofill:focus,
+.autenticacao-form input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #FFFBF2 inset !important;
+  -webkit-text-fill-color: #422f24 !important;
+  font-family: "Inter", sans-serif !important;
+  font-size: 0.95rem !important;
+}
+
+.erro-texto {
+  display: block;
+  margin-top: 8px;
+  color: #ffe4e4;
+  font-size: 0.78rem;
+}
+
+.autenticacao-acoes {
+  width: 100%;
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 0.4rem;
+}
+
+.autenticacao-acoes button {
+  height: 48px;
+  border: none;
+  border-radius: 30px;
+  padding: 0 1.5rem;
+  font-family: "Inter", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease,
+    opacity 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.autenticacao-acoes .secondary-button {
+  flex: 1;
+  background-color: #FFFBF2;
+  color: #422f24;
+}
+
+.autenticacao-acoes .secondary-button:hover {
+  background-color: #f2eadc;
+}
+
+.autenticacao-acoes .primary-button {
+  flex: 1;
+  background: #5C2733;
+  color: #FFFBF2;
+}
+
+.autenticacao-acoes .primary-button:hover {
+  background: #461E28;
+}
+
+.autenticacao-acoes button:active {
+  transform: scale(0.98);
+}
+
+.autenticacao-acoes button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.senha-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.senha-input-wrapper input {
+  width: 100%;
+  padding-right: 48px;
+  box-sizing: border-box;
+}
+
+.botao-mostrar-senha {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: #777;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.botao-mostrar-senha:hover {
+  color: #BC5A6C;
+}
+
+.botao-mostrar-senha svg {
+  width: 21px;
+  height: 21px;
+}
