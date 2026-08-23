@@ -1,0 +1,214 @@
+.eventos-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #FFFBF2;
+}
+
+.eventos-content {
+  width: calc(100% - 280px);
+  margin-left: 280px;
+  flex: 1;
+  padding: 40px;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.eventos-content h1 {
+  font-size: 45px;
+  font-family: "DM Serif Display", serif;
+  color: #2c2421;
+  margin-bottom: 30px;
+}
+
+.eventos-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.eventos-topo input {
+  width: 100%;
+  max-width: 420px;
+  height: 52px;
+  border: 2px solid #e7e0da;
+  border-radius: 16px;
+  padding: 0 18px;
+  font-size: 17px;
+  background: white;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.eventos-topo input::placeholder {
+  color: #422f24;
+  opacity: 0.6;
+}
+
+.acoes-eventos {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: max-content;
+}
+
+.btn-editar {
+  height: 42px;
+  border: none;
+  border-radius: 14px;
+  padding: 0 22px;
+  background: #BC5A6C;
+  color: white;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-editar:hover {
+  filter: brightness(0.94);
+}
+
+.btn-remover {
+  height: 42px;
+  border: 2px solid #BC5A6C;
+  border-radius: 14px;
+  padding: 0 22px;
+  background: white;
+  color: #BC5A6C;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-remover:hover {
+  background: #ffeaea;
+}
+
+.btn-editar ion-icon,
+.btn-remover ion-icon {
+  font-size: 18px;
+}
+
+.form-eventos {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 10px;
+}
+
+.form-eventos input,
+.form-eventos textarea {
+  width: 100%;
+  border: 2px solid #e7e0da;
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-size: 16px;
+  color: #2c2421;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.form-eventos textarea {
+  min-height: 120px;
+  resize: none;
+}
+
+.form-eventos button {
+  margin-top: 10px;
+  height: 52px;
+  border: none;
+  border-radius: 16px;
+  background: #6f432a;
+  color: white;
+  font-size: 17px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.form-eventos button:hover {
+  filter: brightness(0.94);
+}
+
+.paginacao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 26px;
+}
+
+.paginacao button {
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6f432a;
+  cursor: pointer;
+}
+
+.paginacao button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.paginacao ion-icon {
+  font-size: 28px;
+}
+
+.paginacao span {
+  font-size: 18px;
+  color: #422f24;
+}
+
+.eventos-tabela-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 24px;
+  border-radius: 16px;
+}
+
+.eventos-tabela-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  white-space: nowrap;
+}
+
+.mensagem-sucesso {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  background: #4caf50;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+}
+
+.input-valor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.input-valor span {
+  font-size: 16px;
+  color: #555;
+  font-weight: 500;
+}
+
+.input-valor input {
+  flex: 1;
+}
