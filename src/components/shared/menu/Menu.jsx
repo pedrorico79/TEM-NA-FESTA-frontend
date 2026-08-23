@@ -2,7 +2,7 @@ import { useState } from "react";
 import MenuItem from "./MenuItem";
 import "../../css/Menu.css";
 import { useNavigate } from "react-router-dom";
-
+import { api } from "../../../services/api";
 import cupcakeIcon from "../../../assets/cupcake-svgrepo-com.svg";
 import campanhaIcon from "../../../assets/logo-campanha.png";
 
@@ -22,6 +22,15 @@ function Menu(props) {
   const handleNavigate = (path) => {
     navigate(path);
     setIsOpen(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await api.post("usuarios/logout");
+      navigate("/");
+    } catch (error) {
+      console.error("Erro ao realizar logout:", error);
+    }
   };
 
   return (
@@ -105,7 +114,7 @@ function Menu(props) {
           </nav>
         </div>
 
-        <button className="logout-button">
+        <button className="logout-button" onClick={handleLogout}>
           <ion-icon name="log-out-outline"></ion-icon>
           Sair
         </button>
