@@ -3,6 +3,8 @@
 }
 
 .pedidos-content {
+  width: calc(100% - 280px);
+  margin-left: 280px;
   flex: 1;
   padding: 40px;
 }
