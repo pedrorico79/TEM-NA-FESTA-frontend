@@ -13,7 +13,6 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-
   margin-bottom: 20px;
 }
 
@@ -57,7 +56,6 @@
   color: #b8a79d;
 }
 
-
 .view-buttons,
 .sort-buttons {
   display: flex;
@@ -83,11 +81,10 @@
 .sort-buttons button ion-icon {
   font-size: 28px;
   color: #6f432a;
-  
 }
 
 .sort-buttons button ion-icon {
-    font-size: 43px;
+  font-size: 43px;
 }
 
 .view-buttons button.active,
@@ -133,9 +130,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-
   color: #b8a79d;
-
   font-size: 18px;
   font-weight: 400;
 }
@@ -148,17 +143,12 @@
   height: 37px;
   min-width: 200px;
   padding: 0 20px;
-
   border-radius: 12px;
   border: 2px solid #ddd0c7;
-
   background: white;
-
   font-size: 15px;
   font-weight: 400;
-
   color: #2e1c16;
-
   cursor: pointer;
 }
 
@@ -173,12 +163,36 @@
   gap: 22px;
 }
 
+.lista-pedidos.modo-lista {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 24px;
+}
+
+.lista-pedidos.modo-lista .custom-table {
+  white-space: nowrap;
+}
+
 .pedido-card {
   background: white;
   border: 1px solid #ddd0c7;
   border-radius: 22px;
   padding: 15px 20px;
   min-height: 200px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.pedido-card:hover {
+  transform: translateY(-3px);
+  border-color: #bc5a6c;
+  box-shadow: 0 8px 20px rgba(46, 28, 22, 0.10);
+}
+
+.pedido-card:focus {
+  outline: 2px solid #bc5a6c;
+  outline-offset: 3px;
 }
 
 .pedido-header {
@@ -197,9 +211,8 @@
   gap: 10px;
 }
 
-.pedido-top-right ion-icon{
-    font-size: 20px;
-
+.pedido-top-right ion-icon {
+  font-size: 20px;
 }
 
 .pedido-status {
@@ -214,38 +227,35 @@
 .pedido-status.naoIniciado {
   background: #fee2e2;
   border: 1px solid #fca5a5;
+  color: #3e3835;
 }
 
 .pedido-status.producao {
   background: #fef3c7;
   border: 1px solid #fcd34d;
+  color: #3e3835;
 }
 
 .pedido-status.pronto {
   background: #dcfce7;
   border: 1px solid #86efac;
+  color: #3e3835;
 }
 
-.pedido-status.entregue {
-  background: #f4eee6;
-  border: 1px solid #eee7e0;
-}
-
+.pedido-status.entregue,
 .pedido-status.cancelado {
-  background: #f4eee6;
-  border: 1px solid #eee7e0;
+  background: #c8c0b9;
+  border: none;
+  color: #3e3835;
 }
 
 .pedido-cliente {
   margin-top: 15px;
   margin-bottom: 35px;
   margin-left: 35px;
-
   font-size: 25px;
   font-weight: 300;
-
   max-width: 220px;
-
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -256,7 +266,6 @@
   gap: 18px;
   color: #9b7d71;
   font-size: 14px;
-
   margin-bottom: 10px;
 }
 
@@ -268,7 +277,7 @@
 
 .pedido-infos ion-icon {
   font-size: 18px;
-  color: #BC5A6C;
+  color: #bc5a6c;
 }
 
 .pedido-footer {
@@ -279,25 +288,23 @@
   align-items: center;
 }
 
-.pedido-footer span{
-    font-size: 15px;
+.pedido-footer span {
+  font-size: 15px;
 }
 
 .pedido-campanha {
   max-width: 70px;
-
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .pedido-card.desativado {
-  background-color: #D1D0CF; /* fundo do card */
-  border: 2px solid #bdb9b6;     /* borda */
+  background-color: #d1d0cf;
+  border: 2px solid #bdb9b6;
   opacity: 1;
 }
 
-/* textos */
 .pedido-card.desativado,
 .pedido-card.desativado .pedido-id,
 .pedido-card.desativado .pedido-cliente,
@@ -305,24 +312,92 @@
 .pedido-card.desativado .pedido-infos,
 .pedido-card.desativado .pedido-footer span,
 .pedido-card.desativado .pedido-footer strong {
-  color: #3E3835 !important;
+  color: #3e3835 !important;
 }
 
-/* pílula Entregue */
 .pedido-card.desativado .pedido-status.entregue,
 .pedido-card.desativado .pedido-status.cancelado {
-  background-color: #C8C0B9;
-  color: #3E3835;
+  background-color: #c8c0b9;
+  color: #3e3835;
   border: none;
 }
 
-/* linha divisória */
 .pedido-card.desativado hr,
 .pedido-card.desativado .divisor {
-  border-color: #BCB4AE;
+  border-color: #bcb4ae;
 }
 
-/* ícones rosados */
 .pedido-card.desativado ion-icon {
-  color: #C3969B !important;
+  color: #c3969b !important;
+}
+
+.tabela-pedidos-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 24px;
+}
+
+.tabela-pedidos-wrapper .custom-table {
+  width: 100%;
+  white-space: nowrap;
+}
+
+.tabela-pedidos-wrapper .custom-table thead tr th:first-child {
+  border-top-left-radius: 16px;
+}
+
+.tabela-pedidos-wrapper .custom-table thead tr th:last-child {
+  border-top-right-radius: 16px;
+}
+
+.tabela-pedidos-wrapper .custom-table tbody tr {
+  background-color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.tabela-pedidos-wrapper .custom-table tbody tr:hover {
+  background-color: #fff8f5;
+}
+
+.tabela-pedidos-wrapper .custom-table tbody tr td:last-child {
+  width: 45px;
+  text-align: center;
+  padding-left: 8px;
+  padding-right: 18px;
+}
+
+.tabela-pedidos-wrapper .pedido-status {
+  display: inline-flex;
+}
+
+.tabela-pedidos-wrapper .custom-table tbody tr.pedido-tabela-desativado,
+.tabela-pedidos-wrapper .custom-table tbody tr.pedido-tabela-desativado > td {
+  background-color: #d1d0cf !important;
+  color: #3e3835 !important;
+}
+
+.tabela-pedidos-wrapper .custom-table tbody tr.pedido-tabela-desativado:hover,
+.tabela-pedidos-wrapper .custom-table tbody tr.pedido-tabela-desativado:hover > td {
+  background-color: #c9c8c7 !important;
+}
+
+.tabela-pedidos-wrapper .custom-table tbody tr.pedido-tabela-desativado .pedido-status.entregue,
+.tabela-pedidos-wrapper .custom-table tbody tr.pedido-tabela-desativado .pedido-status.cancelado {
+  background-color: #c8c0b9 !important;
+  color: #3e3835 !important;
+  border: none;
+}
+
+.pedido-tabela-seta {
+  font-size: 22px;
+  color: #6f432a;
+  vertical-align: middle;
+}
+
+.paginacao-pedidos {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
 }

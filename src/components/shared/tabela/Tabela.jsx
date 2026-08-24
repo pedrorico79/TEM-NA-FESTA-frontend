@@ -4,15 +4,34 @@ function Tabela({
   columns,
   data,
   sections,
+  onRowClick,
+  rowClassName
 }) {
 
-  const renderRow = (row, index) => (
-    <tr key={index}>
-      {row.map((item, index) => (
-        <td key={index}>{item}</td>
-      ))}
-    </tr>
-  );
+  const renderRow = (row, index) => {
+
+    const classeLinha = rowClassName
+      ? rowClassName(index)
+      : "";
+
+    return (
+      <tr
+        key={index}
+        onClick={
+          onRowClick
+            ? () => onRowClick(index)
+            : undefined
+        }
+        className={classeLinha}
+      >
+        {row.map((item, index) => (
+          <td key={index}>
+            {item}
+          </td>
+        ))}
+      </tr>
+    );
+  };
 
   return (
     <table className="custom-table">
@@ -20,42 +39,44 @@ function Tabela({
       <thead>
         <tr>
           {columns.map((column) => (
-            <th key={column}>{column}</th>
+            <th key={column}>
+              {column}
+            </th>
           ))}
         </tr>
       </thead>
 
       <tbody>
 
-        {/* TABELA NORMAL */}
         {!sections &&
           data.map((row, index) =>
             renderRow(row, index)
           )
         }
 
-        {/* TABELA COM SEÇÕES (Página Inicial) */}
         {sections &&
           sections.map((section, sectionIndex) => (
-            <>
-              <tr
-                className="section-row"
-                key={sectionIndex}
-              >
+            <React.Fragment key={sectionIndex}>
+
+              <tr className="section-row">
                 <td colSpan={columns.length}>
                   <div className="section-divider">
-                    <span>{section.title}</span>
+                    <span>
+                      {section.title}
+                    </span>
                   </div>
                 </td>
               </tr>
 
-              {section.rows.map((row, rowIndex) =>
-                renderRow(
-                  row,
-                  `${sectionIndex}-${rowIndex}`
-                )
+              {section.rows.map(
+                (row, rowIndex) =>
+                  renderRow(
+                    row,
+                    `${sectionIndex}-${rowIndex}`
+                  )
               )}
-            </>
+
+            </React.Fragment>
           ))
         }
 

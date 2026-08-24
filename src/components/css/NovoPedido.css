@@ -1,8 +1,12 @@
 .novoPedido-layout {
     display: flex;
+    width: 100%;
+    min-height: 100vh;
 }
 
 .novoPedido-content {
+    width: calc(100% - 280px);
+    margin-left: 280px;
     flex: 1;
     padding: 24px;
     min-width: 0;
@@ -251,10 +255,8 @@
 .criar-cliente-button {
     width: 100%;
     height: 58px;
-
+    border-radius: 16px;
     border: none;
-    border-top: 1px solid #eee4de;
-
     background: white;
 
     display: flex;
@@ -301,26 +303,26 @@
 }
 
 .novoPedido-footer {
-  position: fixed;
+    position: fixed;
 
-  bottom: 0;
-  left: 280px;
-  right: 0;
+    bottom: 0;
+    left: 280px;
+    right: 0;
 
-  height: 78px;
+    height: 78px;
 
-  background: white;
+    background: white;
 
-  border-top: 1px solid #e7e0da;
+    border-top: 1px solid #e7e0da;
 
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 14px;
 
-  padding: 0 40px;
+    padding: 0 40px;
 
-  z-index: 100;
+    z-index: 100;
 }
 
 .btn-secundario {
