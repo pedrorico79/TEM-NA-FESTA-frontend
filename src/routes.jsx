@@ -7,6 +7,9 @@ import Pedidos from "./components/pages/Pedidos";
 import Produtos from "./components/pages/Produtos";
 import Relatorios from "./components/pages/Relatorios";
 import Clientes from "./components/pages/Clientes";
+import Eventos from "./components/pages/Eventos";
+import Usuarios from "./components/pages/Usuarios";
+import DetalhesPedido from "./components/pages/DetalhesPedido";
 
 export const routes = createBrowserRouter([
   {
@@ -37,5 +40,17 @@ export const routes = createBrowserRouter([
   {
     path: "/Clientes",
     element: <Clientes />,
+  },
+  {
+    path: "/Eventos",
+    element: <Eventos />,
+  },
+  {
+    path: "/Usuarios",
+    element: <Usuarios />,
+  },
+  {
+    path: "/DetalhesPedido/:id",
+    element: <DetalhesPedido />,
   },
 ]);
