@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import Login from "./components/pages/Login";
 import NovoPedido from "./components/pages/NovoPedido";
@@ -53,4 +53,8 @@ export const routes = createBrowserRouter([
     path: "/DetalhesPedido/:id",
     element: <DetalhesPedido />,
   },
+  {
+  path: "/login",
+  element: <Navigate to="/" replace />,
+},
 ]);
