@@ -1,3 +1,5 @@
+import React from "react";
+
 import "../../css/Tabela.css";
 
 function Tabela({
@@ -7,9 +9,7 @@ function Tabela({
   onRowClick,
   rowClassName
 }) {
-
-  const renderRow = (row, index) => {
-
+  const renderRow = (row, index, sectionIndex = null, rowIndex = null) => {
     const classeLinha = rowClassName
       ? rowClassName(index)
       : "";
@@ -19,7 +19,7 @@ function Tabela({
         key={index}
         onClick={
           onRowClick
-            ? () => onRowClick(index)
+            ? () => onRowClick(sectionIndex, rowIndex)
             : undefined
         }
         className={classeLinha}
@@ -35,7 +35,6 @@ function Tabela({
 
   return (
     <table className="custom-table">
-
       <thead>
         <tr>
           {columns.map((column) => (
@@ -47,17 +46,15 @@ function Tabela({
       </thead>
 
       <tbody>
-
         {!sections &&
           data.map((row, index) =>
-            renderRow(row, index)
+            renderRow(row, index, null, index)
           )
         }
 
         {sections &&
           sections.map((section, sectionIndex) => (
             <React.Fragment key={sectionIndex}>
-
               <tr className="section-row">
                 <td colSpan={columns.length}>
                   <div className="section-divider">
@@ -68,20 +65,18 @@ function Tabela({
                 </td>
               </tr>
 
-              {section.rows.map(
-                (row, rowIndex) =>
-                  renderRow(
-                    row,
-                    `${sectionIndex}-${rowIndex}`
-                  )
+              {section.rows.map((row, rowIndex) =>
+                renderRow(
+                  row,
+                  `${sectionIndex}-${rowIndex}`,
+                  sectionIndex,
+                  rowIndex
+                )
               )}
-
             </React.Fragment>
           ))
         }
-
       </tbody>
-
     </table>
   );
 }

@@ -29,7 +29,7 @@ function PaginaInicial() {
 
     const usuarioId = localStorage.getItem("userId");
 
-    api.get(`/lembretes/usuario/${usuarioId}`)
+    api.get(`/lembretes`)
       .then((res) => {
         setLembretes(res.data);
       })
@@ -95,14 +95,18 @@ function PaginaInicial() {
 
   useEffect(() => {
 
-    api.get("/pedidos/count-pedidos")
+    api.get("/pedidos/count-by-status")
       .then((res) => {
 
         setKpis({
-          pedidosAtivos: res.data.pedidosAtivos,
-          aguardandoPreparo: res.data.aguardandoPreparo,
-          emProducao: res.data.emProducao,
-          pagamentosPendentes: res.data.pagamentosPendentes
+          pedidosAtivos:
+            (res.data.AGUARDANDO_SINAL || 0) +
+            (res.data.CONFIRMADO || 0) +
+            (res.data.EM_PRODUCAO || 0) +
+            (res.data.PRONTO_PARA_ENTREGA || 0),
+          aguardandoPreparo: res.data.CONFIRMADO,
+          emProducao: res.data.EM_PRODUCAO,
+          pagamentosPendentes: res.data.AGUARDANDO_SINAL
         });
 
       });

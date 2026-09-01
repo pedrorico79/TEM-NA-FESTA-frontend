@@ -34,7 +34,7 @@ function Clientes() {
 
     const [busca, setBusca] = useState("");
 
-    const clientesFiltrados = clientes.filter((cliente) =>
+    const clientesFiltrados = (clientes || []).filter((cliente) =>
         cliente.nome
             .toLowerCase()
             .normalize("NFD")

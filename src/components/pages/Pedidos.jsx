@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Menu from "../shared/Menu/Menu";
-import BotaoAdicionar from "../shared/botaoAdicionar/botaoAdicionar";
+import BotaoAdicionar from "../shared/botaoAdicionar/BotaoAdicionar";
 
 import HeaderPedidos from "../pedidos/HeaderPedidos";
 import FiltrosPedidos from "../pedidos/FiltrosPedidos";

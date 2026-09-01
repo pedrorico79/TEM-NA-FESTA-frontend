@@ -34,7 +34,7 @@ function Produtos() {
 
     const [busca, setBusca] = useState("");
 
-    const produtosFiltrados = produtos.filter((produto) =>
+    const produtosFiltrados = (produtos || []).filter((produto) =>
         produto.nome
             .toLowerCase()
             .normalize("NFD")

@@ -285,6 +285,14 @@ body {
   text-overflow: ellipsis;
 }
 
+.custom-table tbody tr:not(.section-row) {
+  cursor: pointer;
+}
+
+.custom-table tbody tr:not(.section-row):hover {
+  background-color: #F8F2EB;
+}
+
 .retiradas-tempo {
   display: flex;
   justify-content: space-between;

@@ -14,10 +14,10 @@ function Login() {
   const navigate = useNavigate();
 
   function logar() {
-    api.post("/usuarios/login", {
+    api.post("/auth/login", {
       email: emailDigitado,
       senha: senhaDigitada,
-      rememberMe: lembrarAcesso
+      jwtValidityRememberMe: lembrarAcesso
     })
       .then((res) => {
         const resposta = res.data;
