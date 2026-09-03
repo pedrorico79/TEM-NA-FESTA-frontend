@@ -18,52 +18,69 @@ function ProximasRetiradas() {
   const ITENS_POR_PAGINA = 7;
 
   const getStatus = (status) => {
-    if (status === "NAO_INICIADO") {
-      return (
-        <span className="status naoIniciado">
-          Não iniciado
-        </span>
-      );
-    }
 
-    if (status === "EM_PRODUCAO") {
-      return (
-        <span className="status emProducao">
-          Em produção
-        </span>
-      );
-    }
-
-    if (status === "PRONTO") {
-      return (
-        <span className="status pronto">
-          Pronto
-        </span>
-      );
-    }
-
-    if (status === "ENTREGUE") {
-      return (
-        <span className="status entregue">
-          Entregue
-        </span>
-      );
-    }
-
-    if (status === "CANCELADO") {
-      return (
-        <span className="status cancelado">
-          Cancelado
-        </span>
-      );
-    }
-
+  if (status === "RASCUNHO") {
     return (
-      <span className="status">
-        {status}
+      <span className="status rascunho">
+        Rascunho
       </span>
     );
-  };
+  }
+
+  if (status === "AGUARDANDO_SINAL") {
+    return (
+      <span className="status aguardandoSinal">
+        Aguardando sinal
+      </span>
+    );
+  }
+
+  if (status === "CONFIRMADO") {
+    return (
+      <span className="status confirmado">
+        Confirmado
+      </span>
+    );
+  }
+
+  if (status === "EM_PRODUCAO") {
+    return (
+      <span className="status emProducao">
+        Em produção
+      </span>
+    );
+  }
+
+  if (status === "PRONTO_PARA_ENTREGA") {
+    return (
+      <span className="status pronto">
+        Pronto para entrega
+      </span>
+    );
+  }
+
+  if (status === "ENTREGUE") {
+    return (
+      <span className="status entregue">
+        Entregue
+      </span>
+    );
+  }
+
+  if (status === "CANCELADO") {
+    return (
+      <span className="status cancelado">
+        Cancelado
+      </span>
+    );
+  }
+
+  return (
+    <span className="status">
+      {status}
+    </span>
+  );
+};
 
   async function buscarProximasRetiradas() {
     try {

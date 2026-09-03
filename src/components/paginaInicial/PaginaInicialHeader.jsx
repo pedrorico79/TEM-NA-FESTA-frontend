@@ -1,4 +1,4 @@
-import BotaoAdicionar from "../shared/botaoAdicionar/botaoAdicionar";
+import BotaoAdicionar from "../shared/botaoAdicionar/BotaoAdicionar";
 import { useNavigate } from "react-router-dom";
 
 function PaginaInicialHeader() {
