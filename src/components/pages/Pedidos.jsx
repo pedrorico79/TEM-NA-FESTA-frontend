@@ -1,125 +1,201 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Menu from "../shared/Menu/Menu";
 import BotaoAdicionar from "../shared/botaoAdicionar/BotaoAdicionar";
-
 import HeaderPedidos from "../pedidos/HeaderPedidos";
 import FiltrosPedidos from "../pedidos/FiltrosPedidos";
 import ListaPedidos from "../pedidos/ListaPedidos";
 
+import { api } from "../../services/api";
+
 import "../css/Pedidos.css";
 
 function Pedidos() {
-
   const navigate = useNavigate();
 
   const [busca, setBusca] = useState("");
   const [statusFiltro, setStatusFiltro] = useState("TODOS");
   const [eventoFiltro, setEventoFiltro] = useState("TODOS");
-
   const [ordem, setOrdem] = useState("PEDIDO");
   const [ordemCrescente, setOrdemCrescente] = useState(true);
 
   // Começa sempre na visualização em grade
   const [modoVisualizacao, setModoVisualizacao] = useState("grid");
 
+  const [pedidos, setPedidos] = useState([]);
+  const [clientes, setClientes] = useState({});
+  const [eventos, setEventos] = useState({});
+  const [carregando, setCarregando] = useState(true);
+
   const handleNavigate = (path) => {
     navigate(path);
   };
 
+  const buscarPedidos = async () => {
+    try {
+      setCarregando(true);
+
+      const response = await api.get("/pedidos");
+
+      const pedidosRecebidos = response.data ?? [];
+
+      setPedidos(pedidosRecebidos);
+
+      // Pega apenas os IDs dos clientes
+      const clienteIds = [
+        ...new Set(
+          pedidosRecebidos
+            .map((pedido) => pedido.clienteId)
+            .filter((id) => id != null)
+        )
+      ];
+
+      // Pega apenas os IDs dos eventos
+      const eventoIds = [
+        ...new Set(
+          pedidosRecebidos
+            .map((pedido) => pedido.eventoId)
+            .filter((id) => id != null)
+        )
+      ];
+
+      // Busca os clientes
+      const clientesMap = {};
+
+      await Promise.all(
+        clienteIds.map(async (clienteId) => {
+          try {
+            const clienteResponse = await api.get(
+              `/clientes/${clienteId}`
+            );
+
+            clientesMap[clienteId] = clienteResponse.data;
+          } catch (error) {
+            console.error(
+              `Erro ao buscar cliente ${clienteId}:`,
+              error
+            );
+          }
+        })
+      );
+
+      // Busca os eventos
+      const eventosMap = {};
+
+      await Promise.all(
+        eventoIds.map(async (eventoId) => {
+          try {
+            const eventoResponse = await api.get(
+              `/eventos/${eventoId}`
+            );
+
+            eventosMap[eventoId] = eventoResponse.data;
+          } catch (error) {
+            console.error(
+              `Erro ao buscar evento ${eventoId}:`,
+              error
+            );
+          }
+        })
+      );
+
+      setClientes(clientesMap);
+      setEventos(eventosMap);
+    } catch (error) {
+      console.error("Erro ao buscar pedidos:", error);
+      setPedidos([]);
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  useEffect(() => {
+    buscarPedidos();
+  }, []);
+
   const formatarData = (data) => {
+    if (!data) return "";
 
-    const dia = String(data.getDate()).padStart(2, "0");
+    const dataObjeto = new Date(data);
 
-    const mes = String(data.getMonth() + 1).padStart(2, "0");
+    const dia = String(dataObjeto.getDate()).padStart(2, "0");
+    const mes = String(dataObjeto.getMonth() + 1).padStart(2, "0");
 
     return `${dia}/${mes}`;
   };
 
-  const hojeObjeto = new Date();
+  const calcularRestante = (dataEntrega) => {
+    if (!dataEntrega) return "";
 
-  const amanhaObjeto = new Date();
+    const hoje = new Date();
+    const entrega = new Date(dataEntrega);
 
-  amanhaObjeto.setDate(
-    hojeObjeto.getDate() + 1
-  );
+    hoje.setHours(0, 0, 0, 0);
+    entrega.setHours(0, 0, 0, 0);
 
-  const dataHoje = formatarData(hojeObjeto);
+    const diferenca =
+      Math.ceil(
+        (entrega - hoje) / (1000 * 60 * 60 * 24)
+      );
 
-  const dataAmanha = formatarData(amanhaObjeto);
-
-  const pedidos = [
-    {
-      id: "#21",
-      campanha: "Natal",
-      cliente: "Igor Felix",
-      itens: 12,
-      retirada: dataHoje,
-      restante: "0d restantes",
-      total: "R$780,00",
-      status: "NAO_INICIADO"
-    },
-
-    {
-      id: "#22",
-      campanha: "Halloween",
-      cliente: "Felipe Hideki",
-      itens: 20,
-      retirada: dataHoje,
-      restante: "0d restante",
-      total: "R$200,00",
-      status: "PRONTO"
-    },
-
-    {
-      id: "#23",
-      campanha: "Páscoa",
-      cliente: "Kauã Medeiros",
-      itens: 5,
-      retirada: dataAmanha,
-      restante: "1d restante",
-      total: "R$125,00",
-      status: "NAO_INICIADO"
-    },
-
-    {
-      id: "#24",
-      campanha: "Aniversario",
-      cliente: "Laura Belinello Buzzato",
-      itens: 12,
-      retirada: dataHoje,
-      restante: "0d restantes",
-      total: "R$780,00",
-      status: "EM_PRODUCAO"
-    },
-
-    {
-      id: "#25",
-      campanha: "Casamento",
-      cliente: "Pedro Rico",
-      itens: 12,
-      retirada: "22/05",
-      restante: "Entregue",
-      total: "R$220,00",
-      status: "ENTREGUE"
-    },
-
-    {
-      id: "#26",
-      campanha: "Formatura",
-      cliente: "Ana Souza",
-      itens: 8,
-      retirada: "18/05",
-      restante: "Cancelado",
-      total: "R$95,00",
-      status: "CANCELADO"
+    if (diferenca < 0) {
+      return `${Math.abs(diferenca)}d atrasado`;
     }
-  ];
 
-  const pedidosFiltrados = [...pedidos]
+    if (diferenca === 0) {
+      return "0d restante";
+    }
+
+    return `${diferenca}d restante`;
+  };
+
+  const formatarValor = (valor) => {
+    return Number(valor ?? 0).toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL"
+    });
+  };
+
+  /*
+   * Adapta os dados da API para o formato
+   * que a ListaPedidos já utiliza.
+   */
+  const pedidosFormatados = pedidos.map((pedido) => {
+    const cliente = clientes[pedido.clienteId];
+    const evento = eventos[pedido.eventoId];
+
+    return {
+      ...pedido,
+
+      id: `#${pedido.id}`,
+
+      campanha:
+        evento?.nome ??
+        evento?.descricao ??
+        "",
+
+      cliente:
+        cliente?.nome ??
+        "Cliente não encontrado",
+
+      itens: pedido.itens?.reduce(
+        (total, item) => total + item.quantidade,
+        0
+      ) ?? 0,
+
+      retirada: formatarData(pedido.dataEntrega),
+
+      restante: calcularRestante(pedido.dataEntrega),
+
+      total: formatarValor(pedido.valorTotal),
+
+      status: pedido.statusProducao
+    };
+  });
+
+  const pedidosFiltrados = [...pedidosFormatados]
     .filter((pedido) => {
-
       const textoBusca = busca
         .toLowerCase()
         .trim();
@@ -146,11 +222,8 @@ function Pedidos() {
         correspondeEvento
       );
     })
-
     .sort((a, b) => {
-
       if (ordem === "PEDIDO") {
-
         const numeroA = Number(
           a.id.replace("#", "")
         );
@@ -165,7 +238,6 @@ function Pedidos() {
       }
 
       if (ordem === "CLIENTE") {
-
         const resultado = a.cliente.localeCompare(
           b.cliente,
           "pt-BR"
@@ -177,7 +249,6 @@ function Pedidos() {
       }
 
       if (ordem === "EVENTO") {
-
         const resultado = a.campanha.localeCompare(
           b.campanha,
           "pt-BR"
@@ -193,13 +264,10 @@ function Pedidos() {
 
   return (
     <div className="pedidos-layout">
-
       <Menu active="pedidos" />
 
       <main className="pedidos-content">
-
         <div className="pedidos-top">
-
           <HeaderPedidos />
 
           <BotaoAdicionar
@@ -212,40 +280,36 @@ function Pedidos() {
               handleNavigate("/NovoPedido")
             }
           />
-
         </div>
 
         <FiltrosPedidos
           busca={busca}
           setBusca={setBusca}
-
           statusFiltro={statusFiltro}
           setStatusFiltro={setStatusFiltro}
-
           eventoFiltro={eventoFiltro}
           setEventoFiltro={setEventoFiltro}
-
           ordem={ordem}
           setOrdem={setOrdem}
-
           ordemCrescente={ordemCrescente}
           setOrdemCrescente={setOrdemCrescente}
-
           modoVisualizacao={modoVisualizacao}
           setModoVisualizacao={setModoVisualizacao}
-
-          pedidos={pedidos}
+          pedidos={pedidosFormatados}
         />
 
-        <ListaPedidos
-          pedidos={pedidosFiltrados}
-          modoVisualizacao={modoVisualizacao}
-        />
-
+        {carregando ? (
+          <p>Carregando pedidos...</p>
+        ) : (
+          <ListaPedidos
+            pedidos={pedidosFiltrados}
+            modoVisualizacao={modoVisualizacao}
+          />
+        )}
       </main>
-
     </div>
   );
 }
 
 export default Pedidos;
+

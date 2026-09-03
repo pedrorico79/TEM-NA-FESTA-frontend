@@ -5,21 +5,25 @@ function CardPedido({ pedido }) {
     const navigate = useNavigate();
 
     const getStatusClass = () => {
-        if (pedido.status === "NAO_INICIADO") return "naoIniciado";
+        if (pedido.status === "RASCUNHO") return "rascunho";
         if (pedido.status === "EM_PRODUCAO") return "producao";
-        if (pedido.status === "PRONTO") return "pronto";
+        if (pedido.status === "PRONTO_PARA_ENTREGA") return "pronto";
         if (pedido.status === "ENTREGUE") return "entregue";
         if (pedido.status === "CANCELADO") return "cancelado";
+        if (pedido.status === "AGUARDANDO_SINAL") return "aguardandoSinal";
+        if (pedido.status === "CONFIRMADO") return "confirmado";
 
         return "";
     };
 
     const getStatusText = () => {
-        if (pedido.status === "NAO_INICIADO") return "Não iniciado";
+        if (pedido.status === "RASCUNHO") return "Rascunho";
         if (pedido.status === "EM_PRODUCAO") return "Em Produção";
-        if (pedido.status === "PRONTO") return "Pronto";
+        if (pedido.status === "PRONTO_PARA_ENTREGA") return "Pronto";
         if (pedido.status === "ENTREGUE") return "Entregue";
         if (pedido.status === "CANCELADO") return "Cancelado";
+        if (pedido.status === "AGUARDANDO_SINAL") return "Aguardando Sinal";
+        if (pedido.status === "CONFIRMADO") return "Confirmado";
 
         return pedido.status;
     };
