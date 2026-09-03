@@ -14,7 +14,7 @@ function Login() {
   const navigate = useNavigate();
 
   function logar() {
-    api.post("/auth/login", {
+    api.post("/usuarios/login", {
       email: emailDigitado,
       senha: senhaDigitada,
       jwtValidityRememberMe: lembrarAcesso
