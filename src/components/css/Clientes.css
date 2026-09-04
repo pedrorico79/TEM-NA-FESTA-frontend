@@ -204,3 +204,39 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   z-index: 9999;
 }
+
+.cliente-detalhes {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.cliente-detalhe {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cliente-detalhe strong {
+  font-size: 14px;
+  color: #6f432a;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.cliente-detalhe p {
+  margin: 0;
+  color: #2c2421;
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+.cliente-detalhes .form-grid {
+  margin: 0;
+  gap: 32px;
+}
+
+.cliente-detalhes .modal-actions {
+  margin-top: 8px;
+}
