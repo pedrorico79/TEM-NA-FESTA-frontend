@@ -9,6 +9,7 @@ import ModalNovoProduto from "../produtos/ModalNovoProduto";
 import Paginacao from "../shared/paginacao/Paginacao";
 import { api } from "../../services/api";
 import ModalConfirmacao from "../shared/modal/ModalConfirmacao";
+import ModalVisualizarProduto from "../produtos/ModalVisualizarProduto";
 
 import "../css/Produtos.css";
 
@@ -26,13 +27,16 @@ function Produtos() {
 
     const [paginaAtual, setPaginaAtual] = useState(1);
 
-    const [totalPaginas, setTotalPaginas] = useState(1);
-
     const [modalConfirmacaoOpen, setModalConfirmacaoOpen] = useState(false);
 
     const [produtoConfirmacao, setProdutoConfirmacao] = useState(null);
 
     const [busca, setBusca] = useState("");
+
+    const itensPorPagina = 7;
+
+    const [modalVisualizarOpen, setModalVisualizarOpen] = useState(false);
+    const [produtoVisualizado, setProdutoVisualizado] = useState(null);
 
     const produtosFiltrados = (produtos || []).filter((produto) =>
         produto.nome
@@ -47,30 +51,31 @@ function Produtos() {
             )
     );
 
+    const totalPaginas = Math.ceil(
+        produtosFiltrados.length / itensPorPagina
+    );
+
+    const indiceInicial = (paginaAtual - 1) * itensPorPagina;
+    const indiceFinal = indiceInicial + itensPorPagina;
+
+    const produtosPaginados = produtosFiltrados.slice(
+        indiceInicial,
+        indiceFinal
+    );
+
     function buscarProdutos() {
-
-        api.get("/produtos", {
-            params: {
-                page: paginaAtual - 1,
-                size: 7
-            }
-        })
+        api.get("/produtos")
             .then((response) => {
-
-                setProdutos(response.data.content);
-
-                setTotalPaginas(response.data.totalPages);
-
+                setProdutos(response.data);
             })
             .catch((erro) => {
                 console.error(erro);
             });
-
     }
 
     useEffect(() => {
         buscarProdutos();
-    }, [paginaAtual]);
+    }, []);
 
 
     function cadastrarProduto(produto) {
@@ -160,6 +165,11 @@ function Produtos() {
             });
     }
 
+    function abrirModalVisualizar(produto) {
+        setProdutoVisualizado(produto);
+        setModalVisualizarOpen(true);
+    }
+
     return (
         <div className="produtos-layout">
 
@@ -190,30 +200,30 @@ function Produtos() {
                         <input
                             placeholder="Buscar produto"
                             value={busca}
-                            onChange={(e) => setBusca(e.target.value)}
+                            onChange={(e) => {
+                                setBusca(e.target.value);
+                                setPaginaAtual(1);
+                            }}
                         />
 
                     </div>
 
                     <TabelaProdutos
-                        produtos={produtosFiltrados}
+                        produtos={produtosPaginados}
                         onEditar={abrirModalEditar}
                         onAlterarStatus={alterarStatus}
                         onRemover={abrirModalRemover}
+                        onVisualizar={abrirModalVisualizar}
                     />
 
                     <Paginacao
                         paginaAtual={paginaAtual}
                         totalPaginas={totalPaginas}
                         onAnterior={() =>
-                            setPaginaAtual(
-                                paginaAtual - 1
-                            )
+                            setPaginaAtual(paginaAtual - 1)
                         }
                         onProximo={() =>
-                            setPaginaAtual(
-                                paginaAtual + 1
-                            )
+                            setPaginaAtual(paginaAtual + 1)
                         }
                     />
 
@@ -273,6 +283,15 @@ function Produtos() {
                         Essa ação não pode ser desfeita.
                     </>
                 }
+            />
+
+            <ModalVisualizarProduto
+                open={modalVisualizarOpen}
+                produto={produtoVisualizado}
+                onClose={() => {
+                    setModalVisualizarOpen(false);
+                    setProdutoVisualizado(null);
+                }}
             />
 
 
