@@ -7,6 +7,20 @@ import Tabela from "../shared/tabela/Tabela";
 
 import Paginacao from "../shared/paginacao/Paginacao";
 
+function pedidoEstaAtrasado(dataEntrega) {
+  if (!dataEntrega) {
+    return false;
+  }
+
+  const hoje = new Date();
+  const data = new Date(dataEntrega);
+
+  hoje.setHours(0, 0, 0, 0);
+  data.setHours(0, 0, 0, 0);
+
+  return data < hoje;
+}
+
 function ProximasRetiradas() {
   const navigate = useNavigate();
 
@@ -19,68 +33,68 @@ function ProximasRetiradas() {
 
   const getStatus = (status) => {
 
-  if (status === "RASCUNHO") {
+    if (status === "RASCUNHO") {
+      return (
+        <span className="status rascunho">
+          Rascunho
+        </span>
+      );
+    }
+
+    if (status === "AGUARDANDO_SINAL") {
+      return (
+        <span className="status aguardandoSinal">
+          Aguardando sinal
+        </span>
+      );
+    }
+
+    if (status === "CONFIRMADO") {
+      return (
+        <span className="status confirmado">
+          Confirmado
+        </span>
+      );
+    }
+
+    if (status === "EM_PRODUCAO") {
+      return (
+        <span className="status emProducao">
+          Em produção
+        </span>
+      );
+    }
+
+    if (status === "PRONTO_PARA_ENTREGA") {
+      return (
+        <span className="status pronto">
+          Pronto para entrega
+        </span>
+      );
+    }
+
+    if (status === "ENTREGUE") {
+      return (
+        <span className="status entregue">
+          Entregue
+        </span>
+      );
+    }
+
+    if (status === "CANCELADO") {
+      return (
+        <span className="status cancelado">
+          Cancelado
+        </span>
+      );
+    }
+
     return (
-      <span className="status rascunho">
-        Rascunho
+      <span className="status">
+        {status}
       </span>
     );
-  }
-
-  if (status === "AGUARDANDO_SINAL") {
-    return (
-      <span className="status aguardandoSinal">
-        Aguardando sinal
-      </span>
-    );
-  }
-
-  if (status === "CONFIRMADO") {
-    return (
-      <span className="status confirmado">
-        Confirmado
-      </span>
-    );
-  }
-
-  if (status === "EM_PRODUCAO") {
-    return (
-      <span className="status emProducao">
-        Em produção
-      </span>
-    );
-  }
-
-  if (status === "PRONTO_PARA_ENTREGA") {
-    return (
-      <span className="status pronto">
-        Pronto para entrega
-      </span>
-    );
-  }
-
-  if (status === "ENTREGUE") {
-    return (
-      <span className="status entregue">
-        Entregue
-      </span>
-    );
-  }
-
-  if (status === "CANCELADO") {
-    return (
-      <span className="status cancelado">
-        Cancelado
-      </span>
-    );
-  }
-
-  return (
-    <span className="status">
-      {status}
-    </span>
-  );
-};
+  };
 
   async function buscarProximasRetiradas() {
     try {
@@ -205,29 +219,26 @@ function ProximasRetiradas() {
   }
 
   function tituloDaSecao(dataEntregaISO) {
-    if (!dataEntregaISO) {
-      return "Sem data";
-    }
-
-    const hoje = new Date();
-    const dataEntrega = new Date(dataEntregaISO);
-
-    const diffDias = Math.round(
-      (
-        dataEntrega.setHours(0, 0, 0, 0) -
-        hoje.setHours(0, 0, 0, 0)
-      ) /
-        (1000 * 60 * 60 * 24)
-    );
-
-    if (diffDias === 0) return "Hoje";
-
-    if (diffDias === 1) return "Amanhã";
-
-    return new Date(dataEntregaISO).toLocaleDateString(
-      "pt-BR"
-    );
+  if (!dataEntregaISO) {
+    return "Sem data";
   }
+
+  const hoje = new Date();
+  const dataEntrega = new Date(dataEntregaISO);
+
+  hoje.setHours(0, 0, 0, 0);
+  dataEntrega.setHours(0, 0, 0, 0);
+
+  const diffDias = Math.round(
+    (dataEntrega - hoje) /
+      (1000 * 60 * 60 * 24)
+  );
+
+  if (diffDias === 0) return "Hoje";
+  if (diffDias === 1) return "Amanhã";
+
+  return dataEntrega.toLocaleDateString("pt-BR");
+}
 
   const LIMITE_PEDIDO = 10;
   const LIMITE_CLIENTE = 20;
@@ -235,70 +246,88 @@ function ProximasRetiradas() {
 
   // A paginação acontece ANTES de montar as seções
   const formattedSections = (pedidosDaPagina ?? []).reduce(
-    (acc, pedido) => {
-      const titulo = tituloDaSecao(pedido.dataEntrega);
+  (acc, pedido) => {
+    const titulo = tituloDaSecao(pedido.dataEntrega);
+    const atrasada = pedidoEstaAtrasado(pedido.dataEntrega);
 
-      let secao = acc.find(
-        (s) => s.title === titulo
-      );
+    let secao = acc.find(
+      (s) => s.sectionKey === titulo
+    );
 
-      if (!secao) {
-        secao = {
-          title: titulo,
-          rows: [],
-          rowIds: []
-        };
+    if (!secao) {
+      secao = {
+        sectionKey: titulo,
 
-        acc.push(secao);
-      }
+        title: atrasada ? (
+          <span className="data-atrasada">
+            {titulo}
+          </span>
+        ) : (
+          titulo
+        ),
 
-      const numeroPedido = formatarNumeroPedido(pedido.id);
+        rows: [],
+        rowIds: []
+      };
 
-      const cliente = clientes[pedido.clienteId];
+      acc.push(secao);
+    }
 
-      const nomeCliente = cliente?.nome ?? "-";
+    const numeroPedido = formatarNumeroPedido(pedido.id);
 
-      const itensTexto = formatarItens(pedido.itens);
+    const cliente = clientes[pedido.clienteId];
 
-      secao.rows.push([
-        colunaComTooltip(
+    const nomeCliente = cliente?.nome ?? "-";
+
+    const itensTexto = formatarItens(pedido.itens);
+
+    secao.rows.push([
+      colunaComTooltip(
+        numeroPedido,
+        truncarTexto(
           numeroPedido,
-          truncarTexto(
-            numeroPedido,
-            LIMITE_PEDIDO
-          )
-        ),
+          LIMITE_PEDIDO
+        )
+      ),
 
-        colunaComTooltip(
+      colunaComTooltip(
+        nomeCliente,
+        truncarTexto(
           nomeCliente,
-          truncarTexto(
-            nomeCliente,
-            LIMITE_CLIENTE
-          )
-        ),
+          LIMITE_CLIENTE
+        )
+      ),
 
-        colunaComTooltip(
+      colunaComTooltip(
+        itensTexto,
+        truncarTexto(
           itensTexto,
-          truncarTexto(
-            itensTexto,
-            LIMITE_ITENS
-          )
-        ),
+          LIMITE_ITENS
+        )
+      ),
 
-        getStatus(pedido.statusProducao),
+      <div className="status-container">
+        {getStatus(pedido.statusProducao)}
 
-        <ion-icon
-          name="chevron-forward-outline"
-        ></ion-icon>
-      ]);
+        {pedidoEstaAtrasado(pedido.dataEntrega) && (
+          <span
+            className="aviso-atrasado"
+            title="A retirada deste pedido está atrasada"
+          >
+            ⚠️ Atrasado
+          </span>
+        )}
+      </div>,
 
-      // Guarda o ID correspondente à linha
-      secao.rowIds.push(pedido.id);
+      <ion-icon name="chevron-forward-outline"></ion-icon>
+    ]);
 
-      return acc;
-    },
-    []
-  );
+    secao.rowIds.push(pedido.id);
+
+    return acc;
+  },
+  []
+);
 
   function handleRowClick(rowIndex) {
     // Procura em qual seção está a linha clicada

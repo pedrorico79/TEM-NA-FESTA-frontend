@@ -537,3 +537,50 @@ body {
   margin: 0 0 12px 0;
   line-height: 1.5;
 }
+
+.status-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-container > .status {
+  width: 130px;
+  flex-shrink: 0;
+}
+
+.aviso-atrasado {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background-color: #ffe1e1;
+  color: #b42318;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.retiradas-card
+  .custom-table
+  .section-row:has(.data-atrasada)
+  .section-divider {
+  color: #b42318;
+}
+
+.retiradas-card
+  .custom-table
+  .section-row:has(.data-atrasada)
+  .section-divider::before,
+.retiradas-card
+  .custom-table
+  .section-row:has(.data-atrasada)
+  .section-divider::after {
+  background-color: #fca5a5;
+}
+
+.data-atrasada {
+  color: #b42318;
+  font-weight: 700;
+}
