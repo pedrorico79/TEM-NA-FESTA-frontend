@@ -23,11 +23,6 @@ function ReciboPedido({
         const largura = 840;
         const padding = 60;
 
-        /*
-         * Calculamos a altura com base na quantidade
-         * de itens e pagamentos.
-         */
-
         const quantidadeItens =
           pedido?.itens?.length || 0;
 
@@ -63,6 +58,52 @@ function ReciboPedido({
 
         let y = padding;
 
+        /*
+         * =====================================================
+         * DADOS DO RECIBO
+         * =====================================================
+         */
+
+        const dadosCliente = pedido?.dadosCliente ?? {};
+
+        const nomeCliente =
+          dadosCliente.nome ??
+          "Cliente não informado";
+
+        const enderecoCliente =
+          dadosCliente.endereco ??
+          "Não informado";
+
+        const contatoCliente =
+          dadosCliente.whatsapp ??
+          dadosCliente.telefone ??
+          "Não informado";
+
+        const dataEmissao =
+          pedido?.datas?.dataPedido ??
+          "Não informado";
+
+        const numeroPedido =
+          pedido?.id ??
+          "Não informado";
+
+        /*
+         * CNPJ vindo do .env
+         *
+         * No Vite:
+         * VITE_CNPJ=XX.XXX.XXX/XXXX-XX
+         */
+
+        const cnpj =
+          import.meta.env.VITE_CNPJ ??
+          "CNPJ não informado";
+
+        /*
+         * =====================================================
+         * CABEÇALHO
+         * =====================================================
+         */
+
         ctx.textAlign = "center";
 
         ctx.fillStyle = "#bc5a6c";
@@ -84,13 +125,12 @@ function ReciboPedido({
           "24px Arial";
 
         ctx.fillText(
-          "CNPJ: XX.XXX.XXX/XXXX-XX",
+          `CNPJ: ${cnpj}`,
           largura / 2,
           y
         );
 
         y += 60;
-
 
         /*
          * =====================================================
@@ -118,10 +158,9 @@ function ReciboPedido({
 
         y += 35;
 
-
         /*
          * =====================================================
-         * INFORMAÇÕES
+         * INFORMAÇÕES DO PEDIDO
          * =====================================================
          */
 
@@ -130,14 +169,125 @@ function ReciboPedido({
         ctx.font =
           "26px Arial";
 
-        const escreverInformacao = (
-          label,
-          valor
-        ) => {
+        const escreverInformacao = (label, valor) => {
+          const texto = String(
+            valor ?? "Não informado"
+          );
+
+          const tamanhoFonte = 26;
+          const alturaLinha = 38;
+
+          const larguraDisponivel =
+            largura - padding * 2;
+
+          ctx.font =
+            `bold ${tamanhoFonte}px Arial`;
+
+          const larguraLabel =
+            ctx.measureText(label).width;
+
+          const xValor =
+            padding +
+            larguraLabel +
+            8;
+
+          const larguraPrimeiraLinha =
+            largura - xValor - padding;
+
+          const larguraLinhasSeguintes =
+            largura - xValor - padding;
+
+          const quebrarTexto = (
+            texto,
+            larguraMaxima
+          ) => {
+            const palavras = texto.split(" ");
+
+            const linhas = [];
+            let linhaAtual = "";
+
+            for (const palavra of palavras) {
+              const tentativa =
+                linhaAtual
+                  ? `${linhaAtual} ${palavra}`
+                  : palavra;
+
+              ctx.font =
+                `${tamanhoFonte}px Arial`;
+
+              if (
+                ctx.measureText(tentativa).width <=
+                larguraMaxima
+              ) {
+                linhaAtual = tentativa;
+                continue;
+              }
+
+              if (linhaAtual) {
+                linhas.push(linhaAtual);
+              }
+
+              /*
+               * Palavra maior que a própria largura:
+               * quebra caractere por caractere.
+               */
+              if (
+                ctx.measureText(palavra).width >
+                larguraMaxima
+              ) {
+                let parte = "";
+
+                for (const caractere of palavra) {
+                  const tentativaParte =
+                    parte + caractere;
+
+                  if (
+                    ctx.measureText(
+                      tentativaParte
+                    ).width <= larguraMaxima
+                  ) {
+                    parte = tentativaParte;
+                  } else {
+                    if (parte) {
+                      linhas.push(parte);
+                    }
+
+                    parte = caractere;
+                  }
+                }
+
+                linhaAtual = parte;
+              } else {
+                linhaAtual = palavra;
+              }
+            }
+
+            if (linhaAtual) {
+              linhas.push(linhaAtual);
+            }
+
+            return linhas;
+          };
+
+          /*
+           * Descobre primeiro se cabe na mesma
+           * linha do label.
+           */
+          const linhasPrimeira =
+            quebrarTexto(
+              texto,
+              larguraPrimeiraLinha
+            );
+
+          ctx.textAlign = "left";
+
+          /*
+           * Label
+           */
           ctx.fillStyle = "#333333";
 
           ctx.font =
-            "bold 26px Arial";
+            `bold ${tamanhoFonte}px Arial`;
 
           ctx.fillText(
             label,
@@ -145,52 +295,75 @@ function ReciboPedido({
             y
           );
 
-          const larguraLabel =
-            ctx.measureText(label).width;
-
+          /*
+           * Valor
+           */
           ctx.font =
-            "26px Arial";
+            `${tamanhoFonte}px Arial`;
 
           ctx.fillText(
-            valor,
-            padding + larguraLabel + 8,
+            linhasPrimeira[0] ??
+            "Não informado",
+            xValor,
             y
           );
 
-          y += 42;
-        };
+          y += alturaLinha;
 
+          /*
+           * Se o valor continuou em outras linhas,
+           * desenha cada uma alinhada com o valor.
+           */
+          if (linhasPrimeira.length > 1) {
+            const textoRestante =
+              linhasPrimeira
+                .slice(1)
+                .join(" ");
+
+            const outrasLinhas =
+              quebrarTexto(
+                textoRestante,
+                larguraLinhasSeguintes
+              );
+
+            outrasLinhas.forEach(
+              (linha) => {
+                ctx.fillText(
+                  linha,
+                  xValor,
+                  y
+                );
+
+                y += alturaLinha;
+              }
+            );
+          }
+        };
 
         escreverInformacao(
           "Cliente:",
-          "Sarah Mayumi"
+          nomeCliente
         );
 
         escreverInformacao(
           "Endereço:",
-          "Rua das Orquídeas, 342"
+          enderecoCliente
         );
 
         escreverInformacao(
           "Contato:",
-          "(11) 93478-0032"
+          contatoCliente
         );
 
         escreverInformacao(
           "Pedido:",
-          String(pedido?.id ?? "")
+          numeroPedido
         );
 
         escreverInformacao(
           "Data de Emissão:",
-          "13/04/2026 - 14:32"
+          dataEmissao
         );
-
-        escreverInformacao(
-          "Local de Pagamento:",
-          "São Paulo - SP, pagamento on-line"
-        );
-
 
         /*
          * =====================================================
@@ -218,7 +391,6 @@ function ReciboPedido({
 
         y += 35;
 
-
         /*
          * =====================================================
          * RESUMO DOS ITENS
@@ -238,10 +410,8 @@ function ReciboPedido({
 
         y += 48;
 
-
         pedido?.itens?.forEach(
           (item) => {
-
             ctx.font =
               "26px Arial";
 
@@ -252,7 +422,7 @@ function ReciboPedido({
 
             const valor =
               `R$ ${Number(
-                item.subtotal
+                item.subtotal ?? 0
               ).toFixed(2)}`;
 
             ctx.textAlign = "left";
@@ -274,7 +444,6 @@ function ReciboPedido({
             y += 42;
           }
         );
-
 
         /*
          * =====================================================
@@ -318,14 +487,13 @@ function ReciboPedido({
 
         ctx.fillText(
           `Total do Pedido: R$ ${Number(
-            totalPedido
+            totalPedido ?? 0
           ).toFixed(2)}`,
           largura - padding,
           y
         );
 
         y += 60;
-
 
         /*
          * =====================================================
@@ -351,7 +519,6 @@ function ReciboPedido({
 
         y += 35;
 
-
         /*
          * =====================================================
          * HISTÓRICO DE PAGAMENTOS
@@ -373,10 +540,26 @@ function ReciboPedido({
 
         y += 48;
 
+        if (
+          !pedido?.pagamentos ||
+          pedido.pagamentos.length === 0
+        ) {
+          ctx.font =
+            "26px Arial";
+
+          ctx.fillStyle = "#777777";
+
+          ctx.fillText(
+            "Nenhum pagamento registrado.",
+            padding,
+            y
+          );
+
+          y += 42;
+        }
 
         pedido?.pagamentos?.forEach(
           (pag, idx) => {
-
             ctx.font =
               "26px Arial";
 
@@ -387,8 +570,9 @@ function ReciboPedido({
 
             const valor =
               `R$ ${Number(
-                pag.valor
-              ).toFixed(2)} - ${pag.metodo}`;
+                pag.valor ?? 0
+              ).toFixed(2)} - ${pag.metodo ?? "Não informado"
+              }`;
 
             ctx.textAlign = "left";
 
@@ -409,7 +593,6 @@ function ReciboPedido({
             y += 42;
           }
         );
-
 
         /*
          * =====================================================
@@ -437,11 +620,11 @@ function ReciboPedido({
 
         y += 35;
 
-
         /*
          * =====================================================
          * TOTAIS
-         * ===================================================== */
+         * =====================================================
+         */
 
         ctx.textAlign = "right";
 
@@ -452,7 +635,7 @@ function ReciboPedido({
 
         ctx.fillText(
           `Total Pago: R$ ${Number(
-            totalPago
+            totalPago ?? 0
           ).toFixed(2)}`,
           largura - padding,
           y
@@ -467,12 +650,11 @@ function ReciboPedido({
 
         ctx.fillText(
           `Total a Pagar: R$ ${Number(
-            totalAPagar
+            totalAPagar ?? 0
           ).toFixed(2)}`,
           largura - padding,
           y
         );
-
 
         /*
          * =====================================================
@@ -513,7 +695,6 @@ function ReciboPedido({
     totalPago,
     totalAPagar
   ]);
-
 
   /*
    * =====================================================
@@ -566,7 +747,6 @@ function ReciboPedido({
     }
   };
 
-
   return (
     <div className="recibo-container">
 
@@ -593,14 +773,12 @@ function ReciboPedido({
 
       )}
 
-
       <button
         type="button"
-        className={`botao-copiar-recibo ${
-          copiado
+        className={`botao-copiar-recibo ${copiado
             ? "copiado"
             : ""
-        }`}
+          }`}
         onClick={copiarRecibo}
         disabled={!imagemRecibo}
       >
@@ -614,3 +792,4 @@ function ReciboPedido({
 }
 
 export default ReciboPedido;
+

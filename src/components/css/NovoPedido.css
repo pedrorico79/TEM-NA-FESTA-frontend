@@ -72,6 +72,12 @@
     box-sizing: border-box;
 }
 
+
+.form-group input,
+.form-group textarea {
+    background-color: #FFFBF2;
+}
+
 .card-padrao select,
 .card-padrao input {
     height: 48px;
