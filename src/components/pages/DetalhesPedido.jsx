@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { useNavigate, useParams } from "react-router-dom";
 
-import Menu from "../shared/Menu/Menu";
+import Menu from "../shared/menu/Menu";
 
 import DadosCliente from "../detalhesPedido/DadosCliente";
 

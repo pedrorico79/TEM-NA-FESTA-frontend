@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import Menu from "../shared/Menu/Menu";
+import Menu from "../shared/menu/Menu";
 
 import HeaderNovoPedido from "../novoPedido/HeaderNovoPedido";
 import ClienteCard from "../novoPedido/ClienteCard";

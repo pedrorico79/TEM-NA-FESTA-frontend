@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import Menu from "../shared/Menu/Menu";
+import Menu from "../shared/menu/Menu";
 import BotaoAdicionar from "../shared/botaoAdicionar/BotaoAdicionar";
 import TabelaClientes from "../clientes/TabelaClientes";
 import ModalEditarCliente from "../clientes/ModalEditarCliente";
