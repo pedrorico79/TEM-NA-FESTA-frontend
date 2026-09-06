@@ -1,11 +1,24 @@
 import Tabela from "../shared/tabela/Tabela";
 import SwitchStatus from "../shared/switchStatus/SwitchStatus";
 
+function truncarTexto(texto, limite) {
+    if (!texto) {
+        return "-";
+    }
+
+    if (texto.length <= limite) {
+        return texto;
+    }
+
+    return `${texto.slice(0, limite)}...`;
+}
+
 function TabelaClientes({
     clientes,
     onEditar,
     onAlterarStatus,
-    onRemover
+    onRemover,
+    onVisualizar
 }) {
 
     function formatarEndereco(endereco) {
@@ -13,31 +26,41 @@ function TabelaClientes({
             return "-";
         }
 
-        return `${endereco.logradouro}, ${endereco.numero}${
-            endereco.complemento
-                ? ` - ${endereco.complemento}`
-                : ""
-        }`;
+        const logradouro = endereco.logradouro || "";
+        const numero = endereco.numero || "S/N";
+        const complemento = endereco.complemento
+            ? ` - ${endereco.complemento}`
+            : "";
+
+        return `${logradouro}, ${numero}${complemento}`;
     }
 
     const data = clientes.map((cliente) => [
-        cliente.nome,
-        cliente.telefone,
-        cliente.whatsapp,
-        cliente.instagram || "-",
-        formatarEndereco(cliente.endereco),
+        truncarTexto(cliente.nome, 25),
+
+        truncarTexto(cliente.telefone, 15),
+
+        truncarTexto(cliente.whatsapp, 15),
+
+        truncarTexto(cliente.instagram, 20),
+
+        truncarTexto(formatarEndereco(cliente.endereco), 40),
 
         <div className="acoes-cliente">
             <SwitchStatus
-                ativo={cliente.isAtivo}
-                onClick={() =>
-                    onAlterarStatus(cliente)
-                }
+                ativo={cliente.ativo}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onAlterarStatus(cliente);
+                }}
             />
 
             <button
                 className="btn-editar"
-                onClick={() => onEditar(cliente)}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onEditar(cliente);
+                }}
             >
                 <ion-icon name="pencil-outline"></ion-icon>
                 {" "}Editar
@@ -45,7 +68,10 @@ function TabelaClientes({
 
             <button
                 className="btn-remover"
-                onClick={() => onRemover(cliente)}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onRemover(cliente);
+                }}
             >
                 <ion-icon name="trash-outline"></ion-icon>
                 {" "}Remover
@@ -65,6 +91,9 @@ function TabelaClientes({
                     "AÇÕES"
                 ]}
                 data={data}
+                onRowClick={(row, index) =>
+                    onVisualizar(clientes[index])
+                }
             />
         </div>
     );

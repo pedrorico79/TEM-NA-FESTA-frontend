@@ -263,3 +263,47 @@
 .input-valor input {
     flex: 1;
 }
+
+.produto-detalhes {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.produto-detalhe {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.produto-detalhe strong {
+  font-size: 14px;
+  color: #6f432a;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.produto-detalhe p {
+  margin: 0;
+  color: #2c2421;
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+.produto-detalhe:nth-child(2) p {
+  line-height: 1.6;
+}
+
+.produto-detalhes .form-grid {
+  margin: 0;
+  gap: 32px;
+}
+
+.produto-detalhes .form-grid .produto-detalhe {
+  padding-top: 4px;
+}
+
+.produto-detalhes .modal-actions {
+  margin-top: 8px;
+}

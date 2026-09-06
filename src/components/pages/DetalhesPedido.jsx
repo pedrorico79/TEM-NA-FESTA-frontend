@@ -1,339 +1,276 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
 import { useNavigate, useParams } from "react-router-dom";
 
 import Menu from "../shared/Menu/Menu";
 
 import DadosCliente from "../detalhesPedido/DadosCliente";
+
 import ItensPedido from "../detalhesPedido/ItensPedido";
+
 import PagamentosPedido from "../detalhesPedido/PagamentosPedido";
+
 import ReciboPedido from "../detalhesPedido/ReciboPedido";
+
+import { api } from "../../services/api";
 
 import "../css/DetalhesPedido.css";
 
-function DetalhesPedido() {
+function formatarEndereco(endereco) {
+    if (!endereco) {
+        return "Não informado";
+    }
 
+    return `${endereco.logradouro}, ${endereco.numero}${
+        endereco.complemento
+            ? ` - ${endereco.complemento}`
+            : ""
+    } - ${endereco.bairro}, ${endereco.cidade} - ${
+        endereco.estado
+    }, ${endereco.cep}`;
+}
+
+function DetalhesPedido() {
     const navigate = useNavigate();
+
     const { id } = useParams();
 
-    const pedidosMock = {
+    const [pedido, setPedido] = useState(null);
 
-        "#21": {
-            id: "#21",
-            clienteNome: "Igor Felix",
-            status: "Não iniciado",
+    const [carregando, setCarregando] = useState(true);
 
-            dadosCliente: {
-                nome: "Igor Felix",
-                evento: "Natal",
-                endereco: "Travessa Brasil, 5750",
-                telefone: "(11)91234-2039",
-                whatsapp: "(11)91234-2039",
-                instagram: "@igor-felix"
-            },
+    const [erro, setErro] = useState(false);
 
-            datas: {
-                dataPedido: "01/04/2026",
-                dataRetirada: "14/04/2026"
-            },
+    useEffect(() => {
+        const buscarPedido = async () => {
+            try {
+                setCarregando(true);
+                setErro(false);
 
-            itens: [
-                {
-                    id: 1,
-                    produto: "Bolo de Morango",
-                    descricao: "",
-                    qtd: 2,
-                    precoUnitario: 45.0,
-                    desconto: 0,
-                    subtotal: 90.0
-                },
-                {
-                    id: 2,
-                    produto: "Trufas de Maracujá",
-                    descricao: "",
-                    qtd: 1,
-                    precoUnitario: 7.0,
-                    desconto: 0,
-                    subtotal: 7.0
-                },
-                {
-                    id: 3,
-                    produto: "Pudim",
-                    descricao: "",
-                    qtd: 1,
-                    precoUnitario: 100.0,
-                    desconto: "10%",
-                    subtotal: 90.0
+                // Remove o "#" caso a URL esteja /Pedidos/#21
+                const pedidoId = decodeURIComponent(id).replace("#", "");
+
+                // Busca o pedido
+                const pedidoResponse = await api.get(
+                    `/pedidos/${pedidoId}`
+                );
+
+                const pedidoRecebido = pedidoResponse.data;
+
+                // Busca cliente
+                let cliente = null;
+
+                if (pedidoRecebido.clienteId != null) {
+                    try {
+                        const clienteResponse = await api.get(
+                            `/clientes/${pedidoRecebido.clienteId}`
+                        );
+
+                        cliente = clienteResponse.data;
+                    } catch (error) {
+                        console.error(
+                            "Erro ao buscar cliente:",
+                            error
+                        );
+                    }
                 }
-            ],
 
-            pagamentos: [
-                {
-                    id: 1,
-                    data: "01/04/2026",
-                    valor: 100.0,
-                    metodo: "PIX"
-                },
-                {
-                    id: 2,
-                    data: "13/04/2026",
-                    valor: 87.0,
-                    metodo: "PIX"
+                // Busca evento
+                let evento = null;
+
+                if (pedidoRecebido.eventoId != null) {
+                    try {
+                        const eventoResponse = await api.get(
+                            `/eventos/${pedidoRecebido.eventoId}`
+                        );
+
+                        evento = eventoResponse.data;
+                    } catch (error) {
+                        console.error(
+                            "Erro ao buscar evento:",
+                            error
+                        );
+                    }
                 }
-            ]
-        },
 
-        "#22": {
-            id: "#22",
-            clienteNome: "Felipe Hideki",
-            status: "Pronto",
+                /*
+                 * Converte o retorno da API para o formato
+                 * utilizado pelos componentes da tela.
+                 */
+                const pedidoFormatado = {
+                    ...pedidoRecebido,
 
-            dadosCliente: {
-                nome: "Felipe Hideki",
-                evento: "Halloween",
-                endereco: "Rua das Flores, 123",
-                telefone: "(11)98888-1111",
-                whatsapp: "(11)98888-1111",
-                instagram: "@felipehideki"
-            },
+                    id: `#${pedidoRecebido.id}`,
 
-            datas: {
-                dataPedido: "05/04/2026",
-                dataRetirada: "14/04/2026"
-            },
+                    clienteNome:
+                        cliente?.nome ??
+                        "Cliente não encontrado",
 
-            itens: [
-                {
-                    id: 1,
-                    produto: "Brigadeiro Gourmet",
-                    descricao: "",
-                    qtd: 10,
-                    precoUnitario: 8.0,
-                    desconto: 0,
-                    subtotal: 80.0
-                },
-                {
-                    id: 2,
-                    produto: "Cupcake Halloween",
-                    descricao: "",
-                    qtd: 10,
-                    precoUnitario: 12.0,
-                    desconto: 0,
-                    subtotal: 120.0
-                }
-            ],
+                    status:
+                        pedidoRecebido.statusProducao,
 
-            pagamentos: [
-                {
-                    id: 1,
-                    data: "10/04/2026",
-                    valor: 200.0,
-                    metodo: "PIX"
-                }
-            ]
-        },
+                    dadosCliente: {
+                        nome:
+                            cliente?.nome ??
+                            "Cliente não encontrado",
 
-        "#23": {
-            id: "#23",
-            clienteNome: "Kauã Medeiros",
-            status: "Não iniciado",
+                        evento:
+                            evento?.nome ??
+                            evento?.descricao ??
+                            "Sem evento",
 
-            dadosCliente: {
-                nome: "Kauã Medeiros",
-                evento: "Páscoa",
-                endereco: "Rua Brasil, 500",
-                telefone: "(11)97777-2222",
-                whatsapp: "(11)97777-2222",
-                instagram: "@kauamedeiros"
-            },
+                        endereco: formatarEndereco(cliente?.endereco),
 
-            datas: {
-                dataPedido: "07/04/2026",
-                dataRetirada: "15/04/2026"
-            },
+                        telefone:
+                            cliente?.telefone ??
+                            "Não informado",
 
-            itens: [
-                {
-                    id: 1,
-                    produto: "Ovo de Páscoa",
-                    descricao: "",
-                    qtd: 5,
-                    precoUnitario: 25.0,
-                    desconto: 0,
-                    subtotal: 125.0
-                }
-            ],
+                        whatsapp:
+                            cliente?.whatsapp ??
+                            cliente?.telefone ??
+                            "Não informado",
 
-            pagamentos: []
-        },
+                        instagram:
+                            cliente?.instagram ??
+                            "Não informado"
+                    },
 
-        "#24": {
-            id: "#24",
-            clienteNome: "Laura Belinello Buzzato",
-            status: "Em Produção",
+                    datas: {
+                        dataPedido:
+                            formatarDataCompleta(
+                                pedidoRecebido.dataPedido
+                            ),
 
-            dadosCliente: {
-                nome: "Laura Belinello Buzzato",
-                evento: "Aniversário",
-                endereco: "Avenida Paulista, 1000",
-                telefone: "(11)96666-3333",
-                whatsapp: "(11)96666-3333",
-                instagram: "@laurabuzzato"
-            },
+                        dataRetirada:
+                            formatarDataCompleta(
+                                pedidoRecebido.dataEntrega
+                            )
+                    },
 
-            datas: {
-                dataPedido: "08/04/2026",
-                dataRetirada: "14/04/2026"
-            },
+                    itens:
+                        (pedidoRecebido.itens ?? []).map(
+                            (item) => ({
+                                id: item.id,
 
-            itens: [
-                {
-                    id: 1,
-                    produto: "Bolo de Chocolate",
-                    descricao: "",
-                    qtd: 2,
-                    precoUnitario: 90.0,
-                    desconto: 0,
-                    subtotal: 180.0
-                },
-                {
-                    id: 2,
-                    produto: "Brigadeiros",
-                    descricao: "",
-                    qtd: 10,
-                    precoUnitario: 6.0,
-                    desconto: 0,
-                    subtotal: 60.0
-                }
-            ],
+                                produto:
+                                    item.produto?.nome ??
+                                    "Produto não encontrado",
 
-            pagamentos: [
-                {
-                    id: 1,
-                    data: "10/04/2026",
-                    valor: 100.0,
-                    metodo: "PIX"
-                }
-            ]
-        },
+                                descricao:
+                                    item.produto?.descricao ??
+                                    "",
 
-        "#25": {
-            id: "#25",
-            clienteNome: "Pedro Rico",
-            status: "Entregue",
+                                qtd:
+                                    item.quantidade,
 
-            dadosCliente: {
-                nome: "Pedro Rico",
-                evento: "Casamento",
-                endereco: "Rua das Palmeiras, 200",
-                telefone: "(11)95555-4444",
-                whatsapp: "(11)95555-4444",
-                instagram: "@pedrorico"
-            },
+                                precoUnitario:
+                                    Number(
+                                        item.precoUnitario ?? 0
+                                    ),
 
-            datas: {
-                dataPedido: "01/05/2026",
-                dataRetirada: "22/05/2026"
-            },
+                                desconto: 0,
 
-            itens: [
-                {
-                    id: 1,
-                    produto: "Doces para Casamento",
-                    descricao: "",
-                    qtd: 12,
-                    precoUnitario: 18.33,
-                    desconto: 0,
-                    subtotal: 220.0
-                }
-            ],
+                                subtotal:
+                                    Number(
+                                        item.precoUnitario ?? 0
+                                    ) *
+                                    Number(
+                                        item.quantidade ?? 0
+                                    )
+                            })
+                        ),
 
-            pagamentos: [
-                {
-                    id: 1,
-                    data: "20/05/2026",
-                    valor: 220.0,
-                    metodo: "PIX"
-                }
-            ]
-        },
+                    pagamentos:
+                        (pedidoRecebido.pagamentos ?? []).map(
+                            (pagamento) => ({
+                                id: pagamento.id,
 
-        "#26": {
-            id: "#26",
-            clienteNome: "Ana Souza",
-            status: "Cancelado",
+                                data:
+                                    formatarDataCompleta(
+                                        pagamento.dataPagamento
+                                    ),
 
-            dadosCliente: {
-                nome: "Ana Souza",
-                evento: "Formatura",
-                endereco: "Rua dos Lírios, 300",
-                telefone: "(11)94444-5555",
-                whatsapp: "(11)94444-5555",
-                instagram: "@anasouza"
-            },
+                                valor:
+                                    Number(
+                                        pagamento.valor ?? 0
+                                    ),
 
-            datas: {
-                dataPedido: "01/05/2026",
-                dataRetirada: "18/05/2026"
-            },
+                                metodo:
+                                    pagamento.tipoPagamento ??
+                                    "Não informado"
+                            })
+                        )
+                };
 
-            itens: [
-                {
-                    id: 1,
-                    produto: "Mini Doces",
-                    descricao: "",
-                    qtd: 8,
-                    precoUnitario: 11.875,
-                    desconto: 0,
-                    subtotal: 95.0
-                }
-            ],
+                setPedido(pedidoFormatado);
+            } catch (error) {
+                console.error(
+                    "Erro ao buscar pedido:",
+                    error
+                );
 
-            pagamentos: []
-        }
-    };
+                setErro(true);
+                setPedido(null);
+            } finally {
+                setCarregando(false);
+            }
+        };
 
-    const pedido = pedidosMock[decodeURIComponent(id)];
+        buscarPedido();
+    }, [id]);
 
-    if (!pedido) {
+    if (carregando) {
         return (
             <div className="produtos-layout">
-
                 <Menu active="pedidos" />
 
                 <div className="produtos-content pedido-detalhes-container">
+                    <h1>Carregando pedido...</h1>
+                </div>
+            </div>
+        );
+    }
 
+    if (erro || !pedido) {
+        return (
+            <div className="produtos-layout">
+                <Menu active="pedidos" />
+
+                <div className="produtos-content pedido-detalhes-container">
                     <h1>Pedido não encontrado</h1>
 
                     <button
                         className="btn-voltar"
-                        onClick={() => navigate("/Pedidos")}
+                        onClick={() =>
+                            navigate("/Pedidos")
+                        }
                     >
                         <ion-icon name="arrow-back-outline"></ion-icon>
+
                         Voltar Para Todos Pedidos
                     </button>
-
                 </div>
-
             </div>
         );
     }
 
     const totalPedido = pedido.itens.reduce(
-        (acc, item) => acc + item.subtotal,
+        (acc, item) =>
+            acc + Number(item.subtotal ?? 0),
         0
     );
 
     const totalPago = pedido.pagamentos.reduce(
-        (acc, pag) => acc + pag.valor,
+        (acc, pagamento) =>
+            acc + Number(pagamento.valor ?? 0),
         0
     );
 
-    const totalAPagar = totalPedido - totalPago;
+    const totalAPagar =
+        totalPedido - totalPago;
 
     return (
-
         <div className="produtos-layout">
-
             <Menu active="pedidos" />
 
             <div className="produtos-content pedido-detalhes-container">
@@ -351,29 +288,43 @@ function DetalhesPedido() {
                         </h1>
 
                         <span
-                            className={`badge-status ${pedido.status === "Não iniciado"
+                            className={`badge-status ${
+                                pedido.status ===
+                                "AGUARDANDO_SINAL"
                                     ? "naoIniciado"
-                                    : pedido.status === "Em Produção"
-                                        ? "producao"
-                                        : pedido.status === "Pronto"
-                                            ? "pronto"
-                                            : pedido.status === "Entregue"
-                                                ? "entregue"
-                                                : pedido.status === "Cancelado"
-                                                    ? "cancelado"
-                                                    : ""
-                                }`}
+                                    : pedido.status ===
+                                      "CONFIRMADO"
+                                    ? "naoIniciado"
+                                    : pedido.status ===
+                                      "EM_PRODUCAO"
+                                    ? "producao"
+                                    : pedido.status ===
+                                      "PRONTO_PARA_ENTREGA"
+                                    ? "pronto"
+                                    : pedido.status ===
+                                      "ENTREGUE"
+                                    ? "entregue"
+                                    : pedido.status ===
+                                      "CANCELADO"
+                                    ? "cancelado"
+                                    : ""
+                            }`}
                         >
-                            {pedido.status}
+                            {formatarStatus(
+                                pedido.status
+                            )}
                         </span>
 
                     </div>
 
                     <button
                         className="btn-voltar"
-                        onClick={() => navigate("/Pedidos")}
+                        onClick={() =>
+                            navigate("/Pedidos")
+                        }
                     >
                         <ion-icon name="arrow-back-outline"></ion-icon>
+
                         Voltar Para Todos Pedidos
                     </button>
 
@@ -406,11 +357,10 @@ function DetalhesPedido() {
 
                         <div className="card-padrao card-datas">
 
-
-
                             <div className="datas-grid">
 
                                 <div className="dado-data">
+
                                     <span className="dado-label">
                                         Data do Pedido
                                     </span>
@@ -418,9 +368,11 @@ function DetalhesPedido() {
                                     <span className="dado-valor">
                                         {pedido.datas.dataPedido}
                                     </span>
+
                                 </div>
 
                                 <div className="dado-data">
+
                                     <span className="dado-label">
                                         Data de Retirada
                                     </span>
@@ -428,6 +380,7 @@ function DetalhesPedido() {
                                     <span className="dado-valor">
                                         {pedido.datas.dataRetirada}
                                     </span>
+
                                 </div>
 
                             </div>
@@ -454,8 +407,61 @@ function DetalhesPedido() {
                 </div>
 
             </div>
-
         </div>
+    );
+}
+
+
+/*
+ * Formata:
+ * 2026-08-06T14:30:00
+ *
+ * para:
+ * 06/08/2026
+ */
+function formatarDataCompleta(data) {
+    if (!data) {
+        return "Não informado";
+    }
+
+    const dataObjeto = new Date(data);
+
+    if (Number.isNaN(dataObjeto.getTime())) {
+        return "Não informado";
+    }
+
+    const dia = String(
+        dataObjeto.getDate()
+    ).padStart(2, "0");
+
+    const mes = String(
+        dataObjeto.getMonth() + 1
+    ).padStart(2, "0");
+
+    const ano = dataObjeto.getFullYear();
+
+    return `${dia}/${mes}/${ano}`;
+}
+
+
+/*
+ * Converte o enum do backend para o texto
+ * que aparece na tela.
+ */
+function formatarStatus(status) {
+    const statusMap = {
+        AGUARDANDO_SINAL: "Não iniciado",
+        CONFIRMADO: "Confirmado",
+        EM_PRODUCAO: "Em Produção",
+        PRONTO_PARA_ENTREGA: "Pronto",
+        ENTREGUE: "Entregue",
+        CANCELADO: "Cancelado"
+    };
+
+    return (
+        statusMap[status] ??
+        status ??
+        "Não informado"
     );
 }
 

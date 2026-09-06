@@ -237,25 +237,46 @@ body {
   box-sizing: border-box;
 }
 
-.status.naoIniciado,
-.status.cancelado {
+.status.rascunho {
+  background: #f3f0ed;
+  border: 1px solid #d6cec7;
+  color: #3e3835;
+}
+
+.status.aguardandoSinal {
   background: #fee2e2;
   border: 1px solid #fca5a5;
+  color: #3e3835;
+}
+
+.status.confirmado {
+  background: #dbeafe;
+  border: 1px solid #93c5fd;
+  color: #3e3835;
 }
 
 .status.emProducao {
   background: #fef3c7;
   border: 1px solid #fcd34d;
+  color: #3e3835;
 }
 
 .status.pronto {
   background: #dcfce7;
   border: 1px solid #86efac;
+  color: #3e3835;
 }
 
 .status.entregue {
-  background: #dbeafe;
-  border: 1px solid #93c5fd;
+  background: #c8c0b9;
+  border: none;
+  color: #3e3835;
+}
+
+.status.cancelado {
+  background: #a8a09a;
+  border: none;
+  color: #3e3835;
 }
 
 .tabela-wrapper {
@@ -515,4 +536,51 @@ body {
   color: #594133;
   margin: 0 0 12px 0;
   line-height: 1.5;
+}
+
+.status-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-container > .status {
+  width: 130px;
+  flex-shrink: 0;
+}
+
+.aviso-atrasado {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background-color: #ffe1e1;
+  color: #b42318;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.retiradas-card
+  .custom-table
+  .section-row:has(.data-atrasada)
+  .section-divider {
+  color: #b42318;
+}
+
+.retiradas-card
+  .custom-table
+  .section-row:has(.data-atrasada)
+  .section-divider::before,
+.retiradas-card
+  .custom-table
+  .section-row:has(.data-atrasada)
+  .section-divider::after {
+  background-color: #fca5a5;
+}
+
+.data-atrasada {
+  color: #b42318;
+  font-weight: 700;
 }

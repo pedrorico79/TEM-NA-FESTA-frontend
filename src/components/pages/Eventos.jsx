@@ -219,7 +219,7 @@ function Eventos() {
 
                 setMensagemSucesso(
 
-                    eventoConfirmacao.ativa
+                    eventoConfirmacao.ativo
 
                         ? "Evento desativado com sucesso!"
 
@@ -370,7 +370,7 @@ function Eventos() {
                     confirmarAlteracaoStatus
                 }
                 mensagem={`Tem certeza que deseja ${
-                    eventoConfirmacao?.isAtivo
+                    eventoConfirmacao?.ativo
                         ? "desativar"
                         : "ativar"
                 } o evento ${

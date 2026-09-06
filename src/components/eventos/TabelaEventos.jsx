@@ -14,7 +14,7 @@ function TabelaEventos({
         Evento.dataFim,
         <div className="acoes-eventos">
             <SwitchStatus
-                ativo={Evento.ativa}
+                ativo={Evento.ativo}
                 onClick={() =>
                     onAlterarStatus(Evento)
                 }
