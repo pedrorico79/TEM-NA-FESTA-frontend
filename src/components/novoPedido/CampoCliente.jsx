@@ -8,8 +8,8 @@ import ModalNovoCliente from "./ModalNovoCliente";
 
 function CampoCliente(props) {
 
-    const [modalNovoCliente, setModalNovoCliente] =
-  useState(false);
+  const [modalNovoCliente, setModalNovoCliente] =
+    useState(false);
 
   const [busca, setBusca] = useState("");
 
@@ -30,6 +30,7 @@ function CampoCliente(props) {
       ) {
         setAberto(false);
       }
+
     }
 
     document.addEventListener(
@@ -43,6 +44,7 @@ function CampoCliente(props) {
         "mousedown",
         handleClickOutside
       );
+
     };
 
   }, []);
@@ -53,23 +55,55 @@ function CampoCliente(props) {
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase();
+
+  };
+
+  const formatarTelefone = (telefone) => {
+
+    if (!telefone) {
+      return "";
+    }
+
+    const numeros = telefone.replace(/\D/g, "");
+
+    if (numeros.length === 11) {
+
+      return numeros.replace(
+        /(\d{2})(\d{5})(\d{4})/,
+        "($1) $2-$3"
+      );
+
+    }
+
+    if (numeros.length === 10) {
+
+      return numeros.replace(
+        /(\d{2})(\d{4})(\d{4})/,
+        "($1) $2-$3"
+      );
+
+    }
+
+    return telefone;
+
   };
 
   const clientesFiltrados =
     props.clientes.filter((cliente) =>
-
       removerAcentos(cliente.nome).includes(
         removerAcentos(busca)
       )
     );
 
   return (
+
     <div
       className="campo-cliente"
       ref={containerRef}
     >
 
       {!props.clienteSelecionado ? (
+
         <>
 
           <div className="input-cliente">
@@ -78,20 +112,16 @@ function CampoCliente(props) {
 
             <input
               type="text"
-
               placeholder="Buscar cliente"
-
               value={busca}
-
               onFocus={() =>
                 setAberto(true)
               }
-
               onChange={(e) => {
 
                 setBusca(e.target.value);
-
                 setAberto(true);
+
               }}
             />
 
@@ -101,9 +131,7 @@ function CampoCliente(props) {
                   ? "chevron-up-outline"
                   : "chevron-down-outline"
               }
-
               className="seta-dropdown"
-
               onClick={() =>
                 setAberto(!aberto)
               }
@@ -121,9 +149,7 @@ function CampoCliente(props) {
 
                   <button
                     key={cliente.id}
-
                     className="cliente-option"
-
                     onClick={() => {
 
                       props.setClienteSelecionado(
@@ -131,14 +157,27 @@ function CampoCliente(props) {
                       );
 
                       setBusca("");
-
                       setAberto(false);
+
                     }}
                   >
 
-                    {cliente.nome}
+                    <span>
+
+                      {cliente.nome}
+
+                      {cliente.telefone && (
+
+                        <span className="cliente-telefone">
+                          {" "}— {formatarTelefone(cliente.telefone)}
+                        </span>
+
+                      )}
+
+                    </span>
 
                   </button>
+
                 ))
 
               ) : (
@@ -150,23 +189,38 @@ function CampoCliente(props) {
               )}
 
             </div>
+
           )}
 
         </>
+
       ) : (
 
         <div className="cliente-selecionado">
 
           <span>
+
             {props.clienteSelecionado.nome}
+
+            {props.clienteSelecionado.telefone && (
+
+              <span className="cliente-telefone">
+                {" "}— {formatarTelefone(
+                  props.clienteSelecionado.telefone
+                )}
+              </span>
+
+            )}
+
           </span>
 
           <button
             onClick={() => {
 
               props.setClienteSelecionado(null);
-
+              setBusca("");
               setAberto(true);
+
             }}
           >
 
@@ -174,50 +228,48 @@ function CampoCliente(props) {
 
           </button>
 
-          
-
         </div>
-        
+
       )}
 
       <button
-  className="criar-cliente-button"
+        className="criar-cliente-button"
+        onClick={() =>
+          setModalNovoCliente(true)
+        }
+      >
 
-  onClick={() =>
-    setModalNovoCliente(true)
-  }
->
+        <ion-icon name="person-add"></ion-icon>
 
-  <ion-icon name="person-add"></ion-icon>
+        Criar novo cliente
 
-  Criar novo cliente
+      </button>
 
-</button>
+      <ModalNovoCliente
+        open={modalNovoCliente}
+        onClose={() =>
+          setModalNovoCliente(false)
+        }
+        onCreate={(novoCliente) => {
 
-<ModalNovoCliente
-  open={modalNovoCliente}
+          props.setClientes([
+            ...props.clientes,
+            novoCliente,
+          ]);
 
-  onClose={() =>
-    setModalNovoCliente(false)
-  }
+          props.setClienteSelecionado(
+            novoCliente
+          );
 
-  onCreate={(novoCliente) => {
+          setModalNovoCliente(false);
 
-    props.setClientes([
-      ...props.clientes,
-      novoCliente,
-    ]);
-
-    props.setClienteSelecionado(
-      novoCliente
-    );
-
-    setModalNovoCliente(false);
-  }}
-/>
+        }}
+      />
 
     </div>
+
   );
+
 }
 
 export default CampoCliente;

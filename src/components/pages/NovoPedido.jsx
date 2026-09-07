@@ -1,102 +1,290 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Menu from "../shared/Menu/Menu";
 
 import HeaderNovoPedido from "../novoPedido/HeaderNovoPedido";
+
 import ClienteCard from "../novoPedido/ClienteCard";
+
 import DetalhesPedidoCard from "../novoPedido/DetalhesPedidoCard";
+
 import ItensPedidoCard from "../novoPedido/ItensPedidoCard";
-import FooterNovoPedido from "../novoPedido/FooterNovoPedido";
+
+import { api } from "../../services/api";
 
 import "../css/NovoPedido.css";
 
 function NovoPedido() {
 
-    // FUTURAMENTE VEM DA API
-    const [clientes, setClientes] =
-        useState([
-            {
-                id: 1,
-                nome: "Maria Silva",
-            },
+    const [clientes, setClientes] = useState([]);
 
-            {
-                id: 2,
-                nome: "João Pedro",
-            },
+    const [produtos, setProdutos] = useState([]);
 
-            {
-                id: 3,
-                nome: "Fernanda Lima",
-            },
-        ]);
+    const [eventos, setEventos] = useState([]);
 
-    const campanhas = [
-        "Sem Evento",
-        "Páscoa",
-        "Natal",
-        "Aniversário",
-    ];
-
-    const produtos = [
-        {
-            id: 1,
-            nome: "Bolo de Morango",
-            preco: 780,
-        },
-
-        {
-            id: 2,
-            nome: "Trufa de Maracujá",
-            preco: 345,
-        },
-
-        {
-            id: 3,
-            nome: "Kit Festa",
-            preco: 320,
-        },
-    ];
+    const [entrada, setEntrada] = useState("");
 
     const [pedido, setPedido] = useState({
+
         cliente: null,
-        campanha: "Sem Evento",
+
+        evento: null,
+
         status: "NAO_INICIADO",
+
         entrega: "",
+
         tipoEntrega: "RETIRADA",
+
         itens: [],
+
     });
 
-    const adicionarItem = () => {
+    useEffect(() => {
 
-        const novoItem = {
-            produto: produtos[0],
-            quantidade: 1,
-            descricao: "",
-        };
+        async function carregarDados() {
 
-        setPedido({
-            ...pedido,
+            try {
 
-            itens: [
-                ...pedido.itens,
-                novoItem
-            ]
+                const [
+                    clientesResponse,
+                    produtosResponse,
+                    eventosResponse
+                ] = await Promise.all([
+
+                    api.get("/clientes"),
+
+                    api.get("/produtos"),
+
+                    api.get("/eventos"),
+
+                ]);
+
+                setClientes(clientesResponse.data);
+
+                setProdutos(produtosResponse.data);
+
+                setEventos(eventosResponse.data);
+
+            } catch (error) {
+
+                console.error(
+                    "Erro ao carregar dados do novo pedido:",
+                    error
+                );
+
+            }
+
+        }
+
+        carregarDados();
+
+    }, []);
+
+    const adicionarItens = (produtosSelecionados) => {
+
+        setPedido((pedidoAtual) => {
+
+            const novosItens = [...pedidoAtual.itens];
+
+            produtosSelecionados.forEach((selecionado) => {
+
+                const itemExistente = novosItens.find(
+                    (item) =>
+                        item.produto?.id === selecionado.produto?.id
+                );
+
+                if (itemExistente) {
+
+                    itemExistente.quantidade += Number(
+                        selecionado.quantidade || 1
+                    );
+
+                } else {
+
+                    novosItens.push({
+                        produto: selecionado.produto,
+
+                        quantidade: Number(
+                            selecionado.quantidade || 1
+                        ),
+
+                        descricao: selecionado.produto?.descricao || "",
+
+                        desconto: {
+                            valor: 0,
+                            tipo: "%",
+                        },
+                    });
+
+                }
+
+            });
+
+            return {
+                ...pedidoAtual,
+                itens: novosItens,
+            };
         });
     };
 
     const removerItem = (index) => {
 
-        const novosItens =
-            pedido.itens.filter((_, i) => i !== index);
+        setPedido((pedidoAtual) => ({
+
+            ...pedidoAtual,
+
+            itens: pedidoAtual.itens.filter(
+                (_, i) => i !== index
+            ),
+
+        }));
+
+    };
+
+    const alterarDesconto = (index, valor) => {
+
+        setPedido((pedidoAtual) => ({
+
+            ...pedidoAtual,
+
+            itens: pedidoAtual.itens.map((item, i) => {
+
+                if (i !== index) {
+                    return item;
+                }
+
+                return {
+
+                    ...item,
+
+                    desconto: {
+
+                        ...item.desconto,
+
+                        valor: valor,
+
+                    },
+
+                };
+
+            }),
+
+        }));
+
+    };
+
+    const alterarQuantidade = (index, valor) => {
+        setPedido((pedidoAtual) => ({
+            ...pedidoAtual,
+            itens: pedidoAtual.itens.map((item, i) => {
+                if (i !== index) {
+                    return item;
+                }
+
+                return {
+                    ...item,
+                    quantidade: valor,
+                };
+            }),
+        }));
+    };
+
+    const alterarTipoDesconto = (index, tipo) => {
+
+        setPedido((pedidoAtual) => ({
+
+            ...pedidoAtual,
+
+            itens: pedidoAtual.itens.map((item, i) => {
+
+                if (i !== index) {
+                    return item;
+                }
+
+                return {
+
+                    ...item,
+
+                    desconto: {
+
+                        ...item.desconto,
+
+                        tipo: tipo,
+
+                    },
+
+                };
+
+            }),
+
+        }));
+
+    };
+
+    const alterarEntrada = (valor) => {
+
+        setEntrada(valor);
+
+    };
+
+    const cancelarPedido = () => {
 
         setPedido({
-            ...pedido,
-            itens: novosItens,
+
+            cliente: null,
+
+            evento: null,
+
+            status: "NAO_INICIADO",
+
+            entrega: "",
+
+            tipoEntrega: "RETIRADA",
+
+            itens: [],
+
         });
+
+        setEntrada("");
+
+    };
+
+    const salvarPedido = async () => {
+
+        try {
+
+            const pedidoParaSalvar = {
+
+                ...pedido,
+
+                entrada: Number(entrada || 0),
+
+            };
+
+            console.log(
+                "Pedido para salvar:",
+                pedidoParaSalvar
+            );
+
+            // Quando o endpoint estiver definido,
+            // podemos fazer o POST aqui:
+            //
+            // await api.post("/pedidos", pedidoParaSalvar);
+
+        } catch (error) {
+
+            console.error(
+                "Erro ao salvar pedido:",
+                error
+            );
+
+        }
+
     };
 
     return (
+
         <div className="novoPedido-layout">
 
             <Menu active="pedidos" />
@@ -109,16 +297,13 @@ function NovoPedido() {
 
                     <ClienteCard
                         clientes={clientes}
-
                         setClientes={setClientes}
-
                         pedido={pedido}
-
                         setPedido={setPedido}
                     />
 
                     <DetalhesPedidoCard
-                        campanhas={campanhas}
+                        eventos={eventos}
                         pedido={pedido}
                         setPedido={setPedido}
                     />
@@ -128,16 +313,23 @@ function NovoPedido() {
                 <ItensPedidoCard
                     itens={pedido.itens}
                     produtos={produtos}
-                    adicionarItem={adicionarItem}
+                    adicionarItens={adicionarItens}
                     removerItem={removerItem}
+                    alterarQuantidade={alterarQuantidade}
+                    alterarDesconto={alterarDesconto}
+                    alterarTipoDesconto={alterarTipoDesconto}
+                    entrada={entrada}
+                    alterarEntrada={alterarEntrada}
+                    cancelarPedido={cancelarPedido}
+                    salvarPedido={salvarPedido}
                 />
 
             </main>
 
-            <FooterNovoPedido />
-
         </div>
+
     );
+
 }
 
 export default NovoPedido;
