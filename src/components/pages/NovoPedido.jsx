@@ -10,11 +10,15 @@ import DetalhesPedidoCard from "../novoPedido/DetalhesPedidoCard";
 
 import ItensPedidoCard from "../novoPedido/ItensPedidoCard";
 
+import { useNavigate } from "react-router-dom";
+
 import { api } from "../../services/api";
 
 import "../css/NovoPedido.css";
 
 function NovoPedido() {
+
+    const navigate = useNavigate();
 
     const [clientes, setClientes] = useState([]);
 
@@ -25,20 +29,13 @@ function NovoPedido() {
     const [entrada, setEntrada] = useState("");
 
     const [pedido, setPedido] = useState({
-
-        cliente: null,
-
-        evento: null,
-
-        status: "NAO_INICIADO",
-
-        entrega: "",
-
-        tipoEntrega: "RETIRADA",
-
-        itens: [],
-
-    });
+    cliente: null,
+    eventoId: null,
+    status: "AGUARDANDO_SINAL",
+    dataEntrega: "",
+    enderecoEntregaId: null,
+    itens: [],
+});
 
     useEffect(() => {
 
@@ -85,36 +82,106 @@ function NovoPedido() {
 
         setPedido((pedidoAtual) => {
 
-            const novosItens = [...pedidoAtual.itens];
+            const novosItens = pedidoAtual.itens.map((item) => ({
+                ...item,
+
+                desconto: item.desconto
+                    ? {
+                        ...item.desconto,
+                    }
+                    : {
+                        valor: 0,
+                        tipo: "%",
+                    },
+            }));
 
             produtosSelecionados.forEach((selecionado) => {
 
-                const itemExistente = novosItens.find(
+                const indexExistente = novosItens.findIndex(
                     (item) =>
-                        item.produto?.id === selecionado.produto?.id
+                        item.produto?.id ===
+                        selecionado.produto?.id
                 );
 
-                if (itemExistente) {
+                const quantidadeSelecionada = Number(
+                    selecionado.quantidade || 1
+                );
 
-                    itemExistente.quantidade += Number(
-                        selecionado.quantidade || 1
+                if (indexExistente !== -1) {
+
+                    const itemExistente =
+                        novosItens[indexExistente];
+
+                    /*
+                     * A quantidade que veio do modal já contém
+                     * a quantidade atual do pedido.
+                     *
+                     * Exemplo:
+                     * Pedido = 55
+                     * Modal = 55
+                     * Não adiciona novamente.
+                     *
+                     * Se no modal mudar para 56:
+                     * 56 - 55 = 1
+                     * Pedido passa para 56.
+                     */
+
+                    const quantidadeAtual = Number(
+                        itemExistente.quantidade || 0
                     );
+
+                    const diferenca =
+                        quantidadeSelecionada -
+                        quantidadeAtual;
+
+                    novosItens[indexExistente] = {
+                        ...itemExistente,
+
+                        quantidade:
+                            quantidadeAtual +
+                            diferenca,
+
+                        desconto: {
+                            valor: Number(
+                                selecionado.desconto?.valor ??
+                                itemExistente.desconto?.valor ??
+                                0
+                            ),
+
+                            tipo:
+                                selecionado.desconto?.tipo ??
+                                itemExistente.desconto?.tipo ??
+                                "%",
+                        },
+                    };
 
                 } else {
 
+                    // Produto novo
+
                     novosItens.push({
-                        produto: selecionado.produto,
 
-                        quantidade: Number(
-                            selecionado.quantidade || 1
-                        ),
+                        produto:
+                            selecionado.produto,
 
-                        descricao: selecionado.produto?.descricao || "",
+                        quantidade:
+                            quantidadeSelecionada,
+
+                        descricao:
+                            selecionado.produto?.descricao ||
+                            "",
 
                         desconto: {
-                            valor: 0,
-                            tipo: "%",
+
+                            valor: Number(
+                                selecionado.desconto?.valor || 0
+                            ),
+
+                            tipo:
+                                selecionado.desconto?.tipo ||
+                                "%",
                         },
+
                     });
 
                 }
@@ -122,10 +189,15 @@ function NovoPedido() {
             });
 
             return {
+
                 ...pedidoAtual,
+
                 itens: novosItens,
+
             };
+
         });
+
     };
 
     const removerItem = (index) => {
@@ -228,59 +300,122 @@ function NovoPedido() {
 
     };
 
-    const cancelarPedido = () => {
-
-        setPedido({
-
-            cliente: null,
-
-            evento: null,
-
-            status: "NAO_INICIADO",
-
-            entrega: "",
-
-            tipoEntrega: "RETIRADA",
-
-            itens: [],
-
-        });
-
-        setEntrada("");
-
+    const voltarPedidos = () => {
+        navigate("/Pedidos");
     };
 
     const salvarPedido = async () => {
-
         try {
+            if (!pedido.cliente) {
+                alert("Selecione um cliente.");
+                return;
+            }
+
+            console.log("PEDIDO ANTES DE SALVAR:", pedido);
+console.log("STATUS SELECIONADO:", pedido.status);
+
+if (!pedido.status) {
+    alert("Selecione um status.");
+    return;
+}
+
+            if (!pedido.status) {
+                alert("Selecione um status.");
+                return;
+            }
+
+            if (!pedido.dataEntrega) {
+                alert("Informe a data de entrega.");
+                return;
+            }
+
+            if (!pedido.itens || pedido.itens.length === 0) {
+                alert("Adicione pelo menos um produto.");
+                return;
+            }
 
             const pedidoParaSalvar = {
+                clienteId: pedido.cliente.id,
 
-                ...pedido,
+                dataEntrega: `${pedido.dataEntrega}T00:00:00`,
 
-                entrada: Number(entrada || 0),
+                taxaEntrega: 0,
 
+                observacao: "",
+
+                eventoId: pedido.eventoId || null,
+
+                enderecoEntregaId: null,
+
+                itens: pedido.itens.map((item) => ({
+                    produtoId: item.produto.id,
+
+                    precoUnitario: Number(
+                        item.produto.precoVenda || 0
+                    ),
+
+                    quantidade: Number(
+                        item.quantidade || 1
+                    ),
+
+                    observacaoItem: item.descricao || "",
+                })),
             };
 
             console.log(
-                "Pedido para salvar:",
+                "POST /pedidos:",
                 pedidoParaSalvar
             );
 
-            // Quando o endpoint estiver definido,
-            // podemos fazer o POST aqui:
-            //
-            // await api.post("/pedidos", pedidoParaSalvar);
+            // 1. CRIA O PEDIDO
+            const response = await api.post(
+                "/pedidos",
+                pedidoParaSalvar
+            );
+
+            const pedidoCriado = response.data;
+
+            console.log(
+                "Pedido criado:",
+                pedidoCriado
+            );
+
+            // 2. ATUALIZA O STATUS ESCOLHIDO NO SELECT
+            const statusRequest = {
+                novoStatus: pedido.status,
+                observacao: "",
+            };
+
+            console.log(
+                `PATCH /pedidos/${pedidoCriado.id}/status:`,
+                statusRequest
+            );
+
+            await api.patch(
+                `/pedidos/${pedidoCriado.id}/status`,
+                statusRequest
+            );
+
+            alert("Pedido criado com sucesso!");
+
+            navigate("/Pedidos");
 
         } catch (error) {
-
             console.error(
                 "Erro ao salvar pedido:",
                 error
             );
 
-        }
+            console.error(
+                "Resposta do backend:",
+                error.response?.data
+            );
 
+            alert(
+                error.response?.data?.message ||
+                "Erro ao criar pedido."
+            );
+        }
     };
 
     return (
@@ -320,7 +455,7 @@ function NovoPedido() {
                     alterarTipoDesconto={alterarTipoDesconto}
                     entrada={entrada}
                     alterarEntrada={alterarEntrada}
-                    cancelarPedido={cancelarPedido}
+                    voltarPedidos={voltarPedidos}
                     salvarPedido={salvarPedido}
                 />
 

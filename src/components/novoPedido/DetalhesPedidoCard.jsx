@@ -32,7 +32,7 @@ function DetalhesPedidoCard({
   useEffect(() => {
     async function carregarStatus() {
       try {
-        const response = await api.get("/pedidos/status");
+        const response = await api.get("/status");
 
         const statusSemRascunho = response.data.filter(
           (status) => status !== "RASCUNHO"
@@ -142,13 +142,13 @@ function DetalhesPedidoCard({
             <label>Status</label>
 
             <select
-              value={pedido.status || ""}
-              onChange={(e) =>
-                setPedido({
-                  ...pedido,
+              value={pedido.status}
+              onChange={(e) => {
+                setPedido((pedidoAtual) => ({
+                  ...pedidoAtual,
                   status: e.target.value,
-                })
-              }
+                }));
+              }}
             >
               {statusDisponiveis.map((status) => (
                 <option
@@ -187,84 +187,84 @@ function DetalhesPedidoCard({
 
         <div className="input-group campo-evento">
 
-  <label>Evento</label>
+          <label>Evento</label>
 
-  <div
-    className="campo-evento-container"
-    ref={eventoContainerRef}
-  >
-    {!eventoSelecionado ? (
-      <>
-        <div className="input-evento">
-          <ion-icon name="search-outline"></ion-icon>
+          <div
+            className="campo-evento-container"
+            ref={eventoContainerRef}
+          >
+            {!eventoSelecionado ? (
+              <>
+                <div className="input-evento">
+                  <ion-icon name="search-outline"></ion-icon>
 
-          <input
-            type="text"
-            placeholder="Buscar evento"
-            value={buscaEvento}
-            onFocus={() => setEventoAberto(true)}
-            onChange={(e) => {
-              setBuscaEvento(e.target.value);
-              setEventoAberto(true);
-            }}
-          />
+                  <input
+                    type="text"
+                    placeholder="Buscar evento"
+                    value={buscaEvento}
+                    onFocus={() => setEventoAberto(true)}
+                    onChange={(e) => {
+                      setBuscaEvento(e.target.value);
+                      setEventoAberto(true);
+                    }}
+                  />
 
-          <ion-icon
-            name={
-              eventoAberto
-                ? "chevron-up-outline"
-                : "chevron-down-outline"
-            }
-            className="seta-dropdown"
-            onClick={() => setEventoAberto(!eventoAberto)}
-          ></ion-icon>
-        </div>
+                  <ion-icon
+                    name={
+                      eventoAberto
+                        ? "chevron-up-outline"
+                        : "chevron-down-outline"
+                    }
+                    className="seta-dropdown"
+                    onClick={() => setEventoAberto(!eventoAberto)}
+                  ></ion-icon>
+                </div>
 
-        {eventoAberto && (
-          <div className="lista-eventos">
-            {eventosFiltrados.length > 0 ? (
-              eventosFiltrados.map((evento) => (
+                {eventoAberto && (
+                  <div className="lista-eventos">
+                    {eventosFiltrados.length > 0 ? (
+                      eventosFiltrados.map((evento) => (
+                        <button
+                          type="button"
+                          key={evento.id}
+                          className="evento-option"
+                          onClick={() => selecionarEvento(evento)}
+                        >
+                          {evento.nome}
+                        </button>
+                      ))
+                    ) : (
+                      <span className="sem-eventos">
+                        Nenhum evento encontrado
+                      </span>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="evento-selecionado">
+                <span>{eventoSelecionado.nome}</span>
+
                 <button
                   type="button"
-                  key={evento.id}
-                  className="evento-option"
-                  onClick={() => selecionarEvento(evento)}
+                  onClick={removerEvento}
                 >
-                  {evento.nome}
+                  <ion-icon name="close-outline"></ion-icon>
                 </button>
-              ))
-            ) : (
-              <span className="sem-eventos">
-                Nenhum evento encontrado
-              </span>
+              </div>
             )}
           </div>
-        )}
-      </>
-    ) : (
-      <div className="evento-selecionado">
-        <span>{eventoSelecionado.nome}</span>
 
-        <button
-          type="button"
-          onClick={removerEvento}
-        >
-          <ion-icon name="close-outline"></ion-icon>
-        </button>
-      </div>
-    )}
-  </div>
+          <button
+            type="button"
+            className="criar-evento-button"
+            onClick={criarNovoEvento}
+          >
+            <ion-icon name="calendar-outline"></ion-icon>
+            Criar novo evento
+          </button>
 
-  <button
-    type="button"
-    className="criar-evento-button"
-    onClick={criarNovoEvento}
-  >
-    <ion-icon name="calendar-outline"></ion-icon>
-    Criar novo evento
-  </button>
-
-</div>
+        </div>
 
       </div>
 
