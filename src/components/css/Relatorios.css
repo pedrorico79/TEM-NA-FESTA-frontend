@@ -53,12 +53,6 @@
     gap: 24px;
 }
 
-.tabelas-relatorio {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 24px;
-}
-
 .filtros-relatorio {
     display: flex;
     align-items: center;
@@ -239,4 +233,15 @@
         scrollbar-width: thin;
         scrollbar-color: #2c2421 transparent;
     }
+}
+
+.relatorio-pedidos-produtos {
+display: grid;
+grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+gap: 24px;
+width: 100%;
+}
+
+.relatorio-pedidos-produtos .card-relatorio {
+min-width: 0;
 }
