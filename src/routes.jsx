@@ -11,12 +11,14 @@ import Eventos from "./components/pages/Eventos";
 import Usuarios from "./components/pages/Usuarios";
 import DetalhesPedido from "./components/pages/DetalhesPedido";
 
+import RotaLogin from "./RotaLogin";
+
 export const routes = createBrowserRouter([
   {
     path: "/",
-    element: <Login />,
+    element: <RotaLogin />,
     errorElement: <div>Erro</div>,
-  },
+},,
   {
     path: "/PaginaInicial",
     element: <PaginaInicial />,
