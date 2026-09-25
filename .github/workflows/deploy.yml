@@ -53,5 +53,5 @@ jobs:
           aws ssm send-command \
             --document-name "AWS-RunShellScript" \
             --targets "Key=tag:Name,Values=tem-na-festa-frontend-1a (Manager)-${{ github.event.inputs.environment }}" \
-            --parameters 'commands=["docker service update --image ${{ steps.//login-ecr.outputs.registry }}/tem-na-festa-frontend-${{ github.event.inputs.environment }}:${{ github.sha }} temnafesta_frontend"]' \
+            --parameters 'commands=["docker service update --image ${{ steps.login-ecr.outputs.registry }}/tem-na-festa-frontend-${{ github.event.inputs.environment }}:${{ github.sha }} temnafesta_frontend"]' \
             --region us-east-1
