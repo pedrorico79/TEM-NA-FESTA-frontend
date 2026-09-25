@@ -1,13 +1,19 @@
 import GraficoPedidosSemana from "./GraficoPedidosSemana";
+
 import GraficoComparativoEventos from "./GraficoComparativoEventos";
-import TabelaPedidosPeriodo from "./TabelaPedidosPeriodo";
+
 import TabelaProdutosVendidos from "./TabelaProdutosVendidos";
+
 import TabelaComparativoEventos from "./TabelaComparativoEventos";
 
 function GraficosRelatorio(props) {
 
-    return (
-        <>
+return (
+
+    <>
+
+        <div className="relatorio-pedidos-produtos">
+
             <div className="card-relatorio">
 
                 <h2>Pedidos por semana</h2>
@@ -18,11 +24,7 @@ function GraficosRelatorio(props) {
 
             </div>
 
-            <div className="tabelas-relatorio">
-
-                <TabelaPedidosPeriodo
-                    pedidos={props.pedidosPeriodo}
-                />
+            <div className="card-relatorio">
 
                 <TabelaProdutosVendidos
                     produtos={props.produtosMaisVendidos}
@@ -30,21 +32,26 @@ function GraficosRelatorio(props) {
 
             </div>
 
-            <div className="card-relatorio">
+        </div>
 
-                <h2>Comparativo entre Eventos</h2>
+        <div className="card-relatorio">
 
-                <GraficoComparativoEventos
-                    dados={props.comparativoEventos}
-                />
+            <h2>Comparativo entre Eventos</h2>
 
-                <TabelaComparativoEventos
-                    dados={props.comparativoEventos}
-                />
+            <GraficoComparativoEventos
+                dados={props.comparativoEventos}
+            />
 
-            </div>
-        </>
-    );
+            <TabelaComparativoEventos
+                dados={props.comparativoEventos}
+            />
+
+        </div>
+
+    </>
+
+);
+
 }
 
 export default GraficosRelatorio;

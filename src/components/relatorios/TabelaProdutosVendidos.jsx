@@ -19,7 +19,7 @@ function TabelaProdutosVendidos(props) {
     ]);
 
     return (
-        <div className="card-relatorio">
+        <div>
 
             <h2>Produtos Mais Vendidos</h2>
 

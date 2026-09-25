@@ -14,23 +14,22 @@ function Login() {
   const navigate = useNavigate();
 
   function logar() {
+
     api.post("/usuarios/login", {
       email: emailDigitado,
       senha: senhaDigitada,
       jwtValidityRememberMe: lembrarAcesso
     })
-      .then((res) => {
-        const resposta = res.data;
+      .then(() => {
 
-        console.log("Usuário logado:", resposta);
+        console.log("Usuário logado!");
 
-        localStorage.setItem("userId", resposta.userId);
-        localStorage.setItem("nomeUsuario", resposta.nome);
-        localStorage.setItem("userEmail", emailDigitado);
 
         navigate("/PaginaInicial");
+
       })
       .catch((erro) => {
+
         console.log(erro.response?.data);
         console.log(erro.response?.status);
 

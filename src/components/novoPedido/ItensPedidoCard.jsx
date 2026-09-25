@@ -529,7 +529,7 @@ function ItensPedidoCard(props) {
           type="button"
           className="botao-cancelar"
           onClick={
-            props.cancelarPedido
+            props.voltarPedidos
           }
         >
           Cancelar
