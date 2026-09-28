@@ -6,6 +6,7 @@ import BotaoAdicionar from "../shared/botaoAdicionar/BotaoAdicionar";
 import HeaderPedidos from "../pedidos/HeaderPedidos";
 import FiltrosPedidos from "../pedidos/FiltrosPedidos";
 import ListaPedidos from "../pedidos/ListaPedidos";
+import Paginacao from "../shared/paginacao/Paginacao";
 
 import { api } from "../../services/api";
 
@@ -13,6 +14,9 @@ import "../css/Pedidos.css";
 
 function Pedidos() {
   const navigate = useNavigate();
+
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const itensPorPagina = 6;
 
   const [busca, setBusca] = useState("");
   const [statusFiltro, setStatusFiltro] = useState("TODOS");
@@ -262,6 +266,19 @@ function Pedidos() {
       return 0;
     });
 
+  const totalPaginas = Math.ceil(
+    pedidosFiltrados.length / itensPorPagina
+  );
+
+  const indiceInicial = (paginaAtual - 1) * itensPorPagina;
+
+  const indiceFinal = indiceInicial + itensPorPagina;
+
+  const pedidosPaginados = pedidosFiltrados.slice(
+    indiceInicial,
+    indiceFinal
+  );
+
   return (
     <div className="pedidos-layout">
       <Menu active="pedidos" />
@@ -284,11 +301,20 @@ function Pedidos() {
 
         <FiltrosPedidos
           busca={busca}
-          setBusca={setBusca}
+          setBusca={(valor) => {
+            setBusca(valor);
+            setPaginaAtual(1);
+          }}
           statusFiltro={statusFiltro}
-          setStatusFiltro={setStatusFiltro}
+          setStatusFiltro={(valor) => {
+            setStatusFiltro(valor);
+            setPaginaAtual(1);
+          }}
           eventoFiltro={eventoFiltro}
-          setEventoFiltro={setEventoFiltro}
+          setEventoFiltro={(valor) => {
+            setEventoFiltro(valor);
+            setPaginaAtual(1);
+          }}
           ordem={ordem}
           setOrdem={setOrdem}
           ordemCrescente={ordemCrescente}
@@ -301,10 +327,23 @@ function Pedidos() {
         {carregando ? (
           <p>Carregando pedidos...</p>
         ) : (
-          <ListaPedidos
-            pedidos={pedidosFiltrados}
-            modoVisualizacao={modoVisualizacao}
-          />
+          <>
+            <ListaPedidos
+              pedidos={pedidosPaginados}
+              modoVisualizacao={modoVisualizacao}
+            />
+
+            <Paginacao
+              paginaAtual={paginaAtual}
+              totalPaginas={totalPaginas}
+              onAnterior={() =>
+                setPaginaAtual(paginaAtual - 1)
+              }
+              onProximo={() =>
+                setPaginaAtual(paginaAtual + 1)
+              }
+            />
+          </>
         )}
       </main>
     </div>

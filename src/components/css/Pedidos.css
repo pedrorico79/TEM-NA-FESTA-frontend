@@ -7,6 +7,7 @@
   margin-left: 280px;
   flex: 1;
   padding: 40px;
+  box-sizing: border-box;
 }
 
 .pedidos-top {
@@ -36,6 +37,7 @@
   align-items: center;
   gap: 16px;
   padding: 0 22px;
+  box-sizing: border-box;
 }
 
 .search-container ion-icon {
@@ -55,6 +57,10 @@
 .search-container input::placeholder {
   color: #b8a79d;
 }
+
+/* =========================
+   BOTÕES DE VISUALIZAÇÃO
+========================= */
 
 .view-buttons,
 .sort-buttons {
@@ -159,29 +165,19 @@
 
 .lista-pedidos {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 22px;
-}
-
-.lista-pedidos.modo-lista {
   width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  margin-top: 24px;
-}
-
-.lista-pedidos.modo-lista .custom-table {
-  white-space: nowrap;
 }
 
 .pedido-card {
+  width: 100%;
+  min-height: 240px;
+  box-sizing: border-box;
   background: white;
   border: 1px solid #ddd0c7;
   border-radius: 22px;
-  padding: 15px 20px;
-  min-height: 200px;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  padding: 20px 22px;
 }
 
 .pedido-card:hover {
@@ -198,6 +194,8 @@
 .pedido-header {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
 }
 
 .pedido-id {
@@ -219,9 +217,12 @@
   height: 30px;
   padding: 0 10px;
   border-radius: 999px;
+
   display: flex;
   align-items: center;
+
   font-size: 14px;
+  white-space: nowrap;
 }
 
 .pedido-status.rascunho {
@@ -268,11 +269,14 @@
 
 .pedido-cliente {
   margin-top: 15px;
-  margin-bottom: 35px;
+  margin-bottom: 28px;
   margin-left: 35px;
+
   font-size: 25px;
   font-weight: 300;
+
   max-width: 220px;
+
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -281,9 +285,13 @@
 .pedido-infos {
   display: flex;
   gap: 18px;
+
   color: #9b7d71;
   font-size: 14px;
+
   margin-bottom: 10px;
+
+  flex-wrap: wrap;
 }
 
 .pedido-infos span {
@@ -299,10 +307,14 @@
 
 .pedido-footer {
   border-top: 1px solid #eee2da;
+
   padding-top: 15px;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  gap: 10px;
 }
 
 .pedido-footer span {
@@ -311,6 +323,7 @@
 
 .pedido-campanha {
   max-width: 70px;
+
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -346,6 +359,17 @@
 
 .pedido-card.desativado ion-icon {
   color: #c3969b !important;
+}
+
+.lista-pedidos.modo-lista {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 24px;
+}
+
+.lista-pedidos.modo-lista .custom-table {
+  white-space: nowrap;
 }
 
 .tabela-pedidos-wrapper {
@@ -416,5 +440,80 @@
 .paginacao-pedidos {
   display: flex;
   justify-content: center;
-  margin-top: 10px;
+  margin-top: 20px;
+}
+
+@media (max-width: 1250px) {
+  .lista-pedidos {
+    grid-template-columns: repeat(2, minmax(260px, 330px));
+  }
+}
+
+@media (max-width: 850px) {
+  .pedidos-content {
+    padding: 25px;
+  }
+
+  .lista-pedidos {
+    grid-template-columns: minmax(260px, 330px);
+  }
+}
+
+@media (max-width: 600px) {
+  .pedidos-content {
+    width: 100%;
+    margin-left: 0;
+    padding: 20px;
+  }
+
+  .lista-pedidos {
+    grid-template-columns: 1fr;
+  }
+
+  .pedido-card {
+    max-width: 330px;
+    justify-self: center;
+  }
+}
+
+.pedido-cliente {
+  margin-top: 18px;
+  margin-bottom: 24px;
+  margin-left: 35px;
+  font-size: 25px;
+  font-weight: 300;
+  max-width: 75%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pedido-infos {
+  display: flex;
+  gap: 18px;
+
+  color: #9b7d71;
+  font-size: 14px;
+
+  margin-bottom: 12px;
+
+  flex-wrap: wrap;
+}
+
+.pedido-footer {
+  border-top: 1px solid #eee2da;
+  padding-top: 15px;
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.pedido-campanha {
+  max-width: 120px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

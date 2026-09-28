@@ -26,9 +26,6 @@ function PaginaInicial() {
 
 
   function buscarLembretes() {
-
-    const usuarioId = localStorage.getItem("userId");
-
     api.get(`/lembretes`)
       .then((res) => {
         setLembretes(res.data);
@@ -36,46 +33,37 @@ function PaginaInicial() {
       .catch((erro) => {
         console.log("Erro ao buscar lembretes:", erro.response?.data);
       });
-
   }
 
 
   function criarLembrete(lembrete) {
-
-    const usuarioId = localStorage.getItem("userId");
-
     api.post(
-      `/lembretes?usuarioId=${usuarioId}`,
+      `/lembretes`,
       lembrete
     )
       .then(() => {
         buscarLembretes();
       })
       .catch((erro) => {
-        console.log(erro.response?.data);
+        console.log("Erro ao criar:", erro.response?.data);
       });
-
   }
 
 
   function atualizarLembrete(id, lembrete) {
-
-    const usuarioId = localStorage.getItem("userId");
-
     api.put(
-      `/lembretes/${id}?usuarioId=${usuarioId}`,
-      lembrete
+        `/lembretes/${id}`,
+        lembrete
     )
-      .then(() => {
-
-        buscarLembretes();
-
-      })
-      .catch((erro) => {
-        console.log("Erro ao atualizar:", erro.response?.data);
-      });
-
-  }
+        .then(() => {
+            buscarLembretes();
+        })
+        .catch((erro) => {
+            console.log("Erro ao atualizar:", erro);
+            console.log("Status:", erro.response?.status);
+            console.log("Data:", erro.response?.data);
+        });
+}
 
 
   function deletarLembrete(id) {

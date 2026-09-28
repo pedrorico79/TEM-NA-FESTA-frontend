@@ -21,9 +21,7 @@ function ModalEditarLembrete(props) {
             props.lembrete.id,
             {
                 descricao,
-                data_criacao: props.lembrete.dataCriacao,
-                data_limite: dataLimite,
-                prioridade: props.lembrete.prioridade
+                dataLimite
             }
         );
 

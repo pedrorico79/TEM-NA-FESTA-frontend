@@ -133,6 +133,10 @@
   display: none;
 }
 
+.logout-button ion-icon {
+  font-size: 24px;
+}
+
 @media (max-width: 1024px) {
   .mobile-header {
     display: flex;

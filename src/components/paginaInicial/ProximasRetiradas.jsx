@@ -29,7 +29,7 @@ function ProximasRetiradas() {
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [clientes, setClientes] = useState({});
 
-  const ITENS_POR_PAGINA = 7;
+  const ITENS_POR_PAGINA = 4;
 
   const getStatus = (status) => {
 
