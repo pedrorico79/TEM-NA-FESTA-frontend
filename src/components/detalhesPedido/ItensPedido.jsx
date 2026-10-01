@@ -1,5 +1,3 @@
-import React from "react";
-
 function ItensPedido({ itens, total }) {
   return (
     <div className="card-padrao">

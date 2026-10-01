@@ -1,4 +1,4 @@
-import Menu from "../shared/Menu/Menu";
+import Menu from "../shared/menu/Menu";
 import PaginaInicialHeader from "../paginaInicial/PaginaInicialHeader";
 import PaginaInicialTempo from "../paginaInicial/PaginaInicialTempo";
 import KpiSection from "../paginaInicial/KpiSection";

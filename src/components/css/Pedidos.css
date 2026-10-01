@@ -178,6 +178,7 @@
   border: 1px solid #ddd0c7;
   border-radius: 22px;
   padding: 20px 22px;
+  cursor: pointer;
 }
 
 .pedido-card:hover {

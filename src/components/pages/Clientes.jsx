@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import Menu from "../shared/Menu/Menu";
+import Menu from "../shared/menu/Menu";
 import BotaoAdicionar from "../shared/botaoAdicionar/BotaoAdicionar";
 import TabelaClientes from "../clientes/TabelaClientes";
 import ModalEditarCliente from "../clientes/ModalEditarCliente";
@@ -37,18 +37,7 @@ function Clientes() {
 
     const itensPorPagina = 7;
 
-    const clientesFiltrados = (clientes || []).filter((cliente) =>
-        cliente.nome
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .includes(
-                busca
-                    .toLowerCase()
-                    .normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "")
-            )
-    );
+    const clientesFiltrados = clientes;
 
     const totalPaginas = Math.ceil(
         clientesFiltrados.length / itensPorPagina
@@ -61,9 +50,12 @@ function Clientes() {
         indiceInicial + itensPorPagina
     );
 
-    function buscarClientes() {
-
-        api.get("/clientes")
+    function buscarClientes(busca = "") {
+        api.get("/clientes", {
+            params: {
+                busca: busca || undefined
+            }
+        })
             .then((response) => {
                 setClientes(response.data);
             })
@@ -87,93 +79,75 @@ function Clientes() {
     }
 
     async function cadastrarCliente(cliente) {
+    try {
+        const dadosCliente = {
+            nome: cliente.nome,
+            telefone: cliente.telefone,
+            whatsapp: cliente.whatsapp,
+            instagram: cliente.instagram,
+            anotacoes: cliente.anotacoes,
+            endereco: {
+                cep: cliente.cep,
+                logradouro: cliente.logradouro,
+                numero: cliente.numero,
+                complemento: cliente.complemento,
+                bairro: cliente.bairro,
+                cidade: cliente.cidade,
+                estado: cliente.estado
+            }
+        };
 
-        try {
+        console.log("CLIENTE ENVIADO:", dadosCliente);
 
-            const responseEndereco = await api.post(
-                "/enderecos",
-                {
-                    cep: cliente.cep,
-                    logradouro: cliente.logradouro,
-                    numero: cliente.numero,
-                    complemento: cliente.complemento,
-                    bairro: cliente.bairro,
-                    cidade: cliente.cidade,
-                    estado: cliente.estado
-                }
-            );
+        const responseCliente = await api.post("/clientes", dadosCliente);
 
-            const enderecoId = responseEndereco.data.id;
+        setPaginaAtual(1);
+        buscarClientes();
 
-            const dadosCliente = {
-                nome: cliente.nome,
-                telefone: cliente.telefone,
-                whatsapp: cliente.whatsapp,
-                instagram: cliente.instagram,
-                anotacoes: cliente.anotacoes,
-                enderecoId
-            };
-
-            console.log("CLIENTE ENVIADO:", dadosCliente);
-
-            const responseCliente = await api.post(
-                "/clientes",
-                dadosCliente
-            );
-
-            setPaginaAtual(1);
-            buscarClientes();
-
-            return responseCliente.data;
-
-        } catch (erro) {
-
-            console.error("STATUS:", erro.response?.status);
-            console.error("ERRO BACKEND:", erro.response?.data);
-
-            throw erro;
-        }
+        return responseCliente.data;
+    } catch (erro) {
+        console.error("STATUS:", erro.response?.status);
+        console.error("ERRO BACKEND:", erro.response?.data);
+        throw erro;
     }
+}
 
     async function editarCliente(cliente) {
+    try {
+        const dadosCliente = {
+            nome: cliente.nome,
+            telefone: cliente.telefone,
+            whatsapp: cliente.whatsapp,
+            instagram: cliente.instagram,
+            anotacoes: cliente.anotacoes,
+            endereco: {
+                cep: cliente.cep,
+                logradouro: cliente.logradouro,
+                numero: cliente.numero,
+                complemento: cliente.complemento,
+                bairro: cliente.bairro,
+                cidade: cliente.cidade,
+                estado: cliente.estado
+            }
+        };
 
-        try {
+        console.log("CLIENTE EDITADO:", dadosCliente);
 
-            await api.put(
-                `/enderecos/${cliente.enderecoId}`,
-                {
-                    cep: cliente.cep,
-                    logradouro: cliente.logradouro,
-                    numero: cliente.numero,
-                    complemento: cliente.complemento,
-                    bairro: cliente.bairro,
-                    cidade: cliente.cidade,
-                    estado: cliente.estado
-                }
-            );
+        const responseCliente = await api.put(
+            `/clientes/${cliente.id}`,
+            dadosCliente
+        );
 
-            const responseCliente = await api.put(
-                `/clientes/${cliente.id}`,
-                {
-                    nome: cliente.nome,
-                    telefone: cliente.telefone,
-                    whatsapp: cliente.whatsapp,
-                    instagram: cliente.instagram,
-                    anotacoes: cliente.anotacoes,
-                    enderecoId: cliente.enderecoId
-                }
-            );
+        buscarClientes();
 
-            buscarClientes();
+        return responseCliente.data;
 
-            return responseCliente.data;
-
-        } catch (erro) {
-
-            console.error(erro);
-            throw erro;
-        }
+    } catch (erro) {
+        console.error("STATUS:", erro.response?.status);
+        console.error("ERRO BACKEND:", erro.response?.data);
+        throw erro;
     }
+}
 
     function abrirModalRemover(cliente) {
         setClienteRemocao(cliente);
@@ -212,24 +186,28 @@ function Clientes() {
     }
 
     function confirmarAlteracaoStatus() {
+        const novoStatus = !clienteConfirmacao.ativo;
 
-        api.patch(`/clientes/${clienteConfirmacao.id}/ativo`)
+        api.patch(
+            `/clientes/${clienteConfirmacao.id}/ativo`,
+            {
+                ativo: novoStatus
+            }
+        )
             .then(() => {
-
-                buscarClientes();
+                buscarClientes(busca);
 
                 setModalConfirmacaoOpen(false);
 
                 setMensagemSucesso(
-                    clienteConfirmacao.isAtivo
-                        ? "Cliente desativado com sucesso!"
-                        : "Cliente ativado com sucesso!"
+                    novoStatus
+                        ? "Cliente ativado com sucesso!"
+                        : "Cliente desativado com sucesso!"
                 );
 
                 setTimeout(() => {
                     setMensagemSucesso("");
                 }, 3000);
-
             })
             .catch((erro) => {
                 console.error(erro);
@@ -268,8 +246,11 @@ function Clientes() {
                             placeholder="Buscar cliente"
                             value={busca}
                             onChange={(e) => {
-                                setBusca(e.target.value);
+                                const valor = e.target.value;
+
+                                setBusca(valor);
                                 setPaginaAtual(1);
+                                buscarClientes(valor);
                             }}
                         />
 
@@ -348,17 +329,13 @@ function Clientes() {
 
             <ModalConfirmacao
                 open={modalConfirmacaoOpen}
-                onClose={() =>
-                    setModalConfirmacaoOpen(false)
-                }
+                onClose={() => setModalConfirmacaoOpen(false)}
                 onConfirmar={confirmarAlteracaoStatus}
-                mensagem={`Tem certeza que deseja ${
-                    clienteConfirmacao?.isAtivo
+                mensagem={`Tem certeza que deseja ${clienteConfirmacao?.ativo
                         ? "desativar"
                         : "ativar"
-                } o cliente ${
-                    clienteConfirmacao?.nome || ""
-                }?`}
+                    } o cliente ${clienteConfirmacao?.nome || ""
+                    }?`}
             />
 
             <ModalConfirmacao

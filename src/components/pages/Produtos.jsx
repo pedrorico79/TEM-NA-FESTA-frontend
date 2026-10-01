@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import Menu from "../shared/Menu/Menu";
+import Menu from "../shared/menu/Menu";
 import BotaoAdicionar from "../shared/botaoAdicionar/BotaoAdicionar";
 
 import TabelaProdutos from "../produtos/TabelaProdutos";
@@ -38,18 +38,7 @@ function Produtos() {
     const [modalVisualizarOpen, setModalVisualizarOpen] = useState(false);
     const [produtoVisualizado, setProdutoVisualizado] = useState(null);
 
-    const produtosFiltrados = (produtos || []).filter((produto) =>
-        produto.nome
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .includes(
-                busca
-                    .toLowerCase()
-                    .normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "")
-            )
-    );
+    const produtosFiltrados = produtos;
 
     const totalPaginas = Math.ceil(
         produtosFiltrados.length / itensPorPagina
@@ -63,8 +52,12 @@ function Produtos() {
         indiceFinal
     );
 
-    function buscarProdutos() {
-        api.get("/produtos")
+    function buscarProdutos(nome = "") {
+        api.get("/produtos", {
+            params: {
+                nome: nome || undefined
+            }
+        })
             .then((response) => {
                 setProdutos(response.data);
             })
@@ -141,29 +134,33 @@ function Produtos() {
     }
 
     function confirmarAlteracaoStatus() {
+    const novoStatus = !produtoConfirmacao.ativo;
 
-        api.patch(`/produtos/${produtoConfirmacao.id}/ativo`)
-            .then(() => {
+    api.patch(
+        `/produtos/${produtoConfirmacao.id}/ativo`,
+        {
+            ativo: novoStatus
+        }
+    )
+        .then(() => {
+            buscarProdutos(busca);
 
-                buscarProdutos();
+            setModalConfirmacaoOpen(false);
 
-                setModalConfirmacaoOpen(false);
+            setMensagemSucesso(
+                novoStatus
+                    ? "Produto ativado com sucesso!"
+                    : "Produto desativado com sucesso!"
+            );
 
-                setMensagemSucesso(
-                    produtoConfirmacao.ativo
-                        ? "Produto desativado com sucesso!"
-                        : "Produto ativado com sucesso!"
-                );
-
-                setTimeout(() => {
-                    setMensagemSucesso("");
-                }, 3000);
-
-            })
-            .catch((erro) => {
-                console.error(erro);
-            });
-    }
+            setTimeout(() => {
+                setMensagemSucesso("");
+            }, 3000);
+        })
+        .catch((erro) => {
+            console.error(erro);
+        });
+}
 
     function abrirModalVisualizar(produto) {
         setProdutoVisualizado(produto);
@@ -201,8 +198,11 @@ function Produtos() {
                             placeholder="Buscar produto"
                             value={busca}
                             onChange={(e) => {
-                                setBusca(e.target.value);
+                                const valor = e.target.value;
+
+                                setBusca(valor);
                                 setPaginaAtual(1);
+                                buscarProdutos(valor);
                             }}
                         />
 

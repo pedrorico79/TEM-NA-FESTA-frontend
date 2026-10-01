@@ -1,6 +1,5 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
-import Login from "./components/pages/Login";
 import NovoPedido from "./components/pages/NovoPedido";
 import PaginaInicial from "./components/pages/PaginaInicial";
 import Pedidos from "./components/pages/Pedidos";
@@ -18,7 +17,7 @@ export const routes = createBrowserRouter([
     path: "/",
     element: <RotaLogin />,
     errorElement: <div>Erro</div>,
-},,
+},
   {
     path: "/PaginaInicial",
     element: <PaginaInicial />,

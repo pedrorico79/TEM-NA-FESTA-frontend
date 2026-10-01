@@ -88,12 +88,29 @@ function CampoCliente(props) {
 
   };
 
-  const clientesFiltrados =
-    props.clientes.filter((cliente) =>
-      removerAcentos(cliente.nome).includes(
-        removerAcentos(busca)
-      )
-    );
+  const clientesFiltrados = props.clientes.filter((cliente) => {
+
+  const buscaNome = removerAcentos(busca);
+
+  const nomeCliente = removerAcentos(
+    cliente.nome || ""
+  );
+
+  const buscaNumero = busca.replace(/\D/g, "");
+
+  const telefoneCliente = (
+    cliente.telefone || ""
+  ).replace(/\D/g, "");
+
+  const encontrouNome =
+    nomeCliente.includes(buscaNome);
+
+  const encontrouTelefone =
+    buscaNumero !== "" &&
+    telefoneCliente.includes(buscaNumero);
+
+  return encontrouNome || encontrouTelefone;
+});
 
   return (
 

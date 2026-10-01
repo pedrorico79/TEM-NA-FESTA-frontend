@@ -1,5 +1,3 @@
-import React from "react";
-
 function DadosCliente({ cliente }) {
   return (
     <div className="card-padrao">

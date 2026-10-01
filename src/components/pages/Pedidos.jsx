@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import Menu from "../shared/Menu/Menu";
+import Menu from "../shared/menu/Menu";
 import BotaoAdicionar from "../shared/botaoAdicionar/BotaoAdicionar";
 import HeaderPedidos from "../pedidos/HeaderPedidos";
 import FiltrosPedidos from "../pedidos/FiltrosPedidos";
@@ -16,7 +16,7 @@ function Pedidos() {
   const navigate = useNavigate();
 
   const [paginaAtual, setPaginaAtual] = useState(1);
-  const itensPorPagina = 6;
+  
 
   const [busca, setBusca] = useState("");
   const [statusFiltro, setStatusFiltro] = useState("TODOS");
@@ -26,6 +26,12 @@ function Pedidos() {
 
   // Começa sempre na visualização em grade
   const [modoVisualizacao, setModoVisualizacao] = useState("grid");
+
+  const itensPorPagina = modoVisualizacao === "list" ? 8 : 6;
+
+  useEffect(() => {
+  setPaginaAtual(1);
+}, [modoVisualizacao]);
 
   const [pedidos, setPedidos] = useState([]);
   const [clientes, setClientes] = useState({});

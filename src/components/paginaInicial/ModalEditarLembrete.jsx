@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Modal from "../shared/Modal/Modal";
+import Modal from "../shared/modal/Modal";
 
 function ModalEditarLembrete(props) {
 

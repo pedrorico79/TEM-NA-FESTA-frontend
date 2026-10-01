@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 function ReciboPedido({
   pedido,
@@ -176,9 +176,6 @@ function ReciboPedido({
 
           const tamanhoFonte = 26;
           const alturaLinha = 38;
-
-          const larguraDisponivel =
-            largura - padding * 2;
 
           ctx.font =
             `bold ${tamanhoFonte}px Arial`;
