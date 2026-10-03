@@ -1,4 +1,5 @@
 import "../../css/Modal.css";
+import { createPortal } from "react-dom";
 
 function Modal(props) {
 
@@ -6,7 +7,7 @@ function Modal(props) {
     return null;
   }
 
-  return (
+  return createPortal((
     <div
       className="modal-overlay"
       onClick={props.onClose}
@@ -32,7 +33,7 @@ function Modal(props) {
       </div>
 
     </div>
-  );
+  ), document.body);
 }
 
 export default Modal;

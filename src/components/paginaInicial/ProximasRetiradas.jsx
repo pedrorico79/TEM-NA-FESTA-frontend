@@ -282,45 +282,50 @@ function ProximasRetiradas() {
     const itensTexto = formatarItens(pedido.itens);
 
     secao.rows.push([
-      colunaComTooltip(
-        numeroPedido,
-        truncarTexto(
-          numeroPedido,
-          LIMITE_PEDIDO
-        )
-      ),
+  colunaComTooltip(
+    numeroPedido,
+    truncarTexto(numeroPedido, LIMITE_PEDIDO)
+  ),
 
-      colunaComTooltip(
-        nomeCliente,
-        truncarTexto(
-          nomeCliente,
-          LIMITE_CLIENTE
-        )
-      ),
+  <div className="cliente-pedido">
+    <span className="cliente-nome">
+      {truncarTexto(nomeCliente, LIMITE_CLIENTE)}
+    </span>
 
-      colunaComTooltip(
-        itensTexto,
-        truncarTexto(
-          itensTexto,
-          LIMITE_ITENS
-        )
-      ),
+    <div className="status-mobile">
+      {getStatus(pedido.statusProducao)}
 
-      <div className="status-container">
-        {getStatus(pedido.statusProducao)}
+      {pedidoEstaAtrasado(pedido.dataEntrega) && (
+        <span
+          className="aviso-atrasado"
+          title="A retirada deste pedido está atrasada"
+        >
+          ⚠️ Atrasado
+        </span>
+      )}
+    </div>
+  </div>,
 
-        {pedidoEstaAtrasado(pedido.dataEntrega) && (
-          <span
-            className="aviso-atrasado"
-            title="A retirada deste pedido está atrasada"
-          >
-            ⚠️ Atrasado
-          </span>
-        )}
-      </div>,
+  colunaComTooltip(
+    itensTexto,
+    truncarTexto(itensTexto, LIMITE_ITENS)
+  ),
 
-      <ion-icon name="chevron-forward-outline"></ion-icon>
-    ]);
+  <div className="status-desktop">
+    {getStatus(pedido.statusProducao)}
+
+    {pedidoEstaAtrasado(pedido.dataEntrega) && (
+      <span
+        className="aviso-atrasado"
+        title="A retirada deste pedido está atrasada"
+      >
+        ⚠️ Atrasado
+      </span>
+    )}
+  </div>,
+
+  <ion-icon name="chevron-forward-outline"></ion-icon>
+]);
 
     secao.rowIds.push(pedido.id);
 

@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 999;
+  z-index: 1200;
 }
 
 .modal-content {
@@ -158,6 +158,10 @@
   font-family: inherit;
 }
 
+.modal-content form input[type="date"] {
+  cursor: pointer;
+}
+
 .modal-content form select {
   cursor: pointer;
 }
@@ -168,4 +172,3 @@
   outline: none;
   border-color: #b8aba4;
 }
-

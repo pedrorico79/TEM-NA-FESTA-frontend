@@ -60,9 +60,10 @@ function ModalEditarLembrete(props) {
                     <input
                         type="date"
                         value={dataLimite}
-                        onChange={(e) =>
-                            setDataLimite(e.target.value)
-                        }
+                        onChange={(e) => setDataLimite(e.target.value)}
+                        onClick={(e) => {
+                            e.currentTarget.showPicker?.();
+                        }}
                     />
 
                 </div>

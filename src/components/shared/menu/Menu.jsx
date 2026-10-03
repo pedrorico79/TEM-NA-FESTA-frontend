@@ -35,10 +35,6 @@ function Menu(props) {
   return (
     <>
       <div className="mobile-header">
-        <div className="mobile-logo">
-          <h1>Tem na Festa</h1>
-        </div>
-
         <button
           className="hamburger-btn"
           onClick={toggleMenu}
@@ -48,6 +44,12 @@ function Menu(props) {
             name={isOpen ? "close-outline" : "menu-outline"}
           ></ion-icon>
         </button>
+
+        <div className="mobile-logo">
+          <h1>Tem na Festa</h1>
+        </div>
+
+
       </div>
 
       {isOpen && (

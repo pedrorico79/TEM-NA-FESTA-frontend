@@ -5,18 +5,41 @@ function ModalCriarLembrete(props) {
 
   const [descricao, setDescricao] = useState("");
   const [dataLimite, setDataLimite] = useState("");
+  const [erro, setErro] = useState("");
+  const [salvando, setSalvando] = useState(false);
 
-  function salvar() {
+  function hojeEmFormatoISO() {
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+    const dia = String(hoje.getDate()).padStart(2, "0");
+    return `${ano}-${mes}-${dia}`;
+  }
 
-    props.criarLembrete({
-      descricao,
-      dataLimite
-    });
+  async function salvar(event) {
+    event.preventDefault();
 
-    setDescricao("");
-    setDataLimite("");
+    if (!dataLimite || dataLimite <= hojeEmFormatoISO()) {
+      setErro("A data limite do lembrete deve ser futura.");
+      return;
+    }
 
-    props.onClose();
+    setErro("");
+    setSalvando(true);
+
+    try {
+      await props.criarLembrete({ descricao, dataLimite });
+
+      setDescricao("");
+      setDataLimite("");
+      props.onClose();
+    } catch (error) {
+      console.error("Erro ao criar lembrete:", error);
+      setErro("Não foi possível criar o lembrete. Confira se a data limite é futura e tente novamente.");
+    } finally {
+      setSalvando(false);
+    }
+
   }
 
   return (
@@ -26,7 +49,13 @@ function ModalCriarLembrete(props) {
       onClose={props.onClose}
     >
 
-      <form>
+      <form onSubmit={salvar}>
+
+        {erro && (
+          <div className="mensagem-erro-lembrete" role="alert">
+            {erro}
+          </div>
+        )}
 
         <div className="form-group">
 
@@ -48,7 +77,14 @@ function ModalCriarLembrete(props) {
           <input
             type="date"
             value={dataLimite}
-            onChange={(e) => setDataLimite(e.target.value)}
+            min={hojeEmFormatoISO()}
+            onChange={(e) => {
+              setDataLimite(e.target.value);
+              setErro("");
+            }}
+            onClick={(e) => {
+              e.currentTarget.showPicker?.();
+            }}
           />
 
         </div>
@@ -59,16 +95,17 @@ function ModalCriarLembrete(props) {
             type="button"
             className="secondary-button"
             onClick={props.onClose}
+            disabled={salvando}
           >
             Cancelar
           </button>
 
           <button
-            type="button"
+            type="submit"
             className="primary-button"
-            onClick={salvar}
+            disabled={salvando}
           >
-            Salvar
+            {salvando ? "Salvando..." : "Salvar"}
           </button>
 
         </div>
