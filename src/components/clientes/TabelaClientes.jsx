@@ -1,5 +1,6 @@
 import Tabela from "../shared/tabela/Tabela";
 import SwitchStatus from "../shared/switchStatus/SwitchStatus";
+import { formatarTelefone } from "../../utils/telefone";
 
 function truncarTexto(texto, limite) {
     if (!texto) {
@@ -38,9 +39,9 @@ function TabelaClientes({
     const data = clientes.map((cliente) => [
         truncarTexto(cliente.nome, 25),
 
-        truncarTexto(cliente.telefone, 15),
+        truncarTexto(formatarTelefone(cliente.telefone), 15),
 
-        truncarTexto(cliente.whatsapp, 15),
+        truncarTexto(formatarTelefone(cliente.whatsapp), 15),
 
         truncarTexto(cliente.instagram, 20),
 

@@ -1,3 +1,5 @@
+import { aplicarMascaraTelefone, formatarTelefone } from "../../utils/telefone";
+
 function FormCliente(props) {
 
   const form = props.form;
@@ -31,14 +33,15 @@ function FormCliente(props) {
         <label>Telefone</label>
 
         <input
-          type="text"
+          type="tel"
+          inputMode="tel"
 
-          value={form.telefone}
+          value={formatarTelefone(form.telefone)}
 
           onChange={(e) =>
             setForm({
               ...form,
-              telefone: e.target.value,
+              telefone: aplicarMascaraTelefone(e.target.value),
             })
           }
         />
@@ -50,14 +53,15 @@ function FormCliente(props) {
         <label>WhatsApp</label>
 
         <input
-          type="text"
+          type="tel"
+          inputMode="tel"
 
-          value={form.whatsapp}
+          value={formatarTelefone(form.whatsapp)}
 
           onChange={(e) =>
             setForm({
               ...form,
-              whatsapp: e.target.value,
+              whatsapp: aplicarMascaraTelefone(e.target.value),
             })
           }
         />

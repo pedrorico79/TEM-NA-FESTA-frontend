@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { formatarTelefone } from "../../utils/telefone";
 
 function ReciboPedido({
   pedido,
@@ -74,10 +75,9 @@ function ReciboPedido({
           dadosCliente.endereco ??
           "Não informado";
 
-        const contatoCliente =
-          dadosCliente.whatsapp ??
-          dadosCliente.telefone ??
-          "Não informado";
+        const contatoCliente = formatarTelefone(
+          dadosCliente.whatsapp ?? dadosCliente.telefone
+        ) || "Não informado";
 
         const dataEmissao =
           pedido?.datas?.dataPedido ??
@@ -789,4 +789,3 @@ function ReciboPedido({
 }
 
 export default ReciboPedido;
-

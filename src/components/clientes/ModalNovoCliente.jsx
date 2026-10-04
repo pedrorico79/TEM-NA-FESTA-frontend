@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Modal from "../shared/modal/Modal";
+import { aplicarMascaraTelefone } from "../../utils/telefone";
 
 function ModalNovoCliente(props) {
     const [novoCliente, setNovoCliente] = useState({
@@ -18,7 +19,10 @@ function ModalNovoCliente(props) {
     });
 
     function handleChange(e) {
-        const { name, value } = e.target;
+        const { name } = e.target;
+        const value = ["telefone", "whatsapp"].includes(name)
+            ? aplicarMascaraTelefone(e.target.value)
+            : e.target.value;
 
         setNovoCliente({
             ...novoCliente,
@@ -92,7 +96,8 @@ function ModalNovoCliente(props) {
                     <div className="form-group">
                         <label>Telefone *</label>
                         <input
-                            type="text"
+                            type="tel"
+                            inputMode="tel"
                             name="telefone"
                             value={novoCliente.telefone}
                             onChange={handleChange}
@@ -102,7 +107,8 @@ function ModalNovoCliente(props) {
                     <div className="form-group">
                         <label>WhatsApp *</label>
                         <input
-                            type="text"
+                            type="tel"
+                            inputMode="tel"
                             name="whatsapp"
                             value={novoCliente.whatsapp}
                             onChange={handleChange}

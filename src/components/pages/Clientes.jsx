@@ -121,7 +121,7 @@ function Clientes() {
             instagram: cliente.instagram,
             anotacoes: cliente.anotacoes,
             endereco: {
-                cep: cliente.cep,
+                cep: cliente.cep?.replace(/\D/g, ""),
                 logradouro: cliente.logradouro,
                 numero: cliente.numero,
                 complemento: cliente.complemento,

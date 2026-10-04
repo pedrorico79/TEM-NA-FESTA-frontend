@@ -1,7 +1,22 @@
-function DadosCliente({ cliente }) {
+import { formatarTelefone } from "../../utils/telefone";
+
+function DadosCliente({ cliente, onEditar }) {
   return (
     <div className="card-padrao">
-      <h2 className="secao-titulo">Dados do Cliente</h2>
+      <div className="dados-cliente-header">
+        <h2 className="secao-titulo">Dados do Cliente</h2>
+        {onEditar && (
+          <button
+            type="button"
+            className="btn-editar-dados-cliente"
+            onClick={onEditar}
+            aria-label="Editar dados do cliente"
+            title="Editar cliente"
+          >
+            <ion-icon name="pencil-outline"></ion-icon>
+          </button>
+        )}
+      </div>
 
       <div className="dados-cliente-grid">
         <div className="dado-cliente">
@@ -14,19 +29,14 @@ function DadosCliente({ cliente }) {
           <span className="dado-valor">{cliente.evento}</span>
         </div>
 
-        <div className="dado-cliente col-span-2">
-          <span className="dado-label">Endereço</span>
-          <span className="dado-valor">{cliente.endereco}</span>
-        </div>
-
         <div className="dado-cliente">
           <span className="dado-label">Telefone</span>
-          <span className="dado-valor">{cliente.telefone}</span>
+          <span className="dado-valor">{formatarTelefone(cliente.telefone) || "-"}</span>
         </div>
 
         <div className="dado-cliente">
           <span className="dado-label">WhatsApp</span>
-          <span className="dado-valor">{cliente.whatsapp}</span>
+          <span className="dado-valor">{formatarTelefone(cliente.whatsapp) || "-"}</span>
         </div>
 
         <div className="dado-cliente">

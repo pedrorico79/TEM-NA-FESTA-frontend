@@ -1,4 +1,5 @@
 import Modal from "../shared/modal/Modal";
+import { formatarTelefone } from "../../utils/telefone";
 
 function ModalVisualizarCliente({
     open,
@@ -24,12 +25,12 @@ function ModalVisualizarCliente({
 
                         <div className="cliente-detalhe">
                             <strong>Telefone</strong>
-                            <p>{cliente.telefone || "-"}</p>
+                            <p>{formatarTelefone(cliente.telefone) || "-"}</p>
                         </div>
 
                         <div className="cliente-detalhe">
                             <strong>WhatsApp</strong>
-                            <p>{cliente.whatsapp || "-"}</p>
+                            <p>{formatarTelefone(cliente.whatsapp) || "-"}</p>
                         </div>
 
                     </div>

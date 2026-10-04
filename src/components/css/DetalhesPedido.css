@@ -47,6 +47,37 @@
   color: #3e3835;
 }
 
+.badge-status.rascunho {
+  background: #f3f0ed;
+  border: 1px solid #d6cec7;
+}
+
+.status-pedido-control {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex-shrink: 0;
+}
+
+.badge-status-select {
+  max-width: 100%;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.badge-status-select:disabled {
+  cursor: default;
+  opacity: 0.85;
+}
+
+.erro-status-pedido {
+  max-width: 280px;
+  margin: 6px 0 0;
+  color: #b42318;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
 .badge-status.naoIniciado {
   background: #fee2e2;
   border: 1px solid #fca5a5;
@@ -98,6 +129,13 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.pedido-col-direita {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
 }
 
 .dados-cliente-header {
@@ -272,6 +310,357 @@
   gap: 8px;
   padding: 0 0 10px 0;
   border-bottom: 2px solid #e7e0da;
+}
+
+.data-retirada-valor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-editar-data-retirada {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  padding: 3px;
+  background: transparent;
+  color: #6f432a;
+  cursor: pointer;
+}
+
+.btn-editar-data-retirada ion-icon {
+  font-size: 17px;
+}
+
+.btn-editar-data-retirada:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.endereco-pedido-card {
+  margin: 0;
+}
+
+.endereco-pedido-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 40px;
+}
+
+.endereco-pedido-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 12px 0;
+  border-bottom: 2px solid #e7e0da;
+}
+
+.endereco-pedido-campo .dado-valor {
+  overflow-wrap: anywhere;
+}
+
+.erro-edicao-pedido {
+  margin: 12px 0 0;
+  color: #b42318;
+}
+
+.item-pedido-edicao {
+  padding: 16px 0;
+  border-bottom: 1px solid #e7e0da;
+}
+
+.item-pedido-edicao-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.item-pedido-edicao-header h3 {
+  margin: 0;
+  color: #2c2421;
+  font-size: 18px;
+}
+
+.btn-remover-item-pedido,
+.btn-adicionar-item-pedido {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #e7e0da;
+  border-radius: 12px;
+  background: #fff;
+  color: #6f432a;
+  cursor: pointer;
+}
+
+.btn-remover-item-pedido {
+  width: 38px;
+  height: 38px;
+  color: #b42318;
+}
+
+.btn-remover-item-pedido ion-icon,
+.btn-adicionar-item-pedido ion-icon {
+  font-size: 20px;
+}
+
+.btn-adicionar-item-pedido {
+  min-height: 42px;
+  margin-top: 16px;
+  padding: 0 16px;
+}
+
+.btn-adicionar-item-pedido:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.subtotal-item-edicao {
+  margin: 10px 0 0;
+  color: #594133;
+  font-weight: 600;
+  text-align: right;
+}
+
+.total-itens-edicao {
+  margin: 18px 0 0;
+  color: #2c2421;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.modal-content:has(form.modal-editar-itens-pedido) {
+  width: min(1100px, calc(100vw - 48px));
+  max-width: 1100px;
+}
+
+.modal-editar-itens-pedido {
+  width: 100%;
+  min-width: 0;
+}
+
+.modal-editar-itens-pedido .adicionar-produto-descricao {
+  margin: -8px 0 20px;
+  color: #6f625c;
+  font-size: 15px;
+}
+
+.modal-editar-itens-pedido .busca-produtos-modal {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 48px;
+  margin-bottom: 18px;
+  padding: 0 14px;
+  border: 1px solid #e7e0da;
+  border-radius: 14px;
+  background: #fffbf2;
+  box-sizing: border-box;
+}
+
+.modal-editar-itens-pedido .busca-produtos-modal:focus-within {
+  border-color: #b8aba4;
+}
+
+.modal-editar-itens-pedido .busca-produtos-modal ion-icon {
+  flex-shrink: 0;
+  color: #8f8179;
+  font-size: 21px;
+}
+
+.modal-editar-itens-pedido .busca-produtos-modal input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 0 0 10px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 15px;
+}
+
+.itens-edicao-tabela-wrapper {
+  width: 100%;
+  max-width: 100%;
+  max-height: 390px;
+  overflow: auto;
+  border: 1px solid #e7e0da;
+  border-radius: 14px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.itens-edicao-tabela-wrapper table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+}
+
+.itens-edicao-tabela-wrapper .custom-table th {
+  padding: 12px 6px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.itens-edicao-tabela-wrapper .custom-table td {
+  height: 54px;
+  padding: 6px;
+  vertical-align: middle;
+}
+
+.itens-edicao-tabela-wrapper th:nth-child(1),
+.itens-edicao-tabela-wrapper td:nth-child(1) {
+  width: 16%;
+}
+
+.itens-edicao-tabela-wrapper th:nth-child(2),
+.itens-edicao-tabela-wrapper td:nth-child(2) {
+  width: 16%;
+}
+
+.itens-edicao-tabela-wrapper th:nth-child(3),
+.itens-edicao-tabela-wrapper td:nth-child(3) {
+  width: 21%;
+}
+
+.itens-edicao-tabela-wrapper th:nth-child(4),
+.itens-edicao-tabela-wrapper td:nth-child(4) {
+  width: 14%;
+}
+
+.itens-edicao-tabela-wrapper th:nth-child(5),
+.itens-edicao-tabela-wrapper td:nth-child(5) {
+  width: 9%;
+}
+
+.itens-edicao-tabela-wrapper th:nth-child(6),
+.itens-edicao-tabela-wrapper td:nth-child(6) {
+  width: 14%;
+}
+
+.itens-edicao-tabela-wrapper th:nth-child(7),
+.itens-edicao-tabela-wrapper td:nth-child(7) {
+  width: 38px;
+}
+
+.descricao-produto-item-edicao {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #756b67;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.itens-edicao-tabela-wrapper td .campo-descricao-item-edicao {
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  padding: 0 8px;
+  border: 1px solid #e7e0da;
+  border-radius: 9px;
+  background: #fff;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+.itens-edicao-tabela-wrapper td .quantidade-input {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 70px;
+  height: 36px;
+}
+
+.itens-edicao-tabela-wrapper td .quantidade-input input {
+  width: 70px;
+  height: 36px;
+  padding: 0 8px;
+  border: 2px solid #e7e0da;
+  border-radius: 8px;
+  background: #fff;
+  color: #333;
+  font-family: inherit;
+  font-size: 14px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.preco-item-edicao {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 110px;
+  height: 36px;
+  overflow: hidden;
+  border: 2px solid #e7e0da;
+  border-radius: 8px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.preco-item-edicao span {
+  padding-left: 8px;
+  color: #756b67;
+  font-size: 13px;
+}
+
+.itens-edicao-tabela-wrapper td .preco-item-edicao input {
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.produto-item-edicao {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow-wrap: anywhere;
+  color: #2c2421;
+  font-weight: 400 !important;
+}
+
+.modal-editar-itens-pedido .produtos-selecao-info {
+  margin-top: 14px;
+  color: #756b67;
+  font-size: 14px;
+}
+
+.itens-edicao-tabela-wrapper td:last-child {
+  width: 38px;
+  padding: 4px 2px;
+  text-align: center;
+}
+
+.itens-edicao-tabela-wrapper .btn-remover-item-pedido {
+  width: 30px;
+  height: 30px;
+}
+
+.btn-remover-item-pedido:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.itens-edicao-vazio {
+  margin: 16px;
+  color: #756b67;
+  text-align: center;
 }
 
 .datas-grid {
@@ -548,5 +937,10 @@
 
   .pedido-titulo-wrapper .datas-grid {
     gap: 12px;
+  }
+
+  .endereco-pedido-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
   }
 }
