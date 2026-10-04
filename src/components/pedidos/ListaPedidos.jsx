@@ -9,17 +9,11 @@ function ListaPedidos({ pedidos, modoVisualizacao }) {
   const getStatusClass = (status) => {
     const statusNormalizado = status?.trim().toUpperCase();
 
-    if (statusNormalizado === "NAO_INICIADO") {
-      return "naoIniciado";
-    }
-
-    if (statusNormalizado === "EM_PRODUCAO") {
-      return "producao";
-    }
-
-    if (statusNormalizado === "PRONTO") {
-      return "pronto";
-    }
+    if (statusNormalizado === "RASCUNHO") return "rascunho";
+    if (statusNormalizado === "AGUARDANDO_SINAL") return "aguardandoSinal";
+    if (statusNormalizado === "CONFIRMADO") return "confirmado";
+    if (statusNormalizado === "EM_PRODUCAO") return "producao";
+    if (statusNormalizado === "PRONTO_PARA_ENTREGA") return "pronto";
 
     if (statusNormalizado === "ENTREGUE") {
       return "entregue";
@@ -35,17 +29,11 @@ function ListaPedidos({ pedidos, modoVisualizacao }) {
   const getStatusText = (status) => {
     const statusNormalizado = status?.trim().toUpperCase();
 
-    if (statusNormalizado === "NAO_INICIADO") {
-      return "Não iniciado";
-    }
-
-    if (statusNormalizado === "EM_PRODUCAO") {
-      return "Em Produção";
-    }
-
-    if (statusNormalizado === "PRONTO") {
-      return "Pronto";
-    }
+    if (statusNormalizado === "RASCUNHO") return "Rascunho";
+    if (statusNormalizado === "AGUARDANDO_SINAL") return "Aguardando Sinal";
+    if (statusNormalizado === "CONFIRMADO") return "Confirmado";
+    if (statusNormalizado === "EM_PRODUCAO") return "Em Produção";
+    if (statusNormalizado === "PRONTO_PARA_ENTREGA") return "Pronto";
 
     if (statusNormalizado === "ENTREGUE") {
       return "Entregue";
@@ -84,11 +72,26 @@ function ListaPedidos({ pedidos, modoVisualizacao }) {
     const data = pedidosPagina.map((pedido) => [
       pedido.id,
 
-      pedido.cliente,
+      <div className="pedido-cliente-tabela">
+        <span className="pedido-cliente-tabela-nome">
+          {pedido.cliente}
+        </span>
+        <div className="pedido-mobile-meta">
+          <span className="pedido-mobile-retirada">
+          <ion-icon name="calendar-outline"></ion-icon>
+          {pedido.retirada}
+          </span>
+        </div>
+      </div>,
 
       pedido.campanha,
 
-      `${pedido.itens} itens`,
+      <div className="pedido-itens-tabela">
+        <span>{pedido.itens} {pedido.itens === 1 ? "item" : "itens"}</span>
+        <span className={`pedido-status pedido-status-mobile ${getStatusClass(pedido.status)}`}>
+          {getStatusText(pedido.status)}
+        </span>
+      </div>,
 
       pedido.retirada,
 

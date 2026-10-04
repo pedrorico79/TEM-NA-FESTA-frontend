@@ -1,3 +1,5 @@
+import FiltroDropdown from "./FiltroDropdown";
+
 function FiltrosPedidos({
     busca,
     setBusca,
@@ -5,22 +7,20 @@ function FiltrosPedidos({
     setStatusFiltro,
     eventoFiltro,
     setEventoFiltro,
+    limparFiltros,
     ordem,
     setOrdem,
     ordemCrescente,
     setOrdemCrescente,
     modoVisualizacao,
     setModoVisualizacao,
-    pedidos
+    eventosDisponiveis = []
 }) {
-
-    const eventos = [
-        ...new Set(
-            pedidos
-                .map((pedido) => pedido.campanha)
-                .filter((evento) => evento)
-        )
-    ];
+    const temFiltrosAtivos = Boolean(busca.trim()) ||
+        statusFiltro !== "TODOS" ||
+        eventoFiltro !== "TODOS" ||
+        ordem !== "PEDIDO" ||
+        !ordemCrescente;
 
     return (
         <div className="filtros-card">
@@ -74,7 +74,7 @@ function FiltrosPedidos({
 
             </div>
 
-            <div className="filtros-bottom">
+            <div className={`filtros-bottom ${temFiltrosAtivos ? "com-filtros-ativos" : ""}`}>
 
                 <div className="filtros-left">
 
@@ -86,62 +86,34 @@ function FiltrosPedidos({
 
                     </div>
 
-                    <select
+                    <FiltroDropdown
+                        label="Filtrar por status"
                         value={statusFiltro}
-                        onChange={(e) =>
-                            setStatusFiltro(e.target.value)
-                        }
-                    >
+                        onChange={setStatusFiltro}
+                        options={[
+                            { value: "TODOS", label: "Todos os status" },
+                            { value: "RASCUNHO", label: "Rascunho" },
+                            { value: "AGUARDANDO_SINAL", label: "Aguardando sinal" },
+                            { value: "CONFIRMADO", label: "Confirmado" },
+                            { value: "EM_PRODUCAO", label: "Em Produção" },
+                            { value: "PRONTO_PARA_ENTREGA", label: "Pronto" },
+                            { value: "ENTREGUE", label: "Entregue" },
+                            { value: "CANCELADO", label: "Cancelado" }
+                        ]}
+                    />
 
-                        <option value="TODOS">
-                            Todos os status
-                        </option>
-
-                        <option value="NAO_INICIADO">
-                            Não iniciado
-                        </option>
-
-                        <option value="EM_PRODUCAO">
-                            Em Produção
-                        </option>
-
-                        <option value="PRONTO">
-                            Pronto
-                        </option>
-
-                        <option value="ENTREGUE">
-                            Entregue
-                        </option>
-
-                        <option value="CANCELADO">
-                            Cancelado
-                        </option>
-
-                    </select>
-
-                    <select
+                    <FiltroDropdown
+                        label="Filtrar por evento"
                         value={eventoFiltro}
-                        onChange={(e) =>
-                            setEventoFiltro(e.target.value)
-                        }
-                    >
-
-                        <option value="TODOS">
-                            Todos os eventos
-                        </option>
-
-                        {eventos.map((evento) => (
-
-                            <option
-                                key={evento}
-                                value={evento}
-                            >
-                                {evento}
-                            </option>
-
-                        ))}
-
-                    </select>
+                        onChange={setEventoFiltro}
+                        options={[
+                            { value: "TODOS", label: "Todos os eventos" },
+                            ...eventosDisponiveis.map((evento) => ({
+                                value: String(evento.id),
+                                label: evento.nome
+                            }))
+                        ]}
+                    />
 
                 </div>
 
@@ -155,26 +127,16 @@ function FiltrosPedidos({
 
                     </div>
 
-                    <select
+                    <FiltroDropdown
+                        label="Ordenar pedidos"
                         value={ordem}
-                        onChange={(e) =>
-                            setOrdem(e.target.value)
-                        }
-                    >
-
-                        <option value="PEDIDO">
-                            Ordem de Pedido
-                        </option>
-
-                        <option value="CLIENTE">
-                            Cliente
-                        </option>
-
-                        <option value="EVENTO">
-                            Evento
-                        </option>
-
-                    </select>
+                        onChange={setOrdem}
+                        options={[
+                            { value: "PEDIDO", label: "Ordem de Pedido" },
+                            { value: "CLIENTE", label: "Cliente" },
+                            { value: "EVENTO", label: "Evento" }
+                        ]}
+                    />
 
                     <div className="sort-buttons">
 
@@ -213,6 +175,17 @@ function FiltrosPedidos({
                     </div>
 
                 </div>
+
+                {temFiltrosAtivos && (
+                    <button
+                        type="button"
+                        className="limpar-filtros"
+                        onClick={limparFiltros}
+                    >
+                        <ion-icon name="close-circle-outline"></ion-icon>
+                        Limpar filtros
+                    </button>
+                )}
 
             </div>
 

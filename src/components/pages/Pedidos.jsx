@@ -36,93 +36,90 @@ function Pedidos() {
   const [pedidos, setPedidos] = useState([]);
   const [clientes, setClientes] = useState({});
   const [eventos, setEventos] = useState({});
+  const [opcoesEventos, setOpcoesEventos] = useState([]);
   const [carregando, setCarregando] = useState(true);
 
   const handleNavigate = (path) => {
     navigate(path);
   };
 
-  const buscarPedidos = async () => {
-    try {
-      setCarregando(true);
-
-      const response = await api.get("/pedidos");
-
-      const pedidosRecebidos = response.data ?? [];
-
-      setPedidos(pedidosRecebidos);
-
-      // Pega apenas os IDs dos clientes
-      const clienteIds = [
-        ...new Set(
-          pedidosRecebidos
-            .map((pedido) => pedido.clienteId)
-            .filter((id) => id != null)
-        )
-      ];
-
-      // Pega apenas os IDs dos eventos
-      const eventoIds = [
-        ...new Set(
-          pedidosRecebidos
-            .map((pedido) => pedido.eventoId)
-            .filter((id) => id != null)
-        )
-      ];
-
-      // Busca os clientes
-      const clientesMap = {};
-
-      await Promise.all(
-        clienteIds.map(async (clienteId) => {
-          try {
-            const clienteResponse = await api.get(
-              `/clientes/${clienteId}`
-            );
-
-            clientesMap[clienteId] = clienteResponse.data;
-          } catch (error) {
-            console.error(
-              `Erro ao buscar cliente ${clienteId}:`,
-              error
-            );
-          }
-        })
-      );
-
-      // Busca os eventos
-      const eventosMap = {};
-
-      await Promise.all(
-        eventoIds.map(async (eventoId) => {
-          try {
-            const eventoResponse = await api.get(
-              `/eventos/${eventoId}`
-            );
-
-            eventosMap[eventoId] = eventoResponse.data;
-          } catch (error) {
-            console.error(
-              `Erro ao buscar evento ${eventoId}:`,
-              error
-            );
-          }
-        })
-      );
-
-      setClientes(clientesMap);
-      setEventos(eventosMap);
-    } catch (error) {
-      console.error("Erro ao buscar pedidos:", error);
-      setPedidos([]);
-    } finally {
-      setCarregando(false);
-    }
-  };
+  useEffect(() => {
+    api.get("/eventos")
+      .then((response) => {
+        const listaEventos = response.data ?? [];
+        setOpcoesEventos(listaEventos);
+        setEventos(
+          Object.fromEntries(
+            listaEventos.map((evento) => [evento.id, evento])
+          )
+        );
+      })
+      .catch((error) => console.error("Erro ao buscar eventos:", error));
+  }, []);
 
   useEffect(() => {
-    buscarPedidos();
-  }, []);
+    let ativa = true;
+    const timer = setTimeout(async () => {
+      try {
+        setCarregando(true);
+
+        const params = {};
+        const buscaNormalizada = busca.trim().replace(/^#/, "");
+        if (buscaNormalizada) params.busca = buscaNormalizada;
+        if (statusFiltro !== "TODOS") params.status = statusFiltro;
+        if (eventoFiltro !== "TODOS") params.evento = eventoFiltro;
+
+        const response = await api.get("/pedidos", { params });
+        const pedidosRecebidos = response.data ?? [];
+        if (!ativa) return;
+
+        setPedidos(pedidosRecebidos);
+
+        const clienteIds = [
+          ...new Set(
+            pedidosRecebidos
+              .map((pedido) => pedido.clienteId)
+              .filter((id) => id != null)
+          )
+        ];
+
+        const clientesMap = {};
+
+        await Promise.all(
+          clienteIds.map(async (clienteId) => {
+            try {
+              const clienteResponse = await api.get(
+                `/clientes/${clienteId}`
+              );
+
+              clientesMap[clienteId] = clienteResponse.data;
+            } catch (error) {
+              console.error(
+                `Erro ao buscar cliente ${clienteId}:`,
+                error
+              );
+            }
+          })
+        );
+
+        if (ativa) {
+          setClientes(clientesMap);
+        }
+      } catch (error) {
+        if (ativa) {
+          console.error("Erro ao buscar pedidos:", error);
+          setPedidos([]);
+        }
+      } finally {
+        if (ativa) setCarregando(false);
+      }
+    }, busca.trim() ? 300 : 0);
+
+    return () => {
+      ativa = false;
+      clearTimeout(timer);
+    };
+  }, [busca, statusFiltro, eventoFiltro]);
 
   const formatarData = (data) => {
     if (!data) return "";
@@ -204,73 +201,30 @@ function Pedidos() {
     };
   });
 
-  const pedidosFiltrados = [...pedidosFormatados]
-    .filter((pedido) => {
-      const textoBusca = busca
-        .toLowerCase()
-        .trim();
+  const pedidosFiltrados = [...pedidosFormatados].sort((a, b) => {
+    if (ordem === "PEDIDO") {
+      const numeroA = Number(a.id.replace("#", ""));
+      const numeroB = Number(b.id.replace("#", ""));
 
-      const correspondeBusca =
-        pedido.cliente
-          .toLowerCase()
-          .includes(textoBusca) ||
-        pedido.id
-          .toLowerCase()
-          .includes(textoBusca);
+      return ordemCrescente
+        ? numeroA - numeroB
+        : numeroB - numeroA;
+    }
 
-      const correspondeStatus =
-        statusFiltro === "TODOS" ||
-        pedido.status === statusFiltro;
+    if (ordem === "CLIENTE") {
+      const resultado = a.cliente.localeCompare(b.cliente, "pt-BR");
 
-      const correspondeEvento =
-        eventoFiltro === "TODOS" ||
-        pedido.campanha === eventoFiltro;
+      return ordemCrescente ? resultado : -resultado;
+    }
 
-      return (
-        correspondeBusca &&
-        correspondeStatus &&
-        correspondeEvento
-      );
-    })
-    .sort((a, b) => {
-      if (ordem === "PEDIDO") {
-        const numeroA = Number(
-          a.id.replace("#", "")
-        );
+    if (ordem === "EVENTO") {
+      const resultado = a.campanha.localeCompare(b.campanha, "pt-BR");
 
-        const numeroB = Number(
-          b.id.replace("#", "")
-        );
+      return ordemCrescente ? resultado : -resultado;
+    }
 
-        return ordemCrescente
-          ? numeroA - numeroB
-          : numeroB - numeroA;
-      }
-
-      if (ordem === "CLIENTE") {
-        const resultado = a.cliente.localeCompare(
-          b.cliente,
-          "pt-BR"
-        );
-
-        return ordemCrescente
-          ? resultado
-          : -resultado;
-      }
-
-      if (ordem === "EVENTO") {
-        const resultado = a.campanha.localeCompare(
-          b.campanha,
-          "pt-BR"
-        );
-
-        return ordemCrescente
-          ? resultado
-          : -resultado;
-      }
-
-      return 0;
-    });
+    return 0;
+  });
 
   const totalPaginas = Math.ceil(
     pedidosFiltrados.length / itensPorPagina
@@ -296,9 +250,6 @@ function Pedidos() {
           <BotaoAdicionar
             text="Novo Pedido"
             size="small"
-            style={{
-              marginTop: "40px"
-            }}
             onClick={() =>
               handleNavigate("/NovoPedido")
             }
@@ -321,17 +272,27 @@ function Pedidos() {
             setEventoFiltro(valor);
             setPaginaAtual(1);
           }}
+          limparFiltros={() => {
+            setBusca("");
+            setStatusFiltro("TODOS");
+            setEventoFiltro("TODOS");
+            setOrdem("PEDIDO");
+            setOrdemCrescente(true);
+            setPaginaAtual(1);
+          }}
           ordem={ordem}
           setOrdem={setOrdem}
           ordemCrescente={ordemCrescente}
           setOrdemCrescente={setOrdemCrescente}
           modoVisualizacao={modoVisualizacao}
           setModoVisualizacao={setModoVisualizacao}
-          pedidos={pedidosFormatados}
+          eventosDisponiveis={opcoesEventos}
         />
 
         {carregando ? (
           <p>Carregando pedidos...</p>
+        ) : pedidosFiltrados.length === 0 ? (
+          <p className="pedidos-vazio">Nenhum pedido encontrado.</p>
         ) : (
           <>
             <ListaPedidos
@@ -357,4 +318,3 @@ function Pedidos() {
 }
 
 export default Pedidos;
-

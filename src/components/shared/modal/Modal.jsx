@@ -10,12 +10,15 @@ function Modal(props) {
   return createPortal((
     <div
       className="modal-overlay"
-      onClick={props.onClose}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) props.onClose();
+      }}
     >
 
       <div
         className="modal-content"
         onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
       >
 
         <div className="modal-header">

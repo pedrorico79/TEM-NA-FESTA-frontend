@@ -10,9 +10,23 @@
 }
 
 .pedido-titulo-wrapper {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+}
+
+.titulo-detalhe-pedido {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 16px;
+  min-width: 0;
+}
+
+.titulo-detalhe-pedido h1 {
+  margin: 0;
 }
 
 .pedido-titulo-wrapper h1 {
@@ -84,6 +98,60 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.dados-cliente-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.dados-cliente-header .secao-titulo {
+  min-width: 0;
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.btn-editar-dados-cliente {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 38px;
+  align-self: flex-start;
+  width: 38px;
+  height: 38px;
+  border: 1px solid #e7e0da;
+  border-radius: 12px;
+  background: #fff;
+  color: #6f432a;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-editar-dados-cliente:hover {
+  background: #f8f2eb;
+  border-color: #d4c6b9;
+}
+
+.btn-editar-dados-cliente ion-icon {
+  font-size: 20px;
+}
+
+.pedido-cliente-sucesso {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  padding: 12px 20px;
+  border-radius: 8px;
+  background: #4caf50;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* Estilos de Formulário */
@@ -181,8 +249,15 @@
   margin: 0 0 10px 0;
 }
 
-.card-datas {
+.pedido-titulo-wrapper .card-datas {
   margin: 0;
+  flex: 0 0 auto;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  transform: translateY(46px);
 }
 
 .datas-grid {
@@ -451,4 +526,27 @@
   font-size: inherit;
   font-weight: inherit;
   color: inherit;
+}
+
+@media (max-width: 1024px) {
+  .pedido-titulo-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pedido-titulo-wrapper .card-datas {
+    align-self: stretch;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .pedido-titulo-wrapper .card-datas {
+    align-self: stretch;
+  }
+
+  .pedido-titulo-wrapper .datas-grid {
+    gap: 12px;
+  }
 }
