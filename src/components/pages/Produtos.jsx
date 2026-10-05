@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Menu from "../shared/menu/Menu";
 import BotaoAdicionar from "../shared/botaoAdicionar/BotaoAdicionar";
@@ -32,37 +32,56 @@ function Produtos() {
     const [produtoConfirmacao, setProdutoConfirmacao] = useState(null);
 
     const [busca, setBusca] = useState("");
+    const buscaSequencia = useRef(0);
+    const [carregandoProdutos, setCarregandoProdutos] = useState(true);
+    const [erroProdutos, setErroProdutos] = useState("");
 
     const itensPorPagina = 7;
 
     const [modalVisualizarOpen, setModalVisualizarOpen] = useState(false);
     const [produtoVisualizado, setProdutoVisualizado] = useState(null);
 
-    const produtosFiltrados = produtos;
-
     const totalPaginas = Math.ceil(
-        produtosFiltrados.length / itensPorPagina
+        produtos.length / itensPorPagina
     );
 
     const indiceInicial = (paginaAtual - 1) * itensPorPagina;
     const indiceFinal = indiceInicial + itensPorPagina;
 
-    const produtosPaginados = produtosFiltrados.slice(
+    const produtosPaginados = produtos.slice(
         indiceInicial,
         indiceFinal
     );
 
+    useEffect(() => {
+        if (totalPaginas === 0 && paginaAtual !== 1) {
+            setPaginaAtual(1);
+        } else if (totalPaginas > 0 && paginaAtual > totalPaginas) {
+            setPaginaAtual(totalPaginas);
+        }
+    }, [paginaAtual, totalPaginas]);
+
     function buscarProdutos(nome = "") {
-        api.get("/produtos", {
+        const sequenciaAtual = ++buscaSequencia.current;
+        setCarregandoProdutos(true);
+        setErroProdutos("");
+        return api.get("/produtos", {
             params: {
                 nome: nome || undefined
             }
         })
             .then((response) => {
-                setProdutos(response.data);
+                if (sequenciaAtual === buscaSequencia.current) {
+                    setProdutos(Array.isArray(response.data) ? response.data : []);
+                    setCarregandoProdutos(false);
+                }
             })
             .catch((erro) => {
                 console.error(erro);
+                if (sequenciaAtual === buscaSequencia.current) {
+                    setErroProdutos(erro.response?.data?.message || "Não foi possível carregar os produtos.");
+                    setCarregandoProdutos(false);
+                }
             });
     }
 
@@ -75,7 +94,7 @@ function Produtos() {
         return api.post("/produtos", produto)
             .then((response) => {
                 setPaginaAtual(1);
-                buscarProdutos();
+                buscarProdutos(busca);
                 return response.data;
             })
             .catch((erro) => {
@@ -92,9 +111,14 @@ function Produtos() {
     }
 
     function editarProduto(produto) {
-        return api.put(`/produtos/${produto.id}`, produto)
+        return api.put(`/produtos/${produto.id}`, {
+            nome: produto.nome,
+            descricao: produto.descricao,
+            precoVenda: produto.precoVenda,
+            ativo: produto.ativo,
+        })
             .then((response) => {
-                buscarProdutos();
+                buscarProdutos(busca);
                 return response.data;
             })
             .catch((erro) => {
@@ -112,7 +136,7 @@ function Produtos() {
     function removerProduto() {
         api.delete(`/produtos/${produtoRemocao.id}`)
             .then(() => {
-                buscarProdutos();
+                buscarProdutos(busca);
 
                 setProdutoRemocao(null);
 
@@ -124,7 +148,7 @@ function Produtos() {
             })
             .catch((erro) => {
                 console.error(erro);
-                alert("Erro ao remover produto.");
+                alert(erro.response?.data?.message || "Erro ao remover produto.");
             });
     }
 
@@ -159,6 +183,7 @@ function Produtos() {
         })
         .catch((erro) => {
             console.error(erro);
+            alert(erro.response?.data?.message || "Erro ao alterar o status do produto.");
         });
 }
 
@@ -195,7 +220,9 @@ function Produtos() {
                         />
 
                         <input
+                            type="search"
                             placeholder="Buscar produto"
+                            aria-label="Buscar produto por nome"
                             value={busca}
                             onChange={(e) => {
                                 const valor = e.target.value;
@@ -208,24 +235,32 @@ function Produtos() {
 
                     </div>
 
-                    <TabelaProdutos
-                        produtos={produtosPaginados}
-                        onEditar={abrirModalEditar}
-                        onAlterarStatus={alterarStatus}
-                        onRemover={abrirModalRemover}
-                        onVisualizar={abrirModalVisualizar}
-                    />
+                    {carregandoProdutos ? (
+                        <p className="produtos-vazio" role="status">Carregando produtos…</p>
+                    ) : erroProdutos ? (
+                        <p className="produtos-vazio" role="alert">{erroProdutos}</p>
+                    ) : produtosPaginados.length > 0 ? (
+                        <>
+                            <TabelaProdutos
+                                produtos={produtosPaginados}
+                                onEditar={abrirModalEditar}
+                                onAlterarStatus={alterarStatus}
+                                onRemover={abrirModalRemover}
+                                onVisualizar={abrirModalVisualizar}
+                            />
 
-                    <Paginacao
-                        paginaAtual={paginaAtual}
-                        totalPaginas={totalPaginas}
-                        onAnterior={() =>
-                            setPaginaAtual(paginaAtual - 1)
-                        }
-                        onProximo={() =>
-                            setPaginaAtual(paginaAtual + 1)
-                        }
-                    />
+                            <Paginacao
+                                paginaAtual={paginaAtual}
+                                totalPaginas={totalPaginas}
+                                onAnterior={() => setPaginaAtual((pagina) => pagina - 1)}
+                                onProximo={() => setPaginaAtual((pagina) => pagina + 1)}
+                            />
+                        </>
+                    ) : (
+                        <p className="produtos-vazio">
+                            {busca ? "Nenhum produto encontrado para essa busca." : "Nenhum produto cadastrado."}
+                        </p>
+                    )}
 
                 </div>
 

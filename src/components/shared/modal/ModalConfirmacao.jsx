@@ -12,24 +12,26 @@ function ModalConfirmacao({
             onClose={onClose}
             title="Confirmar alteração"
         >
-            <p>{mensagem}</p>
+            <div className="produto-confirmacao-conteudo">
+                <p>{mensagem}</p>
 
-            <div className="modal-actions">
-                <button
-                    type="button"
-                    className="secondary-button"
-                    onClick={onClose}
-                >
-                    Cancelar
-                </button>
+                <div className="modal-actions">
+                    <button
+                        type="button"
+                        className="secondary-button"
+                        onClick={onClose}
+                    >
+                        Cancelar
+                    </button>
 
-                <button
-                    type="button"
-                    className="primary-button"
-                    onClick={onConfirmar}
-                >
-                    Confirmar
-                </button>
+                    <button
+                        type="button"
+                        className="primary-button"
+                        onClick={onConfirmar}
+                    >
+                        Confirmar
+                    </button>
+                </div>
             </div>
         </Modal>
     );

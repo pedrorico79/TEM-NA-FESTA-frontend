@@ -21,40 +21,59 @@ function TabelaProdutos({
     onVisualizar
 }) {
 
-    const data = produtos.map((produto) => [
-        truncarTexto(produto.nome, 25),
-        truncarTexto(produto.descricao, 50),
-        `R$ ${produto.precoVenda.toFixed(2)}`,
-        <div className="acoes-produto">
-            <SwitchStatus
-                ativo={produto.ativo}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    onAlterarStatus(produto);
-                }}
-            />
+    const data = produtos.map((produto) => {
+        const valorFormatado = Number(produto.precoVenda || 0).toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+        });
 
-            <button
-                className="btn-editar"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    onEditar(produto);
-                }}
-            >
-                <ion-icon name="pencil-outline"></ion-icon> Editar
-            </button>
+        return [
+            <div className="produto-nome-valor">
+                <span className="produto-nome-tabela">{truncarTexto(produto.nome, 25)}</span>
+                <span className="produto-valor-mobile">{valorFormatado}</span>
+            </div>,
+            truncarTexto(produto.descricao, 50),
+            valorFormatado,
+            <div className="acoes-produto">
+                <SwitchStatus
+                    ativo={produto.ativo}
+                    ariaLabel={`${produto.ativo ? "Desativar" : "Ativar"} ${produto.nome}`}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onAlterarStatus(produto);
+                    }}
+                />
 
-            <button
-                className="btn-remover"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    onRemover(produto);
-                }}
-            >
-                <ion-icon name="trash-outline"></ion-icon> Remover
-            </button>
-        </div>
-    ]);
+                <button
+                    type="button"
+                    className="btn-editar"
+                    aria-label={`Editar ${produto.nome}`}
+                    title={`Editar ${produto.nome}`}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onEditar(produto);
+                    }}
+                >
+                    <ion-icon name="pencil-outline"></ion-icon>
+                    <span>Editar</span>
+                </button>
+
+                <button
+                    type="button"
+                    className="btn-remover"
+                    aria-label={`Remover ${produto.nome}`}
+                    title={`Remover ${produto.nome}`}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onRemover(produto);
+                    }}
+                >
+                    <ion-icon name="trash-outline"></ion-icon>
+                    <span>Remover</span>
+                </button>
+            </div>
+        ];
+    });
 
     return (
         <div className="produtos-tabela-wrapper">
