@@ -194,7 +194,7 @@
     width: 100%;
     overflow-x: auto;
     overflow-y: auto;
-    max-height: 350px;
+    max-height: 240px;
     -webkit-overflow-scrolling: touch;
     margin-top: 15px;
     border-radius: 16px;
