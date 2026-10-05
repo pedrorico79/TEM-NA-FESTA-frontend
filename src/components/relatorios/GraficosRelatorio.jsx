@@ -36,7 +36,7 @@ return (
 
         <div className="card-relatorio">
 
-            <h2>Comparativo entre Eventos</h2>
+                <h2>{props.modoEvento ? "Pedidos por ano do evento" : "Comparativo entre Eventos"}</h2>
 
             <GraficoComparativoEventos
                 dados={props.comparativoEventos}
@@ -44,6 +44,7 @@ return (
 
             <TabelaComparativoEventos
                 dados={props.comparativoEventos}
+                modoEvento={props.modoEvento}
             />
 
         </div>
