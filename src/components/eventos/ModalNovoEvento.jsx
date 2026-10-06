@@ -73,6 +73,7 @@ function ModalNovoEvento(props) {
                             name="dataInicio"
                             value={novoEvento.dataInicio}
                             onChange={handleChange}
+                            onClick={(e) => e.currentTarget.showPicker?.()}
                         />
                     </div>
 
@@ -83,6 +84,7 @@ function ModalNovoEvento(props) {
                             name="dataFim"
                             value={novoEvento.dataFim}
                             onChange={handleChange}
+                            onClick={(e) => e.currentTarget.showPicker?.()}
                         />
                     </div>
                 </div>

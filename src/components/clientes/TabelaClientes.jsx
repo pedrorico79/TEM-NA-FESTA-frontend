@@ -14,6 +14,15 @@ function truncarTexto(texto, limite) {
     return `${texto.slice(0, limite)}...`;
 }
 
+function formatarContatoMobile(cliente) {
+    if (cliente.telefone) return formatarTelefone(cliente.telefone);
+    if (cliente.whatsapp) return formatarTelefone(cliente.whatsapp);
+    if (cliente.instagram) {
+        return cliente.instagram.startsWith("@") ? cliente.instagram : `@${cliente.instagram}`;
+    }
+    return "Sem contato";
+}
+
 function TabelaClientes({
     clientes,
     onEditar,
@@ -37,7 +46,12 @@ function TabelaClientes({
     }
 
     const data = clientes.map((cliente) => [
-        truncarTexto(cliente.nome, 25),
+        <div className="cliente-identificacao">
+            <span className="cliente-nome-tabela">{truncarTexto(cliente.nome, 25)}</span>
+            <span className="cliente-contatos-mobile">
+                {formatarContatoMobile(cliente)}
+            </span>
+        </div>,
 
         truncarTexto(formatarTelefone(cliente.telefone), 15),
 
@@ -50,6 +64,7 @@ function TabelaClientes({
         <div className="acoes-cliente">
             <SwitchStatus
                 ativo={cliente.ativo}
+                ariaLabel={`${cliente.ativo ? "Desativar" : "Ativar"} ${cliente.nome}`}
                 onClick={(e) => {
                     e.stopPropagation();
                     onAlterarStatus(cliente);
@@ -57,25 +72,31 @@ function TabelaClientes({
             />
 
             <button
+                type="button"
                 className="btn-editar"
+                aria-label={`Editar ${cliente.nome}`}
+                title={`Editar ${cliente.nome}`}
                 onClick={(e) => {
                     e.stopPropagation();
                     onEditar(cliente);
                 }}
             >
                 <ion-icon name="pencil-outline"></ion-icon>
-                {" "}Editar
+                <span>Editar</span>
             </button>
 
             <button
+                type="button"
                 className="btn-remover"
+                aria-label={`Remover ${cliente.nome}`}
+                title={`Remover ${cliente.nome}`}
                 onClick={(e) => {
                     e.stopPropagation();
                     onRemover(cliente);
                 }}
             >
                 <ion-icon name="trash-outline"></ion-icon>
-                {" "}Remover
+                <span>Remover</span>
             </button>
         </div>
     ]);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Menu from "../shared/menu/Menu";
 import BotaoAdicionar from "../shared/botaoAdicionar/BotaoAdicionar";
@@ -21,7 +21,8 @@ function Clientes() {
 
     const [clienteSelecionado, setClienteSelecionado] = useState(null);
 
-    const [mensagemSucesso, setMensagemSucesso] = useState("");
+    const [alerta, setAlerta] = useState(null);
+    const timeoutAlerta = useRef(null);
 
     const [paginaAtual, setPaginaAtual] = useState(1);
 
@@ -34,6 +35,9 @@ function Clientes() {
 
     const [modalVisualizarOpen, setModalVisualizarOpen] = useState(false);
     const [clienteVisualizado, setClienteVisualizado] = useState(null);
+    const requisicaoBuscaAtual = useRef(0);
+    const [carregando, setCarregando] = useState(false);
+    const [erroBusca, setErroBusca] = useState("");
 
     const itensPorPagina = 7;
 
@@ -50,23 +54,45 @@ function Clientes() {
         indiceInicial + itensPorPagina
     );
 
+    function mostrarAlerta(mensagem, tipo = "sucesso") {
+        window.clearTimeout(timeoutAlerta.current);
+        setAlerta({ mensagem, tipo });
+        timeoutAlerta.current = window.setTimeout(() => setAlerta(null), 3000);
+    }
+
     function buscarClientes(busca = "") {
+        const requisicao = ++requisicaoBuscaAtual.current;
+        setCarregando(true);
+        setErroBusca("");
         api.get("/clientes", {
             params: {
                 busca: busca || undefined
             }
         })
             .then((response) => {
-                setClientes(response.data);
+                if (requisicao === requisicaoBuscaAtual.current) {
+                    setClientes(response.data);
+                    setCarregando(false);
+                }
             })
             .catch((erro) => {
-                console.error(erro);
+                if (requisicao === requisicaoBuscaAtual.current) {
+                    console.error("Erro ao buscar clientes:", erro.response?.data || erro);
+                    setErroBusca(erro.response?.data?.message || "Não foi possível carregar os clientes.");
+                    setCarregando(false);
+                }
             });
     }
 
     useEffect(() => {
         buscarClientes();
     }, []);
+
+    useEffect(() => {
+        if (totalPaginas > 0 && paginaAtual > totalPaginas) {
+            setPaginaAtual(totalPaginas);
+        }
+    }, [paginaAtual, totalPaginas]);
 
     function abrirModalEditar(cliente) {
         setClienteSelecionado(cliente);
@@ -80,47 +106,16 @@ function Clientes() {
 
     async function cadastrarCliente(cliente) {
     try {
+        const enderecoInformado = [cliente.cep, cliente.logradouro, cliente.numero,
+            cliente.complemento, cliente.bairro, cliente.cidade, cliente.estado]
+            .some((valor) => valor?.trim());
         const dadosCliente = {
             nome: cliente.nome,
             telefone: cliente.telefone,
             whatsapp: cliente.whatsapp,
             instagram: cliente.instagram,
             anotacoes: cliente.anotacoes,
-            endereco: {
-                cep: cliente.cep,
-                logradouro: cliente.logradouro,
-                numero: cliente.numero,
-                complemento: cliente.complemento,
-                bairro: cliente.bairro,
-                cidade: cliente.cidade,
-                estado: cliente.estado
-            }
-        };
-
-        console.log("CLIENTE ENVIADO:", dadosCliente);
-
-        const responseCliente = await api.post("/clientes", dadosCliente);
-
-        setPaginaAtual(1);
-        buscarClientes();
-
-        return responseCliente.data;
-    } catch (erro) {
-        console.error("STATUS:", erro.response?.status);
-        console.error("ERRO BACKEND:", erro.response?.data);
-        throw erro;
-    }
-}
-
-    async function editarCliente(cliente) {
-    try {
-        const dadosCliente = {
-            nome: cliente.nome,
-            telefone: cliente.telefone,
-            whatsapp: cliente.whatsapp,
-            instagram: cliente.instagram,
-            anotacoes: cliente.anotacoes,
-            endereco: {
+            endereco: enderecoInformado ? {
                 cep: cliente.cep?.replace(/\D/g, ""),
                 logradouro: cliente.logradouro,
                 numero: cliente.numero,
@@ -128,23 +123,52 @@ function Clientes() {
                 bairro: cliente.bairro,
                 cidade: cliente.cidade,
                 estado: cliente.estado
-            }
+            } : null
         };
 
-        console.log("CLIENTE EDITADO:", dadosCliente);
+        const responseCliente = await api.post("/clientes", dadosCliente);
+
+        setPaginaAtual(1);
+        buscarClientes(busca);
+
+        return responseCliente.data;
+    } catch (erro) {
+        throw erro;
+    }
+}
+
+    async function editarCliente(cliente) {
+    try {
+        const enderecoInformado = [cliente.cep, cliente.logradouro, cliente.numero,
+            cliente.complemento, cliente.bairro, cliente.cidade, cliente.estado]
+            .some((valor) => valor?.trim());
+        const dadosCliente = {
+            nome: cliente.nome,
+            telefone: cliente.telefone,
+            whatsapp: cliente.whatsapp,
+            instagram: cliente.instagram,
+            anotacoes: cliente.anotacoes,
+            endereco: enderecoInformado ? {
+                cep: cliente.cep?.replace(/\D/g, ""),
+                logradouro: cliente.logradouro,
+                numero: cliente.numero,
+                complemento: cliente.complemento,
+                bairro: cliente.bairro,
+                cidade: cliente.cidade,
+                estado: cliente.estado
+            } : null
+        };
 
         const responseCliente = await api.put(
             `/clientes/${cliente.id}`,
             dadosCliente
         );
 
-        buscarClientes();
+        buscarClientes(busca);
 
         return responseCliente.data;
 
     } catch (erro) {
-        console.error("STATUS:", erro.response?.status);
-        console.error("ERRO BACKEND:", erro.response?.data);
         throw erro;
     }
 }
@@ -158,23 +182,19 @@ function Clientes() {
         return api.delete(`/clientes/${clienteRemocao.id}`)
             .then(() => {
 
-                buscarClientes();
+                buscarClientes(busca);
 
                 setClienteRemocao(null);
 
-                setMensagemSucesso(
-                    "Cliente removido com sucesso!"
-                );
-
-                setTimeout(() => {
-                    setMensagemSucesso("");
-                }, 3000);
+                mostrarAlerta("Cliente removido com sucesso!");
 
             })
             .catch((erro) => {
 
                 console.error(erro);
-                alert("Erro ao remover cliente.");
+                mostrarAlerta(erro.response?.status === 422
+                    ? "Não é possível remover este cliente porque ele possui pedidos em andamento."
+                    : erro.response?.data?.message || "Erro ao remover cliente.", "erro");
 
             });
     }
@@ -199,18 +219,14 @@ function Clientes() {
 
                 setModalConfirmacaoOpen(false);
 
-                setMensagemSucesso(
-                    novoStatus
-                        ? "Cliente ativado com sucesso!"
-                        : "Cliente desativado com sucesso!"
-                );
-
-                setTimeout(() => {
-                    setMensagemSucesso("");
-                }, 3000);
+                mostrarAlerta(novoStatus
+                    ? "Cliente ativado com sucesso!"
+                    : "Cliente desativado com sucesso!");
             })
             .catch((erro) => {
-                console.error(erro);
+                mostrarAlerta(erro.response?.status === 422
+                    ? "Não é possível desativar este cliente porque ele possui pedidos em andamento."
+                    : erro.response?.data?.message || "Erro ao alterar o status do cliente.", "erro");
             });
     }
 
@@ -218,9 +234,9 @@ function Clientes() {
 
         <div className="clientes-layout">
 
-            {mensagemSucesso && (
-                <div className="mensagem-sucesso">
-                    {mensagemSucesso}
+            {alerta && (
+                <div className={`alerta-cliente ${alerta.tipo}`} role={alerta.tipo === "erro" ? "alert" : "status"}>
+                    {alerta.mensagem}
                 </div>
             )}
 
@@ -243,7 +259,9 @@ function Clientes() {
                         />
 
                         <input
+                            type="search"
                             placeholder="Buscar cliente"
+                            aria-label="Buscar por nome, telefone, WhatsApp ou Instagram"
                             value={busca}
                             onChange={(e) => {
                                 const valor = e.target.value;
@@ -256,24 +274,35 @@ function Clientes() {
 
                     </div>
 
-                    <TabelaClientes
-                        clientes={clientesPaginados}
-                        onEditar={abrirModalEditar}
-                        onAlterarStatus={alterarStatus}
-                        onRemover={abrirModalRemover}
-                        onVisualizar={abrirModalVisualizar}
-                    />
+                    {carregando ? (
+                        <p className="clientes-estado">Carregando clientes…</p>
+                    ) : erroBusca ? (
+                        <div className="clientes-estado clientes-estado-erro" role="alert">
+                            <span>{erroBusca}</span>
+                            <button type="button" onClick={() => buscarClientes(busca)}>Tentar novamente</button>
+                        </div>
+                    ) : clientesPaginados.length > 0 ? (
+                        <TabelaClientes
+                            clientes={clientesPaginados}
+                            onEditar={abrirModalEditar}
+                            onAlterarStatus={alterarStatus}
+                            onRemover={abrirModalRemover}
+                            onVisualizar={abrirModalVisualizar}
+                        />
+                    ) : (
+                        <p className="clientes-estado">
+                            {busca ? "Nenhum cliente encontrado para essa busca." : "Nenhum cliente cadastrado."}
+                        </p>
+                    )}
 
-                    <Paginacao
-                        paginaAtual={paginaAtual}
-                        totalPaginas={totalPaginas}
-                        onAnterior={() =>
-                            setPaginaAtual(paginaAtual - 1)
-                        }
-                        onProximo={() =>
-                            setPaginaAtual(paginaAtual + 1)
-                        }
-                    />
+                    {totalPaginas > 1 && (
+                        <Paginacao
+                            paginaAtual={paginaAtual}
+                            totalPaginas={totalPaginas}
+                            onAnterior={() => setPaginaAtual((pagina) => pagina - 1)}
+                            onProximo={() => setPaginaAtual((pagina) => pagina + 1)}
+                        />
+                    )}
 
                 </div>
 
@@ -287,16 +316,9 @@ function Clientes() {
                 }
                 onSalvar={editarCliente}
                 onSucesso={() => {
-
-                    setMensagemSucesso(
-                        "Cliente editado com sucesso!"
-                    );
-
-                    setTimeout(() => {
-                        setMensagemSucesso("");
-                    }, 3000);
-
+                    mostrarAlerta("Cliente editado com sucesso!");
                 }}
+                onErro={(mensagem) => mostrarAlerta(mensagem, "erro")}
             />
 
             <ModalNovoCliente
@@ -306,16 +328,9 @@ function Clientes() {
                 }
                 onSalvar={cadastrarCliente}
                 onSucesso={() => {
-
-                    setMensagemSucesso(
-                        "Cliente cadastrado com sucesso!"
-                    );
-
-                    setTimeout(() => {
-                        setMensagemSucesso("");
-                    }, 3000);
-
+                    mostrarAlerta("Cliente cadastrado com sucesso!");
                 }}
+                onErro={(mensagem) => mostrarAlerta(mensagem, "erro")}
             />
 
             <ModalVisualizarCliente

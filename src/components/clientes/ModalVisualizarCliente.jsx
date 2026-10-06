@@ -35,6 +35,15 @@ function ModalVisualizarCliente({
 
                     </div>
 
+                    <div className="cliente-detalhe">
+                        <strong>Cliente desde</strong>
+                        <p>
+                            {cliente.dataCadastro
+                                ? new Date(`${cliente.dataCadastro}T00:00:00`).toLocaleDateString("pt-BR")
+                                : "-"}
+                        </p>
+                    </div>
+
                     <div className="form-grid">
 
                         <div className="cliente-detalhe">
@@ -45,7 +54,7 @@ function ModalVisualizarCliente({
                         <div className="cliente-detalhe">
                             <strong>Status</strong>
                             <p>
-                                {cliente.isAtivo
+                                {cliente.ativo
                                     ? "Ativo"
                                     : "Inativo"}
                             </p>
@@ -69,7 +78,7 @@ function ModalVisualizarCliente({
                                     cliente.endereco.cidade || ""
                                 } - ${
                                     cliente.endereco.estado || ""
-                                }`
+                                } · CEP ${cliente.endereco.cep || "-"}`
                                 : "-"}
                         </p>
                     </div>
