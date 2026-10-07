@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 
 import { api } from "../../services/api";
+import LoadingState from "../shared/LoadingState";
 
 import Tabela from "../shared/tabela/Tabela";
 
@@ -478,12 +479,20 @@ function ProximasRetiradas() {
       </div>
 
       {carregandoRetiradas ? (
-        <div className="retiradas-vazio" role="status">Carregando próximas retiradas…</div>
+        <LoadingState className="retiradas-vazio loading-state--compact" label="Carregando próximas retiradas…" />
       ) : erroRetiradas ? (
         <div className="retiradas-vazio" role="alert">Não foi possível carregar as próximas retiradas.</div>
       ) : pedidos.length === 0 ? (
         <div className="retiradas-vazio" role="status">
-          Nenhuma retirada nos próximos {dias} dias.
+          <div className="retiradas-sem-dados">
+            <span className="retiradas-sem-dados-icone" aria-hidden="true">
+              <ion-icon name="calendar-outline"></ion-icon>
+            </span>
+            <div>
+              <h3>Nenhuma retirada por enquanto</h3>
+              <p>Não há pedidos previstos para os próximos {dias} dias. Você pode escolher outro período no filtro acima.</p>
+            </div>
+          </div>
         </div>
       ) : (
         <>

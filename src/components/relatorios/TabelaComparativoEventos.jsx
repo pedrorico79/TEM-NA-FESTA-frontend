@@ -3,14 +3,18 @@ import Tabela from "../shared/tabela/Tabela";
 function TabelaComparativoEventos(props) {
 
     const columns = [
-        props.modoEvento ? "ANO" : "EVENTO",
+        props.modoEvento
+            ? props.agrupamentoEvento === "MES" ? "MÊS" : "ANO"
+            : "EVENTO",
         "PEDIDOS",
         "FATURAMENTO",
         "TICKET MÉDIO"
     ];
 
     const data = (props.dados || []).map((evento) => [
-        <span title={evento.evento}>{evento.evento}</span>,
+        <span title={props.modoEvento ? evento.periodo : evento.evento}>
+            {props.modoEvento ? evento.periodo : evento.evento}
+        </span>,
         evento.pedidosTotais,
         evento.faturamento?.toLocaleString("pt-BR", {
             style: "currency",

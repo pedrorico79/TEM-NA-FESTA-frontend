@@ -7,6 +7,7 @@ import ModalEditarCliente from "../clientes/ModalEditarCliente";
 import ModalNovoCliente from "../clientes/ModalNovoCliente";
 import ModalVisualizarCliente from "../clientes/ModalVisualizarCliente";
 import Paginacao from "../shared/paginacao/Paginacao";
+import LoadingState from "../shared/LoadingState";
 import { api } from "../../services/api";
 import ModalConfirmacao from "../shared/modal/ModalConfirmacao";
 
@@ -275,7 +276,7 @@ function Clientes() {
                     </div>
 
                     {carregando ? (
-                        <p className="clientes-estado">Carregando clientes…</p>
+                        <LoadingState className="clientes-estado" label="Carregando clientes…" />
                     ) : erroBusca ? (
                         <div className="clientes-estado clientes-estado-erro" role="alert">
                             <span>{erroBusca}</span>

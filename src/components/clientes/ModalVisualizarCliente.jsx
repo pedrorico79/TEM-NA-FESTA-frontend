@@ -91,15 +91,9 @@ function ModalVisualizarCliente({
                     </div>
 
                     <div className="modal-actions">
-
-                        <button
-                            type="button"
-                            className="secondary-button"
-                            onClick={onClose}
-                        >
+                        <button type="button" className="secondary-button" onClick={onClose}>
                             Fechar
                         </button>
-
                     </div>
 
                 </div>

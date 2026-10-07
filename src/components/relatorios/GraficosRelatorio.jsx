@@ -34,20 +34,28 @@ return (
 
         </div>
 
-        <div className="card-relatorio">
+        {props.exibirEvolucaoEvento !== false && <div className="card-relatorio">
 
-                <h2>{props.modoEvento ? "Pedidos por ano do evento" : "Comparativo entre Eventos"}</h2>
+                <h2>
+                    {props.modoEvento
+                        ? props.agrupamentoEvento === "ANO"
+                            ? "Pedidos por ano do evento"
+                            : "Pedidos por mês do evento"
+                        : "Comparativo entre Eventos"}
+                </h2>
 
             <GraficoComparativoEventos
                 dados={props.comparativoEventos}
+                modoEvento={props.modoEvento}
             />
 
             <TabelaComparativoEventos
                 dados={props.comparativoEventos}
                 modoEvento={props.modoEvento}
+                agrupamentoEvento={props.agrupamentoEvento}
             />
 
-        </div>
+        </div>}
 
     </>
 

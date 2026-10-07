@@ -7,6 +7,7 @@ import HeaderPedidos from "../pedidos/HeaderPedidos";
 import FiltrosPedidos from "../pedidos/FiltrosPedidos";
 import ListaPedidos from "../pedidos/ListaPedidos";
 import Paginacao from "../shared/paginacao/Paginacao";
+import LoadingState from "../shared/LoadingState";
 
 import { api } from "../../services/api";
 
@@ -290,7 +291,7 @@ function Pedidos() {
         />
 
         {carregando ? (
-          <p>Carregando pedidos...</p>
+          <LoadingState label="Carregando pedidos…" />
         ) : pedidosFiltrados.length === 0 ? (
           <p className="pedidos-vazio">Nenhum pedido encontrado.</p>
         ) : (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import MenuItem from "./MenuItem";
 
@@ -7,6 +7,7 @@ import "../../css/Menu.css";
 import { useNavigate } from "react-router-dom";
 
 import { api } from "../../../services/api";
+import { buscarUsuarioAtual, limparUsuarioAtualEmCache, obterUsuarioAtualEmCache } from "../../../services/usuarioAtual";
 
 import cupcakeIcon from "../../../assets/cupcake-svgrepo-com.svg";
 import campanhaIcon from "../../../assets/logo-campanha.png";
@@ -15,6 +16,23 @@ function Menu(props) {
   const navigate = useNavigate();
 
   const [isOpen, setIsOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(
+    String(obterUsuarioAtualEmCache()?.perfil || "").toUpperCase() === "ADMIN"
+  );
+
+  useEffect(() => {
+    let ativo = true;
+
+    buscarUsuarioAtual()
+      .then((usuario) => {
+        if (ativo) setIsAdmin(String(usuario?.perfil || "").toUpperCase() === "ADMIN");
+      })
+      .catch(() => {
+        if (ativo) setIsAdmin(false);
+      });
+
+    return () => { ativo = false; };
+  }, []);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -26,6 +44,7 @@ function Menu(props) {
   const handleLogout = async () => {
     try {
       await api.post("usuarios/logout");
+      limparUsuarioAtualEmCache();
       navigate("/");
     } catch (error) {
       console.error("Erro ao realizar logout:", error);
@@ -111,12 +130,14 @@ function Menu(props) {
               onClick={() => handleNavigate("/Relatorios")}
             />
 
-            <MenuItem
-              icon="id-card-outline"
-              text="Usuários"
-              active={props.active === "usuarios"}
-              onClick={() => handleNavigate("/Usuarios")}
-            />
+            {isAdmin && (
+              <MenuItem
+                icon="id-card-outline"
+                text="Usuários"
+                active={props.active === "usuarios"}
+                onClick={() => handleNavigate("/Usuarios")}
+              />
+            )}
           </nav>
         </div>
 

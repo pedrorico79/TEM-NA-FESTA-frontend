@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { formatarTelefone } from "../../utils/telefone";
+import LoadingState from "../shared/LoadingState";
 
 function ReciboPedido({
   pedido,
@@ -764,9 +765,7 @@ function ReciboPedido({
 
       ) : (
 
-        <div className="recibo-carregando">
-          Gerando recibo...
-        </div>
+        <LoadingState className="recibo-carregando loading-state--compact" label="Gerando recibo…" />
 
       )}
 

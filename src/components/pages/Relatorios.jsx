@@ -6,6 +6,7 @@ import Kpi from "../shared/kpi/Kpi";
 import Menu from "../shared/menu/Menu";
 import FiltrosRelatorio from "../relatorios/FiltrosRelatorio";
 import GraficosRelatorio from "../relatorios/GraficosRelatorio";
+import LoadingState from "../shared/LoadingState";
 
 import "../css/Relatorios.css";
 
@@ -82,18 +83,6 @@ function preencherSemanasDoRelatorio(dados, dataInicio, dataFim) {
     return semanas.map(({ chave, ...semana }) => semana);
 }
 
-function contarPedidosPorSemana(pedidos, inicio, fim, lerDataPedido) {
-    const semanas = criarIntervalosSemanais(inicio, fim);
-    const mapa = new Map(semanas.map((semana) => [semana.chave, semana]));
-    (pedidos || []).forEach((pedido) => {
-        const dataPedido = lerDataPedido(pedido.dataPedido || pedido.dataEntrega);
-        if (!dataPedido) return;
-        const semana = mapa.get(chaveData(obterInicioSemana(dataPedido)));
-        if (semana) semana.quantidade += 1;
-    });
-    return semanas.map(({ chave, ...semana }) => semana);
-}
-
 function Relatorios() {
     const hoje = new Date();
 
@@ -127,6 +116,8 @@ function Relatorios() {
     const [pedidosPorSemana, setPedidosPorSemana] = useState([]);
     const [produtosMaisVendidos, setProdutosMaisVendidos] = useState([]);
     const [comparativoEventos, setComparativoEventos] = useState([]);
+    const [agrupamentoEvento, setAgrupamentoEvento] = useState("NENHUM");
+    const [exibirEvolucaoEvento, setExibirEvolucaoEvento] = useState(false);
     const [erroRelatorio, setErroRelatorio] = useState("");
     const [carregandoRelatorio, setCarregandoRelatorio] = useState(false);
 
@@ -140,6 +131,12 @@ function Relatorios() {
         && Boolean(eventoSelecionado)
         && Array.isArray(eventosComDados)
         && !eventosComDados.includes(eventoSelecionado);
+    const relatorioSemPedidos = kpis !== null
+        && !carregandoRelatorio
+        && !erroRelatorio
+        && (tipoFiltro === "evento"
+            ? Boolean(eventoSelecionado) && Number(kpis?.totalPedidos || 0) === 0
+            : Number(kpis?.totalPedidos || 0) === 0);
 
     function obterEventoMaisRecente(listaEventos) {
         const comDataFim = listaEventos.filter((evento) => evento.dataFim);
@@ -174,92 +171,6 @@ function Relatorios() {
 
         setDataInicial(formatarData(inicio));
         setDataFinal(formatarData(fim));
-    }
-
-    function montarDadosEvento(evento, pedidosRecebidos) {
-        const dataInicioEvento = evento?.dataInicio || "";
-        const dataFimEvento = evento?.dataFim || formatarData(new Date());
-        const inicio = dataInicioEvento ? new Date(`${dataInicioEvento}T00:00:00`) : null;
-        const fim = dataFimEvento ? new Date(`${dataFimEvento}T23:59:59`) : null;
-        const lerData = (valor) => {
-            if (!valor) return null;
-            const data = String(valor).slice(0, 10);
-            const [ano, mes, dia] = data.split("-").map(Number);
-            return new Date(ano, mes - 1, dia);
-        };
-        const pedidosFiltrados = (pedidosRecebidos || []).filter((pedido) => {
-            const dataPedido = lerData(pedido.dataPedido || pedido.dataEntrega);
-            if (!dataPedido) return false;
-            return (!inicio || dataPedido >= inicio) && (!fim || dataPedido <= fim);
-        });
-
-        const totalPedidos = pedidosFiltrados.length;
-        const totalEntregues = pedidosFiltrados.filter((pedido) =>
-            String(pedido.statusProducao || pedido.status || "").toUpperCase() === "ENTREGUE"
-        ).length;
-        const faturamentoTotal = pedidosFiltrados.reduce(
-            (total, pedido) => total + Number(pedido.valorTotal || 0),
-            0
-        );
-        const periodoDias = inicio && fim
-            ? Math.max(0, Math.round((fim - inicio) / 86400000))
-            : 0;
-
-        setKpis({
-            totalPedidos,
-            totalEntregues,
-            taxaConclusaoPorcentagem: totalPedidos ? (totalEntregues / totalPedidos) * 100 : 0,
-            faturamentoTotal: faturamentoTotal.toFixed(2),
-            periodoDias,
-        });
-
-        setPedidosPorSemana(contarPedidosPorSemana(
-            pedidosFiltrados,
-            inicio,
-            fim,
-            lerData
-        ));
-
-        const produtos = new Map();
-        pedidosFiltrados.forEach((pedido) => {
-            (pedido.itens || []).forEach((item) => {
-                const nome = item.produto?.nome || item.nomeProduto || "Produto";
-                const quantidade = Number(item.quantidade || 0);
-                const valorUnitario = Number(item.precoUnitario || item.produto?.precoVenda || 0);
-                const registro = produtos.get(nome) || { item: nome, qtdeVendida: 0, faturamento: 0 };
-                registro.qtdeVendida += quantidade;
-                registro.faturamento += quantidade * valorUnitario;
-                produtos.set(nome, registro);
-            });
-        });
-        const listaProdutos = [...produtos.values()].sort((a, b) => b.qtdeVendida - a.qtdeVendida);
-        const faturamentoProdutos = listaProdutos.reduce((total, produto) => total + produto.faturamento, 0);
-        setProdutosMaisVendidos(listaProdutos.slice(0, 10).map((produto) => ({
-            ...produto,
-            faturamento: produto.faturamento.toFixed(2),
-            porcentagemDoTotal: faturamentoProdutos
-                ? ((produto.faturamento / faturamentoProdutos) * 100).toFixed(1)
-                : "0.0",
-        })));
-
-        const porAno = new Map();
-        pedidosFiltrados.forEach((pedido) => {
-            const dataPedido = lerData(pedido.dataPedido || pedido.dataEntrega);
-            if (!dataPedido) return;
-            const ano = String(dataPedido.getFullYear());
-            const registro = porAno.get(ano) || { evento: ano, pedidosTotais: 0, vendasObtidas: 0, faturamento: 0 };
-            registro.pedidosTotais += 1;
-            registro.faturamento += Number(pedido.valorTotal || 0);
-            if (String(pedido.statusProducao || pedido.status || "").toUpperCase() === "ENTREGUE") {
-                registro.vendasObtidas += 1;
-            }
-            porAno.set(ano, registro);
-        });
-        setComparativoEventos([...porAno.values()].sort((a, b) => a.evento.localeCompare(b.evento)).map((ano) => ({
-            ...ano,
-            faturamento: Number(ano.faturamento.toFixed(2)),
-            ticketMedio: ano.pedidosTotais ? Number((ano.faturamento / ano.pedidosTotais).toFixed(2)) : 0,
-        })));
     }
 
     useEffect(() => {
@@ -341,31 +252,65 @@ function Relatorios() {
                 setPedidosPorSemana([]);
                 setProdutosMaisVendidos([]);
                 setComparativoEventos([]);
+                setAgrupamentoEvento("NENHUM");
+                setExibirEvolucaoEvento(false);
                 setCarregandoRelatorio(false);
                 return;
             }
 
-            try {
-                const evento = eventos.find((item) => String(item.id) === eventoSelecionado);
-                const pedidosResponse = await api.get("/pedidos", {
-                    params: { evento: Number(eventoSelecionado) },
-                });
-                if (ativo) {
-                    const pedidosEventoFiltrados = pedidosResponse.data || [];
-                    montarDadosEvento(evento, pedidosEventoFiltrados);
-                }
-            } catch (error) {
-                console.error("Erro ao carregar pedidos do evento:", error.response?.data || error);
-                if (ativo) {
-                    setKpis(null);
-                    setPedidosPorSemana([]);
-                    setProdutosMaisVendidos([]);
-                    setComparativoEventos([]);
-                    setErroRelatorio("Não foi possível carregar os pedidos deste evento.");
-                }
-            } finally {
-                if (ativo) setCarregandoRelatorio(false);
+            const evento = eventos.find((item) => String(item.id) === eventoSelecionado);
+            if (!evento?.dataInicio || !evento?.dataFim) {
+                setKpis(null);
+                setPedidosPorSemana([]);
+                setProdutosMaisVendidos([]);
+                setComparativoEventos([]);
+                setAgrupamentoEvento("NENHUM");
+                setExibirEvolucaoEvento(false);
+                setErroRelatorio("Este evento não tem um período completo para gerar o relatório.");
+                setCarregandoRelatorio(false);
+                return;
             }
+
+            const params = {
+                de: evento.dataInicio,
+                ate: evento.dataFim,
+                eventoId: Number(eventoSelecionado),
+            };
+            const respostas = await Promise.allSettled([
+                api.get("/relatorios/kpis", { params }),
+                api.get("/relatorios/pedidos-por-semana", { params }),
+                api.get("/relatorios/produtos-mais-vendidos", {
+                    params: { ...params, page: 0, size: 10 },
+                }),
+                api.get(`/relatorios/eventos/${eventoSelecionado}/evolucao`),
+            ]);
+
+            if (!ativo) return;
+
+            const [kpi, semana, produtos, evolucao] = respostas;
+            setKpis(kpi.status === "fulfilled" ? kpi.value.data : null);
+            setPedidosPorSemana(semana.status === "fulfilled"
+                ? preencherSemanasDoRelatorio(semana.value.data || [], evento.dataInicio, evento.dataFim)
+                : []);
+            setProdutosMaisVendidos(produtos.status === "fulfilled"
+                ? produtos.value.data?.content || []
+                : []);
+
+            const dadosEvolucao = evolucao.status === "fulfilled"
+                ? evolucao.value.data
+                : null;
+            const agrupamento = dadosEvolucao?.agrupamento || "NENHUM";
+            const serieEvolucao = dadosEvolucao?.dados || [];
+            setAgrupamentoEvento(agrupamento);
+            setComparativoEventos(serieEvolucao);
+            setExibirEvolucaoEvento(agrupamento !== "NENHUM" && serieEvolucao.length > 0);
+
+            const falhas = respostas.filter((resposta) => resposta.status === "rejected");
+            if (falhas.length) {
+                falhas.forEach((falha) => console.error("Erro ao carregar dados do evento:", falha.reason?.response?.data || falha.reason));
+                setErroRelatorio("Alguns dados do evento não puderam ser carregados.");
+            }
+            setCarregandoRelatorio(false);
         }
 
         async function carregarPorPeriodo() {
@@ -381,12 +326,15 @@ function Relatorios() {
 
             if (!ativo) return;
             const [kpi, semana, produtos, eventosResponse] = respostas;
+            setAgrupamentoEvento("NENHUM");
             setKpis(kpi.status === "fulfilled" ? kpi.value.data : null);
             setPedidosPorSemana(semana.status === "fulfilled"
                 ? preencherSemanasDoRelatorio(semana.value.data || [], dataInicial, dataFinal)
                 : []);
             setProdutosMaisVendidos(produtos.status === "fulfilled" ? produtos.value.data?.content || [] : []);
-            setComparativoEventos(eventosResponse.status === "fulfilled" ? eventosResponse.value.data || [] : []);
+            const dadosComparativo = eventosResponse.status === "fulfilled" ? eventosResponse.value.data || [] : [];
+            setComparativoEventos(dadosComparativo);
+            setExibirEvolucaoEvento(dadosComparativo.length > 0);
 
             const falhas = respostas.filter((resposta) => resposta.status === "rejected");
             if (falhas.length) {
@@ -437,11 +385,11 @@ function Relatorios() {
                 )}
 
                 {carregandoRelatorio && (
-                    <p className="relatorio-carregando" role="status">Carregando relatório…</p>
+                    <LoadingState className="relatorio-carregando" label="Carregando relatório…" />
                 )}
 
                 {tipoFiltro === "evento" && verificandoEventos && (
-                    <p className="relatorio-carregando" role="status">Verificando quais eventos têm pedidos…</p>
+                    <LoadingState className="relatorio-carregando" label="Verificando eventos…" />
                 )}
 
                 {tipoFiltro === "evento" && !verificandoEventos && eventos.length === 0 && (
@@ -456,7 +404,23 @@ function Relatorios() {
                     <p className="relatorio-estado-vazio" role="status">Este evento ainda não possui pedidos dentro do período dele.</p>
                 )}
 
-                {(tipoFiltro === "periodo" || (tipoFiltro === "evento" && eventoSelecionado && !eventoSelecionadoSemDados && !nenhumEventoTemDados)) && <>
+                {!carregandoRelatorio && relatorioSemPedidos && (tipoFiltro === "periodo" || (!eventoSelecionadoSemDados && !nenhumEventoTemDados)) && (
+                    <section className="relatorio-vazio-card" role="status">
+                        <span className="relatorio-vazio-icone" aria-hidden="true">
+                            <ion-icon name="bar-chart-outline"></ion-icon>
+                        </span>
+                        <div>
+                            <h2>{tipoFiltro === "evento" ? "Ainda sem pedidos neste evento" : "Nenhum pedido neste período"}</h2>
+                            <p>
+                                {tipoFiltro === "evento"
+                                    ? "Quando houver pedidos associados a este evento, os indicadores e gráficos aparecerão aqui."
+                                    : "Escolha outro período para visualizar os indicadores e gráficos dos pedidos."}
+                            </p>
+                        </div>
+                    </section>
+                )}
+
+                {!carregandoRelatorio && !relatorioSemPedidos && (tipoFiltro === "periodo" || (tipoFiltro === "evento" && eventoSelecionado && !eventoSelecionadoSemDados && !nenhumEventoTemDados)) && <>
                 <section className="kpis">
 
                     <Kpi
@@ -502,6 +466,8 @@ function Relatorios() {
                     comparativoEventos={comparativoEventos}
                     produtosMaisVendidos={produtosMaisVendidos}
                     modoEvento={tipoFiltro === "evento"}
+                    agrupamentoEvento={agrupamentoEvento}
+                    exibirEvolucaoEvento={exibirEvolucaoEvento}
                 />
                 </>}
 

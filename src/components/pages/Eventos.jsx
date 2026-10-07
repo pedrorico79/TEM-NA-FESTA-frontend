@@ -5,7 +5,9 @@ import BotaoAdicionar from "../shared/botaoAdicionar/BotaoAdicionar";
 import TabelaEventos from "../eventos/TabelaEventos";
 import ModalEditarEvento from "../eventos/ModalEditarEvento";
 import ModalNovoEvento from "../eventos/ModalNovoEvento";
+import ModalVisualizarEvento from "../eventos/ModalVisualizarEvento";
 import Paginacao from "../shared/paginacao/Paginacao";
+import LoadingState from "../shared/LoadingState";
 import { api } from "../../services/api";
 import ModalConfirmacao from "../shared/modal/ModalConfirmacao";
 import "../css/Eventos.css";
@@ -16,22 +18,34 @@ function Eventos() {
     const [modalNovoOpen, setModalNovoOpen] = useState(false);
     const [eventoSelecionado, setEventoSelecionado] = useState(null);
     const [mensagemSucesso, setMensagemSucesso] = useState("");
+    const [mensagemErro, setMensagemErro] = useState("");
     const [paginaAtual, setPaginaAtual] = useState(1);
     const [modalConfirmacaoOpen, setModalConfirmacaoOpen] = useState(false);
     const [eventoConfirmacao, setEventoConfirmacao] = useState(null);
     const [eventoRemocao, setEventoRemocao] = useState(null);
     const [busca, setBusca] = useState("");
+    const [carregandoEventos, setCarregandoEventos] = useState(true);
+    const [erroEventos, setErroEventos] = useState("");
+    const [eventoVisualizado, setEventoVisualizado] = useState(null);
+    const [modalVisualizarOpen, setModalVisualizarOpen] = useState(false);
+    const [carregandoDetalhe, setCarregandoDetalhe] = useState(false);
+    const [erroDetalhe, setErroDetalhe] = useState("");
 
     const eventosPorPagina = 7;
 
     function buscarEventos() {
+        setCarregandoEventos(true);
+        setErroEventos("");
         api.get("/eventos")
             .then((response) => {
-                console.log("Eventos recebidos:", response.data);
-                setEventos(response.data);
+                setEventos(Array.isArray(response.data) ? response.data : []);
             })
             .catch((erro) => {
                 console.error("ERRO AO BUSCAR EVENTOS:", erro);
+                setErroEventos(erro.response?.data?.message || "Não foi possível carregar os eventos.");
+            })
+            .finally(() => {
+                setCarregandoEventos(false);
             });
     }
 
@@ -65,6 +79,10 @@ function Eventos() {
         indiceInicial + eventosPorPagina
     );
 
+    useEffect(() => {
+        if (paginaAtual > totalPaginas) setPaginaAtual(totalPaginas);
+    }, [paginaAtual, totalPaginas]);
+
     function cadastrarEvento(evento) {
         return api.post("/eventos", evento)
             .then((response) => {
@@ -85,6 +103,21 @@ function Eventos() {
     function abrirModalEditar(evento) {
         setEventoSelecionado(evento);
         setModalOpen(true);
+    }
+
+    function abrirModalVisualizar(evento) {
+        setEventoVisualizado(evento);
+        setModalVisualizarOpen(true);
+        setCarregandoDetalhe(true);
+        setErroDetalhe("");
+
+        api.get(`/eventos/${evento.id}`)
+            .then((response) => setEventoVisualizado(response.data))
+            .catch((erro) => {
+                console.error("ERRO AO BUSCAR DETALHES DO EVENTO:", erro);
+                setErroDetalhe(erro.response?.data?.message || "Não foi possível carregar os detalhes do evento.");
+            })
+            .finally(() => setCarregandoDetalhe(false));
     }
 
     function editarEvento(evento) {
@@ -127,7 +160,8 @@ function Eventos() {
             })
             .catch((erro) => {
                 console.error("ERRO AO REMOVER EVENTO:", erro);
-                alert("Erro ao remover evento.");
+                setMensagemErro(erro.response?.data?.message || "Não foi possível remover o evento.");
+                setTimeout(() => setMensagemErro(""), 3000);
             });
     }
 
@@ -139,14 +173,17 @@ function Eventos() {
     function confirmarAlteracaoStatus() {
         const novoStatus = !eventoConfirmacao.ativo;
 
-        api.patch(
+        return api.patch(
             `/eventos/${eventoConfirmacao.id}`,
             {
                 ativo: novoStatus
             }
         )
-            .then(() => {
-                buscarEventos();
+            .then((response) => {
+                const eventoAtualizado = response.data;
+                setEventos((atuais) => atuais.map((evento) =>
+                    evento.id === eventoAtualizado.id ? eventoAtualizado : evento
+                ));
 
                 setModalConfirmacaoOpen(false);
 
@@ -166,6 +203,8 @@ function Eventos() {
                     "ERRO BACKEND:",
                     erro.response?.data
                 );
+                setMensagemErro(erro.response?.data?.message || "Não foi possível alterar o status do evento.");
+                setTimeout(() => setMensagemErro(""), 3000);
             });
     }
 
@@ -178,9 +217,15 @@ function Eventos() {
                 </div>
             )}
 
+            {mensagemErro && (
+                <div className="mensagem-erro-evento" role="alert">
+                    {mensagemErro}
+                </div>
+            )}
+
             <Menu active="eventos" />
 
-            <div className="eventos-content">
+            <main className="eventos-content">
 
                 <h1>Gestão de Eventos</h1>
 
@@ -205,38 +250,40 @@ function Eventos() {
 
                     </div>
 
-                    <TabelaEventos
-                        eventos={eventosPaginados}
-                        onEditar={abrirModalEditar}
-                        onAlterarStatus={alterarStatus}
-                        onRemover={abrirModalRemover}
-                    />
+                    {carregandoEventos ? (
+                        <LoadingState className="eventos-estado" label="Carregando eventos…" />
+                    ) : erroEventos ? (
+                        <p className="eventos-estado" role="alert">{erroEventos}</p>
+                    ) : eventosFiltrados.length === 0 ? (
+                        <p className="eventos-estado">
+                            {busca ? "Nenhum evento encontrado para essa busca." : "Nenhum evento cadastrado."}
+                        </p>
+                    ) : (
+                        <>
+                            <TabelaEventos
+                                eventos={eventosPaginados}
+                                onEditar={abrirModalEditar}
+                                onAlterarStatus={alterarStatus}
+                                onRemover={abrirModalRemover}
+                                onVisualizar={abrirModalVisualizar}
+                            />
 
-                    <Paginacao
-                        paginaAtual={paginaAtual}
-                        totalPaginas={totalPaginas}
-                        onAnterior={() =>
-                            setPaginaAtual((pagina) =>
-                                Math.max(1, pagina - 1)
-                            )
-                        }
-                        onProximo={() =>
-                            setPaginaAtual((pagina) =>
-                                Math.min(
-                                    totalPaginas,
-                                    pagina + 1
-                                )
-                            )
-                        }
-                    />
+                            <Paginacao
+                                paginaAtual={paginaAtual}
+                                totalPaginas={totalPaginas}
+                                onAnterior={() => setPaginaAtual((pagina) => Math.max(1, pagina - 1))}
+                                onProximo={() => setPaginaAtual((pagina) => Math.min(totalPaginas, pagina + 1))}
+                            />
+                        </>
+                    )}
 
                 </div>
 
-            </div>
+            </main>
 
             <ModalEditarEvento
                 open={modalOpen}
-                evento={eventoSelecionado}
+                Evento={eventoSelecionado}
                 onClose={() => setModalOpen(false)}
                 onSalvar={editarEvento}
                 onSucesso={() => {
@@ -263,6 +310,14 @@ function Eventos() {
                         setMensagemSucesso("");
                     }, 3000);
                 }}
+            />
+
+            <ModalVisualizarEvento
+                open={modalVisualizarOpen}
+                evento={eventoVisualizado}
+                carregando={carregandoDetalhe}
+                erro={erroDetalhe}
+                onClose={() => setModalVisualizarOpen(false)}
             />
 
             <ModalConfirmacao

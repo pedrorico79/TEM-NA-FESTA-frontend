@@ -45,6 +45,11 @@ function ModalVisualizarProduto({
 
                     </div>
 
+                    <div className="modal-actions">
+                        <button type="button" className="secondary-button" onClick={onClose}>
+                            Fechar
+                        </button>
+                    </div>
 
                 </div>
             )}

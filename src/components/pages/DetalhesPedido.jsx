@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import Menu from "../shared/menu/Menu";
+import LoadingState from "../shared/LoadingState";
 
 import DadosCliente from "../detalhesPedido/DadosCliente";
 import EnderecoPedido from "../detalhesPedido/EnderecoPedido";
@@ -397,7 +398,7 @@ function DetalhesPedido() {
                 <Menu active="pedidos" />
 
                 <div className="produtos-content pedido-detalhes-container">
-                    <h1>Carregando pedido...</h1>
+                    <LoadingState label="Carregando pedido…" />
                 </div>
             </div>
         );
@@ -646,6 +647,7 @@ function DetalhesPedido() {
                             type="date"
                             min={dataLocalParaInput(new Date())}
                             value={dataRetiradaEditada}
+                            onClick={(e) => e.currentTarget.showPicker?.()}
                             onChange={(e) => setDataRetiradaEditada(e.target.value)}
                             required
                         />

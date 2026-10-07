@@ -5,8 +5,7 @@ function ModalNovoEvento(props) {
     const [novoEvento, setNovoEvento] = useState({
         nome: "",
         dataInicio: "",
-        dataFim: "",
-        ativa: true
+        dataFim: ""
     });
 
     function handleChange(e) {
@@ -28,8 +27,7 @@ function ModalNovoEvento(props) {
         props.onSalvar({
             nome: novoEvento.nome,
             dataInicio: novoEvento.dataInicio,
-            dataFim: novoEvento.dataFim,
-            ativa: true
+            dataFim: novoEvento.dataFim
         })
             .then(() => {
                 setNovoEvento({

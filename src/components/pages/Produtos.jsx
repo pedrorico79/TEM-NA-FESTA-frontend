@@ -7,6 +7,7 @@ import TabelaProdutos from "../produtos/TabelaProdutos";
 import ModalEditarProduto from "../produtos/ModalEditarProduto";
 import ModalNovoProduto from "../produtos/ModalNovoProduto";
 import Paginacao from "../shared/paginacao/Paginacao";
+import LoadingState from "../shared/LoadingState";
 import { api } from "../../services/api";
 import ModalConfirmacao from "../shared/modal/ModalConfirmacao";
 import ModalVisualizarProduto from "../produtos/ModalVisualizarProduto";
@@ -236,7 +237,7 @@ function Produtos() {
                     </div>
 
                     {carregandoProdutos ? (
-                        <p className="produtos-vazio" role="status">Carregando produtos…</p>
+                        <LoadingState className="produtos-vazio" label="Carregando produtos…" />
                     ) : erroProdutos ? (
                         <p className="produtos-vazio" role="alert">{erroProdutos}</p>
                     ) : produtosPaginados.length > 0 ? (
