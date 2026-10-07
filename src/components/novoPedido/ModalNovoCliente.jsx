@@ -1,5 +1,6 @@
 import Modal from "../shared/modal/Modal";
 import { useState } from "react";
+import { aplicarMascaraTelefone } from "../../utils/telefone";
 
 function ModalNovoCliente(props) {
 
@@ -24,9 +25,13 @@ function ModalNovoCliente(props) {
     const cliente = novoCliente;
 
     const handleChange = (campo, valor) => {
+        const valorFormatado = ["telefone", "whatsapp"].includes(campo)
+            ? aplicarMascaraTelefone(valor)
+            : valor;
+
         setNovoCliente({
         ...cliente,
-        [campo]: valor,
+        [campo]: valorFormatado,
     });
     };
 
@@ -67,6 +72,8 @@ function ModalNovoCliente(props) {
                     <label>Telefone</label>
 
                     <input
+                        type="tel"
+                        inputMode="tel"
                         value={cliente.telefone}
                         onChange={(e) =>
                             handleChange("telefone", e.target.value)
@@ -78,6 +85,8 @@ function ModalNovoCliente(props) {
                     <label>WhatsApp</label>
 
                     <input
+                        type="tel"
+                        inputMode="tel"
                         value={cliente.whatsapp}
                     onChange={(e) =>
                         handleChange("whatsapp", e.target.value)

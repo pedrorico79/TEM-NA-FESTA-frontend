@@ -12,7 +12,7 @@ function TabelaProdutosVendidos(props) {
 
     const data = (props.produtos || []).map((produto, index) => [
         index + 1,
-        produto.item,
+        <span className="relatorio-produto-item" title={produto.item}>{produto.item}</span>,
         produto.qtdeVendida,
         `R$ ${produto.faturamento}`,
         `${produto.porcentagemDoTotal}%`
@@ -23,7 +23,7 @@ function TabelaProdutosVendidos(props) {
 
             <h2>Produtos Mais Vendidos</h2>
 
-            <div className="relatorio-tabela-wrapper">
+            <div className="relatorio-tabela-wrapper relatorio-produtos-tabela-wrapper">
 
                 <Tabela
                     columns={columns}

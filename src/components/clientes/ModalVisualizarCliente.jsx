@@ -1,4 +1,5 @@
 import Modal from "../shared/modal/Modal";
+import { formatarTelefone } from "../../utils/telefone";
 
 function ModalVisualizarCliente({
     open,
@@ -24,14 +25,23 @@ function ModalVisualizarCliente({
 
                         <div className="cliente-detalhe">
                             <strong>Telefone</strong>
-                            <p>{cliente.telefone || "-"}</p>
+                            <p>{formatarTelefone(cliente.telefone) || "-"}</p>
                         </div>
 
                         <div className="cliente-detalhe">
                             <strong>WhatsApp</strong>
-                            <p>{cliente.whatsapp || "-"}</p>
+                            <p>{formatarTelefone(cliente.whatsapp) || "-"}</p>
                         </div>
 
+                    </div>
+
+                    <div className="cliente-detalhe">
+                        <strong>Cliente desde</strong>
+                        <p>
+                            {cliente.dataCadastro
+                                ? new Date(`${cliente.dataCadastro}T00:00:00`).toLocaleDateString("pt-BR")
+                                : "-"}
+                        </p>
                     </div>
 
                     <div className="form-grid">
@@ -44,7 +54,7 @@ function ModalVisualizarCliente({
                         <div className="cliente-detalhe">
                             <strong>Status</strong>
                             <p>
-                                {cliente.isAtivo
+                                {cliente.ativo
                                     ? "Ativo"
                                     : "Inativo"}
                             </p>
@@ -68,7 +78,7 @@ function ModalVisualizarCliente({
                                     cliente.endereco.cidade || ""
                                 } - ${
                                     cliente.endereco.estado || ""
-                                }`
+                                } · CEP ${cliente.endereco.cep || "-"}`
                                 : "-"}
                         </p>
                     </div>

@@ -1,4 +1,3 @@
-import React from "react";
 import BotaoAdicionar from "../shared/botaoAdicionar/BotaoAdicionar";
 
 function PagamentosPedido({ pagamentos, totalAPagar, totalPago }) {

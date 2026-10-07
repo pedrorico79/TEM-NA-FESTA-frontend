@@ -1,4 +1,4 @@
-import KPI from "../shared/KPI/KPI";
+import KPI from "../shared/kpi/Kpi";
 
 function KpiSection(props) {
   return (

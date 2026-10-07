@@ -29,7 +29,10 @@ function ModalVisualizarProduto({
                         <div className="produto-detalhe">
                             <strong>Valor</strong>
                             <p>
-                                R$ {produto.precoVenda?.toFixed(2) || "0,00"}
+                                {Number(produto.precoVenda || 0).toLocaleString("pt-BR", {
+                                    style: "currency",
+                                    currency: "BRL",
+                                })}
                             </p>
                         </div>
 

@@ -1,5 +1,6 @@
-.layout {
+.relatorios-layout {
     display: flex;
+    width: 100%;
     min-height: 100vh;
 }
 
@@ -53,6 +54,15 @@
     gap: 24px;
 }
 
+.grafico-relatorio-wrapper {
+    width: 100%;
+    margin: 0;
+}
+
+.grafico-relatorio-wrapper .recharts-responsive-container {
+    width: 100% !important;
+}
+
 .filtros-relatorio {
     display: flex;
     align-items: center;
@@ -61,6 +71,18 @@
     background: white;
     border: 1px solid #e7e0da;
     border-radius: 12px;
+}
+
+.relatorio-erro-filtro {
+    margin: -14px 0 0;
+    color: #b42318;
+    font-size: 14px;
+}
+
+.relatorio-carregando,
+.relatorio-estado-vazio {
+    margin: 0;
+    color: #756b67;
 }
 
 .filtros-relatorio button {
@@ -97,16 +119,82 @@
     outline: none;
 }
 
+.filtros-relatorio .filtro-dropdown {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+    min-width: 180px;
+    max-width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #e7e0da;
+    border-radius: 10px;
+    background: white;
+    color: #2c2421;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.filtros-relatorio .filtro-dropdown span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.filtros-relatorio .filtro-dropdown ion-icon {
+    flex: 0 0 auto;
+    margin-left: 8px;
+    font-size: 18px;
+}
+
+.filtro-dropdown-menu {
+    position: fixed;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow-y: auto;
+    padding: 6px;
+    border: 1px solid #e7e0da;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 8px 24px rgba(46, 28, 22, 0.18);
+}
+
+.filtro-dropdown-menu button {
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #2c2421;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.filtro-dropdown-menu button:hover,
+.filtro-dropdown-menu button.selecionado {
+    background: #f7f4f2;
+}
+
 .filtros-relatorio select:focus,
 .filtros-relatorio input:focus {
     border-color: #6f432a;
+}
+
+.filtros-relatorio input[aria-invalid="true"] {
+    border-color: #b42318;
 }
 
 .relatorio-tabela-wrapper {
     width: 100%;
     overflow-x: auto;
     overflow-y: auto;
-    max-height: 350px;
+    max-height: 240px;
     -webkit-overflow-scrolling: touch;
     margin-top: 15px;
     border-radius: 16px;
@@ -121,6 +209,12 @@
     white-space: normal;
     table-layout: fixed;
     margin: 0;
+}
+
+.relatorio-tabela-wrapper table tr,
+.relatorio-tabela-wrapper table th,
+.relatorio-tabela-wrapper table td {
+    cursor: default;
 }
 
 .relatorio-tabela-wrapper th,
@@ -140,7 +234,23 @@
     }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
+    .relatorios .relatorio-pedidos-produtos {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .relatorios-layout {
+        display: block;
+        width: 100%;
+    }
+
+    .relatorios {
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0;
+        padding: 84px 24px 32px;
+    }
+
     .filtros-relatorio {
         flex-wrap: wrap;
     }
@@ -148,11 +258,141 @@
 
 @media (max-width: 768px) {
     .kpis {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
     }
 
     .relatorios {
+        padding: 80px 16px 28px;
+        gap: 18px;
+    }
+
+    .relatorios h1 {
+        font-size: clamp(32px, 8vw, 40px);
+        line-height: 1.15;
+    }
+
+    .filtros-relatorio {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        padding: 12px;
+        border-radius: 18px;
+    }
+
+    .filtros-relatorio button {
+        width: 100%;
+        min-width: 0;
+        justify-content: center;
+        padding: 0 8px;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .filtros-relatorio > span {
+        align-self: center;
+        min-width: 0;
+        font-size: 13px;
+    }
+
+    .filtros-relatorio select,
+    .filtros-relatorio input {
+        width: 100%;
+        min-width: 0;
+        height: 38px;
+        padding: 0 8px;
+        font-size: 13px;
+    }
+
+    .relatorios .relatorio-pedidos-produtos {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+    }
+
+    .card-relatorio {
         padding: 16px;
+        border-radius: 18px;
+    }
+
+    .card-relatorio h2 {
+        margin-bottom: 14px;
+        font-size: 20px;
+    }
+
+    .kpis .kpi-card {
+        min-width: 0;
+        padding: 14px;
+        border-radius: 18px;
+    }
+
+    .kpis .kpi-card h3 {
+        height: auto;
+        min-height: 34px;
+        font-size: 12px;
+    }
+
+    .kpis .kpi-card h2 {
+        font-size: clamp(22px, 6vw, 30px);
+    }
+
+    .kpis .kpi-card p {
+        font-size: 12px;
+        line-height: 1.35;
+    }
+
+    .relatorio-tabela-wrapper {
+        max-height: 300px;
+        overflow-x: auto;
+    }
+
+    .relatorio-tabela-wrapper table {
+        min-width: 610px;
+    }
+
+    .relatorio-produtos-tabela-wrapper {
+        max-height: 300px;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .relatorio-tabela-wrapper th,
+    .relatorio-tabela-wrapper td {
+        padding: 10px 8px;
+        font-size: 13px;
+    }
+
+    .relatorio-erro-filtro {
+        margin-top: -10px;
+        font-size: 13px;
+    }
+
+    .relatorio-carregando,
+    .relatorio-estado-vazio {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 380px) {
+    .relatorios {
+        padding-right: 12px;
+        padding-left: 12px;
+    }
+
+    .filtros-relatorio {
+        gap: 8px;
+        padding: 10px;
+    }
+
+    .filtros-relatorio button {
+        font-size: 12px;
+    }
+
+    .kpis {
+        gap: 8px;
+    }
+
+    .kpis .kpi-card {
+        padding: 11px;
     }
 }
 
@@ -244,4 +484,100 @@ width: 100%;
 
 .relatorio-pedidos-produtos .card-relatorio {
 min-width: 0;
+}
+
+@media (max-width: 768px) {
+    .relatorio-eventos-tabela-wrapper {
+        overflow-x: hidden;
+    }
+
+    .relatorio-eventos-tabela-wrapper table {
+        width: 100% !important;
+        min-width: 0 !important;
+        table-layout: fixed;
+    }
+
+    .relatorio-eventos-tabela-wrapper th,
+    .relatorio-eventos-tabela-wrapper td {
+        padding: 8px 4px;
+        font-size: 11px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .relatorio-eventos-tabela-wrapper th:nth-child(1),
+    .relatorio-eventos-tabela-wrapper td:nth-child(1) {
+        width: 34%;
+    }
+
+    .relatorio-eventos-tabela-wrapper th:nth-child(2),
+    .relatorio-eventos-tabela-wrapper td:nth-child(2) {
+        width: 16%;
+    }
+
+    .relatorio-eventos-tabela-wrapper th:nth-child(3),
+    .relatorio-eventos-tabela-wrapper td:nth-child(3) {
+        width: 25%;
+    }
+
+    .relatorio-eventos-tabela-wrapper th:nth-child(4),
+    .relatorio-eventos-tabela-wrapper td:nth-child(4) {
+        width: 25%;
+    }
+
+    .relatorio-pedidos-produtos .card-relatorio:nth-of-type(2) .relatorio-produtos-tabela-wrapper {
+        overflow-x: hidden;
+    }
+
+    .relatorio-pedidos-produtos .card-relatorio:nth-of-type(2) .relatorio-produtos-tabela-wrapper table {
+        width: 100% !important;
+        min-width: 0 !important;
+        table-layout: fixed;
+    }
+
+    .relatorio-pedidos-produtos .card-relatorio:nth-of-type(2) .relatorio-produtos-tabela-wrapper th,
+    .relatorio-pedidos-produtos .card-relatorio:nth-of-type(2) .relatorio-produtos-tabela-wrapper td {
+        padding: 9px 4px;
+        font-size: 12px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .relatorio-pedidos-produtos .card-relatorio:nth-of-type(2) .relatorio-produtos-tabela-wrapper th:nth-child(1),
+    .relatorio-pedidos-produtos .card-relatorio:nth-of-type(2) .relatorio-produtos-tabela-wrapper td:nth-child(1) {
+        width: 12%;
+    }
+
+    .relatorio-pedidos-produtos .card-relatorio:nth-of-type(2) .relatorio-produtos-tabela-wrapper th:nth-child(2),
+    .relatorio-pedidos-produtos .card-relatorio:nth-of-type(2) .relatorio-produtos-tabela-wrapper td:nth-child(2) {
+        width: 32%;
+        max-width: none;
+        white-space: normal;
+    }
+
+    .relatorio-pedidos-produtos .card-relatorio:nth-of-type(2) .relatorio-produtos-tabela-wrapper th:nth-child(3),
+    .relatorio-pedidos-produtos .card-relatorio:nth-of-type(2) .relatorio-produtos-tabela-wrapper td:nth-child(3) {
+        width: 18%;
+    }
+
+    .relatorio-pedidos-produtos .card-relatorio:nth-of-type(2) .relatorio-produtos-tabela-wrapper th:nth-child(4),
+    .relatorio-pedidos-produtos .card-relatorio:nth-of-type(2) .relatorio-produtos-tabela-wrapper td:nth-child(4) {
+        width: 19%;
+    }
+
+    .relatorio-pedidos-produtos .card-relatorio:nth-of-type(2) .relatorio-produtos-tabela-wrapper th:nth-child(5),
+    .relatorio-pedidos-produtos .card-relatorio:nth-of-type(2) .relatorio-produtos-tabela-wrapper td:nth-child(5) {
+        width: 19%;
+    }
+
+    .relatorio-produto-item {
+        display: -webkit-box;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-height: 1.25;
+        white-space: normal;
+    }
 }

@@ -78,7 +78,7 @@ function CardPedido({ pedido }) {
 
                 <span>
                     <ion-icon name="archive-outline"></ion-icon>
-                    {pedido.itens} itens
+                    {pedido.itens} {pedido.itens === 1 ? "item" : "itens"}
                 </span>
 
                 <span>

@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import Menu from "../shared/Menu/Menu";
+import Menu from "../shared/menu/Menu";
 import BotaoAdicionar from "../shared/botaoAdicionar/BotaoAdicionar";
 import HeaderPedidos from "../pedidos/HeaderPedidos";
 import FiltrosPedidos from "../pedidos/FiltrosPedidos";
 import ListaPedidos from "../pedidos/ListaPedidos";
+import Paginacao from "../shared/paginacao/Paginacao";
 
 import { api } from "../../services/api";
 
@@ -13,6 +14,9 @@ import "../css/Pedidos.css";
 
 function Pedidos() {
   const navigate = useNavigate();
+
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  
 
   const [busca, setBusca] = useState("");
   const [statusFiltro, setStatusFiltro] = useState("TODOS");
@@ -23,96 +27,99 @@ function Pedidos() {
   // Começa sempre na visualização em grade
   const [modoVisualizacao, setModoVisualizacao] = useState("grid");
 
+  const itensPorPagina = modoVisualizacao === "list" ? 8 : 6;
+
+  useEffect(() => {
+  setPaginaAtual(1);
+}, [modoVisualizacao]);
+
   const [pedidos, setPedidos] = useState([]);
   const [clientes, setClientes] = useState({});
   const [eventos, setEventos] = useState({});
+  const [opcoesEventos, setOpcoesEventos] = useState([]);
   const [carregando, setCarregando] = useState(true);
 
   const handleNavigate = (path) => {
     navigate(path);
   };
 
-  const buscarPedidos = async () => {
-    try {
-      setCarregando(true);
-
-      const response = await api.get("/pedidos");
-
-      const pedidosRecebidos = response.data ?? [];
-
-      setPedidos(pedidosRecebidos);
-
-      // Pega apenas os IDs dos clientes
-      const clienteIds = [
-        ...new Set(
-          pedidosRecebidos
-            .map((pedido) => pedido.clienteId)
-            .filter((id) => id != null)
-        )
-      ];
-
-      // Pega apenas os IDs dos eventos
-      const eventoIds = [
-        ...new Set(
-          pedidosRecebidos
-            .map((pedido) => pedido.eventoId)
-            .filter((id) => id != null)
-        )
-      ];
-
-      // Busca os clientes
-      const clientesMap = {};
-
-      await Promise.all(
-        clienteIds.map(async (clienteId) => {
-          try {
-            const clienteResponse = await api.get(
-              `/clientes/${clienteId}`
-            );
-
-            clientesMap[clienteId] = clienteResponse.data;
-          } catch (error) {
-            console.error(
-              `Erro ao buscar cliente ${clienteId}:`,
-              error
-            );
-          }
-        })
-      );
-
-      // Busca os eventos
-      const eventosMap = {};
-
-      await Promise.all(
-        eventoIds.map(async (eventoId) => {
-          try {
-            const eventoResponse = await api.get(
-              `/eventos/${eventoId}`
-            );
-
-            eventosMap[eventoId] = eventoResponse.data;
-          } catch (error) {
-            console.error(
-              `Erro ao buscar evento ${eventoId}:`,
-              error
-            );
-          }
-        })
-      );
-
-      setClientes(clientesMap);
-      setEventos(eventosMap);
-    } catch (error) {
-      console.error("Erro ao buscar pedidos:", error);
-      setPedidos([]);
-    } finally {
-      setCarregando(false);
-    }
-  };
+  useEffect(() => {
+    api.get("/eventos")
+      .then((response) => {
+        const listaEventos = response.data ?? [];
+        setOpcoesEventos(listaEventos);
+        setEventos(
+          Object.fromEntries(
+            listaEventos.map((evento) => [evento.id, evento])
+          )
+        );
+      })
+      .catch((error) => console.error("Erro ao buscar eventos:", error));
+  }, []);
 
   useEffect(() => {
-    buscarPedidos();
-  }, []);
+    let ativa = true;
+    const timer = setTimeout(async () => {
+      try {
+        setCarregando(true);
+
+        const params = {};
+        const buscaNormalizada = busca.trim().replace(/^#/, "");
+        if (buscaNormalizada) params.busca = buscaNormalizada;
+        if (statusFiltro !== "TODOS") params.status = statusFiltro;
+        if (eventoFiltro !== "TODOS") params.evento = eventoFiltro;
+
+        const response = await api.get("/pedidos", { params });
+        const pedidosRecebidos = response.data ?? [];
+        if (!ativa) return;
+
+        setPedidos(pedidosRecebidos);
+
+        const clienteIds = [
+          ...new Set(
+            pedidosRecebidos
+              .map((pedido) => pedido.clienteId)
+              .filter((id) => id != null)
+          )
+        ];
+
+        const clientesMap = {};
+
+        await Promise.all(
+          clienteIds.map(async (clienteId) => {
+            try {
+              const clienteResponse = await api.get(
+                `/clientes/${clienteId}`
+              );
+
+              clientesMap[clienteId] = clienteResponse.data;
+            } catch (error) {
+              console.error(
+                `Erro ao buscar cliente ${clienteId}:`,
+                error
+              );
+            }
+          })
+        );
+
+        if (ativa) {
+          setClientes(clientesMap);
+        }
+      } catch (error) {
+        if (ativa) {
+          console.error("Erro ao buscar pedidos:", error);
+          setPedidos([]);
+        }
+      } finally {
+        if (ativa) setCarregando(false);
+      }
+    }, busca.trim() ? 300 : 0);
+
+    return () => {
+      ativa = false;
+      clearTimeout(timer);
+    };
+  }, [busca, statusFiltro, eventoFiltro]);
 
   const formatarData = (data) => {
     if (!data) return "";
@@ -194,73 +201,43 @@ function Pedidos() {
     };
   });
 
-  const pedidosFiltrados = [...pedidosFormatados]
-    .filter((pedido) => {
-      const textoBusca = busca
-        .toLowerCase()
-        .trim();
+  const pedidosFiltrados = [...pedidosFormatados].sort((a, b) => {
+    if (ordem === "PEDIDO") {
+      const numeroA = Number(a.id.replace("#", ""));
+      const numeroB = Number(b.id.replace("#", ""));
 
-      const correspondeBusca =
-        pedido.cliente
-          .toLowerCase()
-          .includes(textoBusca) ||
-        pedido.id
-          .toLowerCase()
-          .includes(textoBusca);
+      return ordemCrescente
+        ? numeroA - numeroB
+        : numeroB - numeroA;
+    }
 
-      const correspondeStatus =
-        statusFiltro === "TODOS" ||
-        pedido.status === statusFiltro;
+    if (ordem === "CLIENTE") {
+      const resultado = a.cliente.localeCompare(b.cliente, "pt-BR");
 
-      const correspondeEvento =
-        eventoFiltro === "TODOS" ||
-        pedido.campanha === eventoFiltro;
+      return ordemCrescente ? resultado : -resultado;
+    }
 
-      return (
-        correspondeBusca &&
-        correspondeStatus &&
-        correspondeEvento
-      );
-    })
-    .sort((a, b) => {
-      if (ordem === "PEDIDO") {
-        const numeroA = Number(
-          a.id.replace("#", "")
-        );
+    if (ordem === "EVENTO") {
+      const resultado = a.campanha.localeCompare(b.campanha, "pt-BR");
 
-        const numeroB = Number(
-          b.id.replace("#", "")
-        );
+      return ordemCrescente ? resultado : -resultado;
+    }
 
-        return ordemCrescente
-          ? numeroA - numeroB
-          : numeroB - numeroA;
-      }
+    return 0;
+  });
 
-      if (ordem === "CLIENTE") {
-        const resultado = a.cliente.localeCompare(
-          b.cliente,
-          "pt-BR"
-        );
+  const totalPaginas = Math.ceil(
+    pedidosFiltrados.length / itensPorPagina
+  );
 
-        return ordemCrescente
-          ? resultado
-          : -resultado;
-      }
+  const indiceInicial = (paginaAtual - 1) * itensPorPagina;
 
-      if (ordem === "EVENTO") {
-        const resultado = a.campanha.localeCompare(
-          b.campanha,
-          "pt-BR"
-        );
+  const indiceFinal = indiceInicial + itensPorPagina;
 
-        return ordemCrescente
-          ? resultado
-          : -resultado;
-      }
-
-      return 0;
-    });
+  const pedidosPaginados = pedidosFiltrados.slice(
+    indiceInicial,
+    indiceFinal
+  );
 
   return (
     <div className="pedidos-layout">
@@ -273,9 +250,6 @@ function Pedidos() {
           <BotaoAdicionar
             text="Novo Pedido"
             size="small"
-            style={{
-              marginTop: "40px"
-            }}
             onClick={() =>
               handleNavigate("/NovoPedido")
             }
@@ -284,27 +258,59 @@ function Pedidos() {
 
         <FiltrosPedidos
           busca={busca}
-          setBusca={setBusca}
+          setBusca={(valor) => {
+            setBusca(valor);
+            setPaginaAtual(1);
+          }}
           statusFiltro={statusFiltro}
-          setStatusFiltro={setStatusFiltro}
+          setStatusFiltro={(valor) => {
+            setStatusFiltro(valor);
+            setPaginaAtual(1);
+          }}
           eventoFiltro={eventoFiltro}
-          setEventoFiltro={setEventoFiltro}
+          setEventoFiltro={(valor) => {
+            setEventoFiltro(valor);
+            setPaginaAtual(1);
+          }}
+          limparFiltros={() => {
+            setBusca("");
+            setStatusFiltro("TODOS");
+            setEventoFiltro("TODOS");
+            setOrdem("PEDIDO");
+            setOrdemCrescente(true);
+            setPaginaAtual(1);
+          }}
           ordem={ordem}
           setOrdem={setOrdem}
           ordemCrescente={ordemCrescente}
           setOrdemCrescente={setOrdemCrescente}
           modoVisualizacao={modoVisualizacao}
           setModoVisualizacao={setModoVisualizacao}
-          pedidos={pedidosFormatados}
+          eventosDisponiveis={opcoesEventos}
         />
 
         {carregando ? (
           <p>Carregando pedidos...</p>
+        ) : pedidosFiltrados.length === 0 ? (
+          <p className="pedidos-vazio">Nenhum pedido encontrado.</p>
         ) : (
-          <ListaPedidos
-            pedidos={pedidosFiltrados}
-            modoVisualizacao={modoVisualizacao}
-          />
+          <>
+            <ListaPedidos
+              pedidos={pedidosPaginados}
+              modoVisualizacao={modoVisualizacao}
+            />
+
+            <Paginacao
+              paginaAtual={paginaAtual}
+              totalPaginas={totalPaginas}
+              onAnterior={() =>
+                setPaginaAtual(paginaAtual - 1)
+              }
+              onProximo={() =>
+                setPaginaAtual(paginaAtual + 1)
+              }
+            />
+          </>
         )}
       </main>
     </div>
@@ -312,4 +318,3 @@ function Pedidos() {
 }
 
 export default Pedidos;
-

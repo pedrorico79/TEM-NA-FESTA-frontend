@@ -79,6 +79,7 @@ function ModalEditarEvento(props) {
                             name="dataInicio"
                             value={EventoEditado.dataInicio}
                             onChange={handleChange}
+                            onClick={(e) => e.currentTarget.showPicker?.()}
                         />
                     </div>
 
@@ -89,6 +90,7 @@ function ModalEditarEvento(props) {
                             name="dataFim"
                             value={EventoEditado.dataFim}
                             onChange={handleChange}
+                            onClick={(e) => e.currentTarget.showPicker?.()}
                         />
                     </div>
 

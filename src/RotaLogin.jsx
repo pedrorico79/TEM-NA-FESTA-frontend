@@ -13,7 +13,7 @@ function RotaLogin() {
                 await api.get("/usuarios/me");
 
                 setAutenticado(true);
-            } catch (error) {
+            } catch{
                 setAutenticado(false);
             } finally {
                 setCarregando(false);

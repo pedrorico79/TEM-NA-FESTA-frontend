@@ -1,8 +1,9 @@
 import ModalCriarLembrete from "./ModalCriarLembrete";
 import ModalEditarLembrete from "./ModalEditarLembrete";
 import ModalExcluirLembrete from "./ModalExcluirLembrete";
+import ModalVisualizarLembrete from "./ModalVisualizarLembrete";
 import ItemCardLembrete from "./ItemCardLembrete";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function CardLembrete(props) {
 
@@ -12,12 +13,21 @@ function CardLembrete(props) {
 
   const [openModalExcluir, setOpenModalExcluir] = useState(false);
 
+  const [openModalVisualizar, setOpenModalVisualizar] = useState(false);
+
   const [lembreteSelecionado, setLembreteSelecionado] = useState(null);
+
+  useEffect(() => {
+    if (props.painelAberto === false) {
+      setOpenModal(false);
+    }
+  }, [props.painelAberto]);
 
 
   function formatarData(data) {
-    return new Date(data).toLocaleDateString("pt-BR");
-  }
+  const [ano, mes, dia] = data.split("-");
+  return `${dia}/${mes}/${ano}`;
+}
 
 
   function abrirModalEditar(lembrete) {
@@ -53,6 +63,11 @@ function CardLembrete(props) {
             texto={lembrete.descricao}
 
             data={`Até dia ${formatarData(lembrete.dataLimite)}`}
+
+            onVisualizar={() => {
+              setLembreteSelecionado(lembrete);
+              setOpenModalVisualizar(true);
+            }}
 
             onEditar={() => abrirModalEditar(lembrete)}
 
@@ -115,6 +130,12 @@ function CardLembrete(props) {
 
         deletarLembrete={props.deletarLembrete}
 
+      />
+
+      <ModalVisualizarLembrete
+        open={openModalVisualizar}
+        onClose={() => setOpenModalVisualizar(false)}
+        lembrete={lembreteSelecionado}
       />
 
 

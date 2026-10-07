@@ -1,20 +1,25 @@
 import "../../css/Modal.css";
+import { createPortal } from "react-dom";
 
 function Modal(props) {
+  const variantClass = props.variant ? ` modal-${props.variant}` : "";
 
   if (!props.open) {
     return null;
   }
 
-  return (
+  return createPortal((
     <div
-      className="modal-overlay"
-      onClick={props.onClose}
+      className={`modal-overlay${variantClass}`}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) props.onClose();
+      }}
     >
 
       <div
-        className="modal-content"
+        className={`modal-content${variantClass}`}
         onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
       >
 
         <div className="modal-header">
@@ -32,7 +37,7 @@ function Modal(props) {
       </div>
 
     </div>
-  );
+  ), document.body);
 }
 
 export default Modal;

@@ -1,79 +1,45 @@
 import { useEffect, useState } from "react";
 
-import Menu from "../shared/Menu/Menu";
-
+import Menu from "../shared/menu/Menu";
 import BotaoAdicionar from "../shared/botaoAdicionar/BotaoAdicionar";
-
 import TabelaEventos from "../eventos/TabelaEventos";
-
 import ModalEditarEvento from "../eventos/ModalEditarEvento";
-
 import ModalNovoEvento from "../eventos/ModalNovoEvento";
-
 import Paginacao from "../shared/paginacao/Paginacao";
-
 import { api } from "../../services/api";
-
 import ModalConfirmacao from "../shared/modal/ModalConfirmacao";
-
 import "../css/Eventos.css";
 
 function Eventos() {
-
     const [eventos, setEventos] = useState([]);
-
     const [modalOpen, setModalOpen] = useState(false);
-
     const [modalNovoOpen, setModalNovoOpen] = useState(false);
-
     const [eventoSelecionado, setEventoSelecionado] = useState(null);
-
     const [mensagemSucesso, setMensagemSucesso] = useState("");
-
     const [paginaAtual, setPaginaAtual] = useState(1);
-
     const [modalConfirmacaoOpen, setModalConfirmacaoOpen] = useState(false);
-
     const [eventoConfirmacao, setEventoConfirmacao] = useState(null);
-
     const [eventoRemocao, setEventoRemocao] = useState(null);
-
     const [busca, setBusca] = useState("");
 
     const eventosPorPagina = 7;
 
     function buscarEventos() {
-
-        api.get("/eventos", {
-            params: {
-                apenasAtivas: false
-            }
-        })
-
+        api.get("/eventos")
             .then((response) => {
-
                 console.log("Eventos recebidos:", response.data);
-
                 setEventos(response.data);
-
             })
-
             .catch((erro) => {
-
                 console.error("ERRO AO BUSCAR EVENTOS:", erro);
-
             });
-
     }
 
     useEffect(() => {
-
         buscarEventos();
-
     }, []);
 
     const eventosFiltrados = eventos.filter((evento) => {
-
         const nomeEvento = evento.nome
             ?.toLowerCase()
             .normalize("NFD")
@@ -85,7 +51,6 @@ function Eventos() {
             .replace(/[\u0300-\u036f]/g, "");
 
         return nomeEvento?.includes(buscaNormalizada);
-
     });
 
     const totalPaginas = Math.max(
@@ -101,78 +66,55 @@ function Eventos() {
     );
 
     function cadastrarEvento(evento) {
-
         return api.post("/eventos", evento)
-
             .then((response) => {
-
                 setPaginaAtual(1);
-
                 buscarEventos();
-
                 return response.data;
-
             })
-
             .catch((erro) => {
-
                 console.error("ERRO:", erro);
-
                 console.error(
                     "RESPOSTA DO BACKEND:",
                     erro.response?.data
                 );
-
                 throw erro;
-
             });
-
     }
 
     function abrirModalEditar(evento) {
-
         setEventoSelecionado(evento);
-
         setModalOpen(true);
-
     }
 
     function editarEvento(evento) {
-
-        return api.put(`/eventos/${evento.id}`, evento)
-
+        return api.put(`/eventos/${evento.id}`, {
+            nome: evento.nome,
+            dataInicio: evento.dataInicio,
+            dataFim: evento.dataFim
+        })
             .then((response) => {
-
                 buscarEventos();
-
                 return response.data;
-
             })
-
             .catch((erro) => {
-
-                console.error(erro);
-
+                console.error("ERRO AO EDITAR EVENTO:", erro);
+                console.error(
+                    "RESPOSTA DO BACKEND:",
+                    erro.response?.data
+                );
                 throw erro;
-
             });
-
     }
 
     function abrirModalRemover(evento) {
-
         setEventoRemocao(evento);
-
     }
 
     function removerEvento() {
-
-        api.delete(`/eventos/${eventoRemocao.id}`)
-
+        return api.delete(`/eventos/${eventoRemocao.id}`)
             .then(() => {
-
                 buscarEventos();
-
                 setEventoRemocao(null);
 
                 setMensagemSucesso(
@@ -180,81 +122,60 @@ function Eventos() {
                 );
 
                 setTimeout(() => {
-
                     setMensagemSucesso("");
-
                 }, 3000);
-
             })
-
             .catch((erro) => {
-
-                console.error(erro);
-
+                console.error("ERRO AO REMOVER EVENTO:", erro);
                 alert("Erro ao remover evento.");
-
             });
-
     }
 
     function alterarStatus(evento) {
-
         setEventoConfirmacao(evento);
-
         setModalConfirmacaoOpen(true);
-
     }
 
     function confirmarAlteracaoStatus() {
+        const novoStatus = !eventoConfirmacao.ativo;
 
         api.patch(
-            `/eventos/${eventoConfirmacao.id}/ativo`
+            `/eventos/${eventoConfirmacao.id}`,
+            {
+                ativo: novoStatus
+            }
         )
-
             .then(() => {
-
                 buscarEventos();
 
                 setModalConfirmacaoOpen(false);
 
                 setMensagemSucesso(
-
-                    eventoConfirmacao.ativo
-
-                        ? "Evento desativado com sucesso!"
-
-                        : "Evento ativado com sucesso!"
-
+                    novoStatus
+                        ? "Evento ativado com sucesso!"
+                        : "Evento desativado com sucesso!"
                 );
 
                 setTimeout(() => {
-
                     setMensagemSucesso("");
-
                 }, 3000);
-
             })
-
             .catch((erro) => {
-
-                console.error(erro);
-
+                console.error("STATUS:", erro.response?.status);
+                console.error(
+                    "ERRO BACKEND:",
+                    erro.response?.data
+                );
             });
-
     }
 
     return (
-
         <div className="eventos-layout">
 
             {mensagemSucesso && (
-
                 <div className="mensagem-sucesso">
-
                     {mensagemSucesso}
-
                 </div>
-
             )}
 
             <Menu active="eventos" />
@@ -270,20 +191,15 @@ function Eventos() {
                         <BotaoAdicionar
                             text="Adicionar Novo Evento"
                             size="medium"
-                            onClick={() =>
-                                setModalNovoOpen(true)
-                            }
+                            onClick={() => setModalNovoOpen(true)}
                         />
 
                         <input
                             placeholder="Buscar evento"
                             value={busca}
                             onChange={(e) => {
-
                                 setBusca(e.target.value);
-
                                 setPaginaAtual(1);
-
                             }}
                         />
 
@@ -321,43 +237,31 @@ function Eventos() {
             <ModalEditarEvento
                 open={modalOpen}
                 evento={eventoSelecionado}
-                onClose={() =>
-                    setModalOpen(false)
-                }
+                onClose={() => setModalOpen(false)}
                 onSalvar={editarEvento}
                 onSucesso={() => {
-
                     setMensagemSucesso(
                         "Evento editado com sucesso!"
                     );
 
                     setTimeout(() => {
-
                         setMensagemSucesso("");
-
                     }, 3000);
-
                 }}
             />
 
             <ModalNovoEvento
                 open={modalNovoOpen}
-                onClose={() =>
-                    setModalNovoOpen(false)
-                }
+                onClose={() => setModalNovoOpen(false)}
                 onSalvar={cadastrarEvento}
                 onSucesso={() => {
-
                     setMensagemSucesso(
                         "Evento cadastrado com sucesso!"
                     );
 
                     setTimeout(() => {
-
                         setMensagemSucesso("");
-
                     }, 3000);
-
                 }}
             />
 
@@ -366,9 +270,7 @@ function Eventos() {
                 onClose={() =>
                     setModalConfirmacaoOpen(false)
                 }
-                onConfirmar={
-                    confirmarAlteracaoStatus
-                }
+                onConfirmar={confirmarAlteracaoStatus}
                 mensagem={`Tem certeza que deseja ${
                     eventoConfirmacao?.ativo
                         ? "desativar"
@@ -386,22 +288,17 @@ function Eventos() {
                 onConfirmar={removerEvento}
                 mensagem={
                     <>
-                        Tem certeza que deseja remover
-                        o evento{" "}
+                        Tem certeza que deseja remover o evento{" "}
                         {eventoRemocao?.nome || ""}?
-
                         <br />
                         <br />
-
                         Essa ação não pode ser desfeita.
                     </>
                 }
             />
 
         </div>
-
     );
-
 }
 
 export default Eventos;

@@ -20,13 +20,16 @@ function TabelaPedidosPeriodo(props) {
 
     return (
         <div className="card-relatorio">
-            <h2>Pedidos do Período</h2>
+            <h2>{props.titulo || "Pedidos do Período"}</h2>
 
             <div className="relatorio-tabela-wrapper">
                 <Tabela
                     columns={columns}
                     data={data}
                 />
+                {data.length === 0 && (
+                    <p className="relatorio-estado-vazio">Nenhum pedido encontrado neste filtro.</p>
+                )}
             </div>
         </div>
     );

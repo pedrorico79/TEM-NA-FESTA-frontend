@@ -33,8 +33,17 @@ function ModalEditarProduto(props) {
     function salvar(e) {
         e.preventDefault();
 
-        if (!produtoEditado.nome.trim() || !produtoEditado.precoVenda) {
-            alert("Nome e preço de venda são obrigatórios.");
+        const precoVenda = Number(produtoEditado.precoVenda);
+        if (!produtoEditado.nome.trim()) {
+            alert("O nome do produto é obrigatório.");
+            return;
+        }
+        if (!produtoEditado.precoVenda || !Number.isFinite(precoVenda) || precoVenda <= 0) {
+            alert("O preço de venda deve ser maior que zero.");
+            return;
+        }
+        if (precoVenda > 99999999.99) {
+            alert("O preço deve ter no máximo 8 dígitos inteiros e 2 casas decimais.");
             return;
         }
 
@@ -51,7 +60,7 @@ function ModalEditarProduto(props) {
             })
             .catch((erro) => {
                 console.error(erro);
-                alert("Erro ao editar produto.");
+                alert(erro.response?.data?.message || erro.response?.data?.detail || "Erro ao editar produto.");
             });
     }
 
@@ -70,6 +79,8 @@ function ModalEditarProduto(props) {
                         <input
                             type="text"
                             name="nome"
+                            maxLength={100}
+                            required
                             value={produtoEditado.nome}
                             onChange={handleChange}
                         />
@@ -82,8 +93,11 @@ function ModalEditarProduto(props) {
                             <span>R$</span>
                             <input
                                 type="number"
+                                min="0.01"
+                                max="99999999.99"
                                 step="0.01"
                                 name="precoVenda"
+                                required
                                 value={produtoEditado.precoVenda}
                                 onChange={handleChange}
                             />

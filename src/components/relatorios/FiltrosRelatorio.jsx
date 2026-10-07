@@ -1,49 +1,72 @@
-import { useState } from "react";
+import FiltroDropdown from "../pedidos/FiltroDropdown";
 
 function FiltrosRelatorio(props) {
-
-    const [periodo, setPeriodo] = useState("mes");
-
-    const [tipoFiltro, setTipoFiltro] = useState("periodo");
-
     return (
         <div className="filtros-relatorio">
 
             <button
-                className={tipoFiltro === "evento" ? "active" : ""}
-                onClick={() => setTipoFiltro("evento")}
+                type="button"
+                className={props.tipoFiltro === "evento" ? "active" : ""}
+                aria-pressed={props.tipoFiltro === "evento"}
+                onClick={() => props.setTipoFiltro("evento")}
             >
                 <ion-icon name="pricetag-outline" />
                 Por Evento
             </button>
 
             <button
-                className={tipoFiltro === "periodo" ? "active" : ""}
-                onClick={() => setTipoFiltro("periodo")}
+                type="button"
+                className={props.tipoFiltro === "periodo" ? "active" : ""}
+                aria-pressed={props.tipoFiltro === "periodo"}
+                onClick={() => props.setTipoFiltro("periodo")}
             >
                 <ion-icon name="calendar-outline" />
                 Por Período
             </button>
 
-            <span>Período:</span>
+            {props.tipoFiltro === "periodo" && <>
+                <span>Período:</span>
 
-            <select
-                value={periodo}
-                onChange={(e) => setPeriodo(e.target.value)}
-            >
-                <option value="mes">Últimos 30 dias</option>
-                <option value="6meses">Últimos 6 meses</option>
-                <option value="ano">Este ano</option>
-                <option value="personalizado">Personalizado</option>
-            </select>
+                <FiltroDropdown
+                    value={props.periodo}
+                    onChange={props.onPeriodoChange}
+                    label="Selecionar período"
+                    options={[
+                        { value: "mes", label: "Últimos 30 dias" },
+                        { value: "6meses", label: "Últimos 6 meses" },
+                        { value: "ano", label: "Este ano" },
+                        { value: "personalizado", label: "Personalizado" }
+                    ]}
+                />
+            </>}
 
-            {periodo === "personalizado" && (
+            {props.tipoFiltro === "evento" && (
+                <>
+                    <span>Evento:</span>
+                    <FiltroDropdown
+                        value={props.eventoSelecionado}
+                        onChange={props.setEventoSelecionado}
+                        label="Selecionar evento"
+                        options={[
+                            { value: "", label: "Selecione um evento" },
+                            ...props.eventos.map((evento) => ({
+                                value: String(evento.id),
+                                label: evento.nome
+                            }))
+                        ]}
+                    />
+                </>
+            )}
+
+            {props.tipoFiltro === "periodo" && props.periodo === "personalizado" && (
                 <>
                     <span>De:</span>
 
                     <input
                         type="date"
                         value={props.dataInicial}
+                        aria-invalid={props.intervaloInvalido}
+                        onClick={(e) => e.currentTarget.showPicker?.()}
                         onChange={(e) =>
                             props.setDataInicial(e.target.value)
                         }
@@ -54,6 +77,8 @@ function FiltrosRelatorio(props) {
                     <input
                         type="date"
                         value={props.dataFinal}
+                        aria-invalid={props.intervaloInvalido}
+                        onClick={(e) => e.currentTarget.showPicker?.()}
                         onChange={(e) =>
                             props.setDataFinal(e.target.value)
                         }

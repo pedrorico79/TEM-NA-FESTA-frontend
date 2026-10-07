@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 
 import { api } from "../../services/api";
@@ -25,11 +26,17 @@ function ProximasRetiradas() {
   const navigate = useNavigate();
 
   const [pedidos, setPedidos] = useState([]);
+  const [carregandoRetiradas, setCarregandoRetiradas] = useState(true);
+  const [erroRetiradas, setErroRetiradas] = useState(false);
   const [dias, setDias] = useState(7);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [clientes, setClientes] = useState({});
+  const [diasMenuAberto, setDiasMenuAberto] = useState(false);
+  const [posicaoMenuDias, setPosicaoMenuDias] = useState({ top: 0, left: 0, width: 0 });
+  const seletorDiasRef = useRef(null);
+  const menuDiasRef = useRef(null);
 
-  const ITENS_POR_PAGINA = 7;
+  const ITENS_POR_PAGINA = 4;
 
   const getStatus = (status) => {
 
@@ -97,6 +104,8 @@ function ProximasRetiradas() {
   };
 
   async function buscarProximasRetiradas() {
+    setCarregandoRetiradas(true);
+    setErroRetiradas(false);
     try {
       const response = await api.get("/pedidos/proximas-retiradas", {
         params: {
@@ -148,6 +157,9 @@ function ProximasRetiradas() {
 
       setPedidos([]);
       setClientes({});
+      setErroRetiradas(true);
+    } finally {
+      setCarregandoRetiradas(false);
     }
   }
 
@@ -155,9 +167,67 @@ function ProximasRetiradas() {
     buscarProximasRetiradas();
   }, [dias]);
 
-  function alterarDias(e) {
-    setDias(Number(e.target.value));
+  useEffect(() => {
+    if (!diasMenuAberto) return undefined;
+
+    function fecharAoClicarFora(event) {
+      if (
+        !seletorDiasRef.current?.contains(event.target) &&
+        !menuDiasRef.current?.contains(event.target)
+      ) {
+        setDiasMenuAberto(false);
+      }
+    }
+
+    function fecharComEscape(event) {
+      if (event.key === "Escape") setDiasMenuAberto(false);
+    }
+
+    function fecharAoMoverTela() {
+      setDiasMenuAberto(false);
+    }
+
+    document.addEventListener("pointerdown", fecharAoClicarFora);
+    document.addEventListener("keydown", fecharComEscape);
+    document.addEventListener("scroll", fecharAoMoverTela, true);
+    window.addEventListener("resize", fecharAoMoverTela);
+
+    return () => {
+      document.removeEventListener("pointerdown", fecharAoClicarFora);
+      document.removeEventListener("keydown", fecharComEscape);
+      document.removeEventListener("scroll", fecharAoMoverTela, true);
+      window.removeEventListener("resize", fecharAoMoverTela);
+    };
+  }, [diasMenuAberto]);
+
+  function abrirMenuDias() {
+    if (diasMenuAberto) {
+      setDiasMenuAberto(false);
+      return;
+    }
+
+    const seletor = seletorDiasRef.current;
+    if (!seletor) return;
+
+    const retangulo = seletor.getBoundingClientRect();
+    const alturaMenu = 3 * 44 + 12;
+    const larguraMenu = Math.max(retangulo.width, 140);
+    const left = Math.max(
+      8,
+      Math.min(retangulo.right - larguraMenu, window.innerWidth - larguraMenu - 8)
+    );
+    const top = retangulo.bottom + alturaMenu + 8 <= window.innerHeight
+      ? retangulo.bottom + 6
+      : Math.max(8, retangulo.top - alturaMenu - 6);
+
+    setPosicaoMenuDias({ top, left, width: larguraMenu });
+    setDiasMenuAberto(true);
+  }
+
+  function alterarDias(novosDias) {
+    setDias(Number(novosDias));
     setPaginaAtual(1);
+    setDiasMenuAberto(false);
   }
 
   function irParaPaginaAnterior() {
@@ -282,45 +352,50 @@ function ProximasRetiradas() {
     const itensTexto = formatarItens(pedido.itens);
 
     secao.rows.push([
-      colunaComTooltip(
-        numeroPedido,
-        truncarTexto(
-          numeroPedido,
-          LIMITE_PEDIDO
-        )
-      ),
+  colunaComTooltip(
+    numeroPedido,
+    truncarTexto(numeroPedido, LIMITE_PEDIDO)
+  ),
 
-      colunaComTooltip(
-        nomeCliente,
-        truncarTexto(
-          nomeCliente,
-          LIMITE_CLIENTE
-        )
-      ),
+  <div className="cliente-pedido">
+    <span className="cliente-nome">
+      {truncarTexto(nomeCliente, LIMITE_CLIENTE)}
+    </span>
 
-      colunaComTooltip(
-        itensTexto,
-        truncarTexto(
-          itensTexto,
-          LIMITE_ITENS
-        )
-      ),
+    <div className="status-mobile">
+      {getStatus(pedido.statusProducao)}
 
-      <div className="status-container">
-        {getStatus(pedido.statusProducao)}
+      {pedidoEstaAtrasado(pedido.dataEntrega) && (
+        <span
+          className="aviso-atrasado"
+          title="A retirada deste pedido está atrasada"
+        >
+          ⚠️ Atrasado
+        </span>
+      )}
+    </div>
+  </div>,
 
-        {pedidoEstaAtrasado(pedido.dataEntrega) && (
-          <span
-            className="aviso-atrasado"
-            title="A retirada deste pedido está atrasada"
-          >
-            ⚠️ Atrasado
-          </span>
-        )}
-      </div>,
+  colunaComTooltip(
+    itensTexto,
+    truncarTexto(itensTexto, LIMITE_ITENS)
+  ),
 
-      <ion-icon name="chevron-forward-outline"></ion-icon>
-    ]);
+  <div className="status-desktop">
+    {getStatus(pedido.statusProducao)}
+
+    {pedidoEstaAtrasado(pedido.dataEntrega) && (
+      <span
+        className="aviso-atrasado"
+        title="A retirada deste pedido está atrasada"
+      >
+        ⚠️ Atrasado
+      </span>
+    )}
+  </div>,
+
+  <ion-icon name="chevron-forward-outline"></ion-icon>
+]);
 
     secao.rowIds.push(pedido.id);
 
@@ -359,36 +434,81 @@ function ProximasRetiradas() {
       <div className="retiradas-tempo">
         <h2>Próximas Retiradas</h2>
 
-        <select
-          value={dias}
-          onChange={alterarDias}
+        <button
+          ref={seletorDiasRef}
+          type="button"
+          className="retiradas-periodo"
+          onClick={abrirMenuDias}
+          aria-haspopup="listbox"
+          aria-expanded={diasMenuAberto}
+          aria-controls="retiradas-periodo-opcoes"
         >
-          <option value={7}>7 dias</option>
-          <option value={15}>15 dias</option>
-          <option value={30}>30 dias</option>
-        </select>
+          <span>{dias} dias</span>
+          <ion-icon name="chevron-down-outline"></ion-icon>
+        </button>
+
+        {diasMenuAberto && createPortal(
+          <div
+            ref={menuDiasRef}
+            id="retiradas-periodo-opcoes"
+            className="retiradas-periodo-opcoes"
+            role="listbox"
+            aria-label="Período de retiradas"
+            style={{
+              top: `${posicaoMenuDias.top}px`,
+              left: `${posicaoMenuDias.left}px`,
+              width: `${posicaoMenuDias.width}px`
+            }}
+          >
+            {[7, 15, 30].map((opcao) => (
+              <button
+                key={opcao}
+                type="button"
+                role="option"
+                aria-selected={dias === opcao}
+                className={dias === opcao ? "selecionado" : ""}
+                onClick={() => alterarDias(opcao)}
+              >
+                {opcao} dias
+              </button>
+            ))}
+          </div>,
+          document.body
+        )}
       </div>
 
-      <div className="tabela-wrapper">
-        <Tabela
-          columns={[
-            "#PEDIDO",
-            "CLIENTE",
-            "ITENS",
-            "STATUS",
-            ""
-          ]}
-          sections={formattedSections}
-          onRowClick={handleRowClick}
-        />
-      </div>
+      {carregandoRetiradas ? (
+        <div className="retiradas-vazio" role="status">Carregando próximas retiradas…</div>
+      ) : erroRetiradas ? (
+        <div className="retiradas-vazio" role="alert">Não foi possível carregar as próximas retiradas.</div>
+      ) : pedidos.length === 0 ? (
+        <div className="retiradas-vazio" role="status">
+          Nenhuma retirada nos próximos {dias} dias.
+        </div>
+      ) : (
+        <>
+          <div className="tabela-wrapper">
+            <Tabela
+              columns={[
+                "#PEDIDO",
+                "CLIENTE",
+                "ITENS",
+                "STATUS",
+                ""
+              ]}
+              sections={formattedSections}
+              onRowClick={handleRowClick}
+            />
+          </div>
 
-      <Paginacao
-        paginaAtual={paginaAtual}
-        totalPaginas={totalPaginas}
-        onAnterior={irParaPaginaAnterior}
-        onProximo={irParaProximaPagina}
-      />
+          <Paginacao
+            paginaAtual={paginaAtual}
+            totalPaginas={totalPaginas}
+            onAnterior={irParaPaginaAnterior}
+            onProximo={irParaProximaPagina}
+          />
+        </>
+      )}
     </div>
   );
 }

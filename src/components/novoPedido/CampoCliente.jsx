@@ -5,6 +5,7 @@ import {
 } from "react";
 
 import ModalNovoCliente from "./ModalNovoCliente";
+import { formatarTelefone } from "../../utils/telefone";
 
 function CampoCliente(props) {
 
@@ -58,42 +59,29 @@ function CampoCliente(props) {
 
   };
 
-  const formatarTelefone = (telefone) => {
+  const clientesFiltrados = props.clientes.filter((cliente) => {
 
-    if (!telefone) {
-      return "";
-    }
+  const buscaNome = removerAcentos(busca);
 
-    const numeros = telefone.replace(/\D/g, "");
+  const nomeCliente = removerAcentos(
+    cliente.nome || ""
+  );
 
-    if (numeros.length === 11) {
+  const buscaNumero = busca.replace(/\D/g, "");
 
-      return numeros.replace(
-        /(\d{2})(\d{5})(\d{4})/,
-        "($1) $2-$3"
-      );
+  const telefoneCliente = (
+    cliente.telefone || ""
+  ).replace(/\D/g, "");
 
-    }
+  const encontrouNome =
+    nomeCliente.includes(buscaNome);
 
-    if (numeros.length === 10) {
+  const encontrouTelefone =
+    buscaNumero !== "" &&
+    telefoneCliente.includes(buscaNumero);
 
-      return numeros.replace(
-        /(\d{2})(\d{4})(\d{4})/,
-        "($1) $2-$3"
-      );
-
-    }
-
-    return telefone;
-
-  };
-
-  const clientesFiltrados =
-    props.clientes.filter((cliente) =>
-      removerAcentos(cliente.nome).includes(
-        removerAcentos(busca)
-      )
-    );
+  return encontrouNome || encontrouTelefone;
+});
 
   return (
 

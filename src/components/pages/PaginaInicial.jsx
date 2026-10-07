@@ -1,4 +1,4 @@
-import Menu from "../shared/Menu/Menu";
+import Menu from "../shared/menu/Menu";
 import PaginaInicialHeader from "../paginaInicial/PaginaInicialHeader";
 import PaginaInicialTempo from "../paginaInicial/PaginaInicialTempo";
 import KpiSection from "../paginaInicial/KpiSection";
@@ -6,7 +6,7 @@ import CardAlerta from "../paginaInicial/CardAlerta";
 import CardLembrete from "../paginaInicial/CardLembrete";
 import ProximasRetiradas from "../paginaInicial/ProximasRetiradas";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../../services/api";
 
 import "../css/PaginaInicial.css";
@@ -24,57 +24,69 @@ function PaginaInicial() {
 
   const [lembreteSelecionado, setLembreteSelecionado] = useState(null);
 
+  const [lembretesAbertos, setLembretesAbertos] = useState(false);
 
-  function buscarLembretes() {
+  const [mensagemSucesso, setMensagemSucesso] = useState("");
+  const [alturaRetiradas, setAlturaRetiradas] = useState(0);
+  const paginaInicialGridRef = useRef(null);
 
-    const usuarioId = localStorage.getItem("userId");
+  useEffect(() => {
+    const grid = paginaInicialGridRef.current;
+    const cardRetiradas = grid?.querySelector(".retiradas-card");
 
-    api.get(`/lembretes`)
-      .then((res) => {
-        setLembretes(res.data);
-      })
-      .catch((erro) => {
-        console.log("Erro ao buscar lembretes:", erro.response?.data);
-      });
+    if (!cardRetiradas || typeof ResizeObserver === "undefined") {
+      return;
+    }
 
+    const atualizarAltura = () => {
+      setAlturaRetiradas(Math.ceil(cardRetiradas.getBoundingClientRect().height));
+    };
+
+    atualizarAltura();
+
+    const observer = new ResizeObserver(atualizarAltura);
+    observer.observe(cardRetiradas);
+
+    return () => observer.disconnect();
+  }, []);
+
+  function mostrarMensagemSucesso(mensagem) {
+    setMensagemSucesso(mensagem);
+    setTimeout(() => setMensagemSucesso(""), 3000);
   }
 
 
-  function criarLembrete(lembrete) {
+  async function buscarLembretes() {
+    try {
+      const res = await api.get("/lembretes");
+      setLembretes(res.data);
+    } catch (erro) {
+      console.log("Erro ao buscar lembretes:", erro.response?.data);
+    }
+  }
 
-    const usuarioId = localStorage.getItem("userId");
 
-    api.post(
-      `/lembretes?usuarioId=${usuarioId}`,
-      lembrete
-    )
-      .then(() => {
-        buscarLembretes();
-      })
-      .catch((erro) => {
-        console.log(erro.response?.data);
-      });
-
+  async function criarLembrete(lembrete) {
+    await api.post("/lembretes", lembrete);
+    await buscarLembretes();
+    mostrarMensagemSucesso("Lembrete criado com sucesso!");
   }
 
 
   function atualizarLembrete(id, lembrete) {
-
-    const usuarioId = localStorage.getItem("userId");
-
     api.put(
-      `/lembretes/${id}?usuarioId=${usuarioId}`,
+      `/lembretes/${id}`,
       lembrete
     )
       .then(() => {
-
         buscarLembretes();
-
+        mostrarMensagemSucesso("Lembrete editado com sucesso!");
       })
       .catch((erro) => {
-        console.log("Erro ao atualizar:", erro.response?.data);
+        console.log("Erro ao atualizar:", erro);
+        console.log("Status:", erro.response?.status);
+        console.log("Data:", erro.response?.data);
       });
-
   }
 
 
@@ -84,6 +96,7 @@ function PaginaInicial() {
       .then(() => {
 
         buscarLembretes();
+        mostrarMensagemSucesso("Lembrete excluído com sucesso!");
 
       })
       .catch((erro) => {
@@ -120,13 +133,23 @@ function PaginaInicial() {
   return (
     <div className="paginaInicial-layout">
 
+      {mensagemSucesso && (
+        <div className="mensagem-sucesso-lembrete" role="status">
+          {mensagemSucesso}
+        </div>
+      )}
+
       <Menu active="paginaInicial" />
 
       <main className="paginaInicial-content">
 
         <PaginaInicialHeader />
 
-        <div className="paginaInicial-grid">
+        <div
+          className="paginaInicial-grid"
+          ref={paginaInicialGridRef}
+          style={alturaRetiradas ? { "--retiradas-card-height": `${alturaRetiradas}px` } : undefined}
+        >
 
           <section className="left-content">
 
@@ -137,9 +160,17 @@ function PaginaInicial() {
           </section>
 
 
-          <aside className="right-content">
+          <aside
+            className={`right-content ${lembretesAbertos ? "lembretes-aberto" : ""}`}
+            onClick={(event) => {
+              if (lembretesAbertos && event.target === event.currentTarget) {
+                setLembretesAbertos(false);
+              }
+            }}
+          >
 
             <CardLembrete
+              painelAberto={lembretesAbertos}
               lembretes={lembretes}
               criarLembrete={criarLembrete}
               atualizarLembrete={atualizarLembrete}
@@ -148,6 +179,15 @@ function PaginaInicial() {
             />
 
           </aside>
+
+          <button
+            className="btn-lembretes-mobile"
+            onClick={() => setLembretesAbertos((abertos) => !abertos)}
+            aria-label={lembretesAbertos ? "Fechar lembretes" : "Abrir lembretes"}
+            aria-expanded={lembretesAbertos}
+          >
+            <ion-icon name={lembretesAbertos ? "close-outline" : "reader-outline"}></ion-icon>
+          </button>
 
         </div>
 

@@ -3,14 +3,14 @@ import Tabela from "../shared/tabela/Tabela";
 function TabelaComparativoEventos(props) {
 
     const columns = [
-        "EVENTO",
+        props.modoEvento ? "ANO" : "EVENTO",
         "PEDIDOS",
         "FATURAMENTO",
         "TICKET MÉDIO"
     ];
 
     const data = (props.dados || []).map((evento) => [
-        evento.evento,
+        <span title={evento.evento}>{evento.evento}</span>,
         evento.pedidosTotais,
         evento.faturamento?.toLocaleString("pt-BR", {
             style: "currency",
@@ -23,7 +23,7 @@ function TabelaComparativoEventos(props) {
     ]);
 
     return (
-        <div className="relatorio-tabela-wrapper">
+        <div className="relatorio-tabela-wrapper relatorio-eventos-tabela-wrapper">
             <Tabela
                 columns={columns}
                 data={data}

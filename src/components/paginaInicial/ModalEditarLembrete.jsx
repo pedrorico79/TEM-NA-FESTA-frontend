@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Modal from "../shared/Modal/Modal";
+import Modal from "../shared/modal/Modal";
 
 function ModalEditarLembrete(props) {
 
@@ -21,9 +21,7 @@ function ModalEditarLembrete(props) {
             props.lembrete.id,
             {
                 descricao,
-                data_criacao: props.lembrete.dataCriacao,
-                data_limite: dataLimite,
-                prioridade: props.lembrete.prioridade
+                dataLimite
             }
         );
 
@@ -37,6 +35,7 @@ function ModalEditarLembrete(props) {
             open={props.open}
             title="Editar lembrete"
             onClose={props.onClose}
+            variant="lembrete"
         >
 
             <form>
@@ -62,9 +61,10 @@ function ModalEditarLembrete(props) {
                     <input
                         type="date"
                         value={dataLimite}
-                        onChange={(e) =>
-                            setDataLimite(e.target.value)
-                        }
+                        onChange={(e) => setDataLimite(e.target.value)}
+                        onClick={(e) => {
+                            e.currentTarget.showPicker?.();
+                        }}
                     />
 
                 </div>

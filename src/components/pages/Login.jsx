@@ -1,7 +1,7 @@
 import LogoSection from "../login/LogoSection";
 import LoginForm from "../login/LoginForm";
 import "../css/login.css";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../services/api";
 

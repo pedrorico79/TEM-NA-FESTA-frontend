@@ -5,3 +5,8 @@
     font-family: "Inter", sans-serif;
     font-weight: 300;
 }
+
+input[type="date"],
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+}

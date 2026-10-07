@@ -1,4 +1,4 @@
-import Modal from "../shared/Modal/Modal";
+import Modal from "../shared/modal/Modal";
 
 function ModalExcluirLembrete(props) {
 
@@ -18,6 +18,7 @@ function ModalExcluirLembrete(props) {
             open={props.open}
             title="Excluir lembrete"
             onClose={props.onClose}
+            variant="lembrete"
         >
 
             <p>
