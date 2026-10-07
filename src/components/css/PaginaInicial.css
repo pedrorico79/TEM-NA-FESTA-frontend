@@ -79,6 +79,25 @@ body {
   overflow: hidden;
 }
 
+@media (min-width: 1201px) {
+  .retiradas-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 560px;
+  }
+}
+
+.retiradas-vazio {
+  display: flex;
+  flex: 1;
+  min-height: 300px;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: #756b67;
+  text-align: center;
+}
+
 .lembretes-card {
   padding: 24px;
 }
@@ -744,6 +763,18 @@ body {
 }
 
 @media (max-width: 768px) {
+
+  .modal-overlay.modal-lembrete {
+    padding: 16px;
+  }
+
+  .modal-content.modal-lembrete {
+    width: 100%;
+    max-width: 520px;
+    max-height: calc(100dvh - 32px);
+    padding: 20px;
+    border-radius: 20px;
+  }
 
   main.paginaInicial-content {
     padding: 20px 12px !important;

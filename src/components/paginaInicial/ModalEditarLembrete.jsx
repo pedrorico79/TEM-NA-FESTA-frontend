@@ -35,6 +35,7 @@ function ModalEditarLembrete(props) {
             open={props.open}
             title="Editar lembrete"
             onClose={props.onClose}
+            variant="lembrete"
         >
 
             <form>

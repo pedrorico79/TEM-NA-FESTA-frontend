@@ -26,6 +26,8 @@ function ProximasRetiradas() {
   const navigate = useNavigate();
 
   const [pedidos, setPedidos] = useState([]);
+  const [carregandoRetiradas, setCarregandoRetiradas] = useState(true);
+  const [erroRetiradas, setErroRetiradas] = useState(false);
   const [dias, setDias] = useState(7);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [clientes, setClientes] = useState({});
@@ -102,6 +104,8 @@ function ProximasRetiradas() {
   };
 
   async function buscarProximasRetiradas() {
+    setCarregandoRetiradas(true);
+    setErroRetiradas(false);
     try {
       const response = await api.get("/pedidos/proximas-retiradas", {
         params: {
@@ -153,6 +157,9 @@ function ProximasRetiradas() {
 
       setPedidos([]);
       setClientes({});
+      setErroRetiradas(true);
+    } finally {
+      setCarregandoRetiradas(false);
     }
   }
 
@@ -470,26 +477,38 @@ function ProximasRetiradas() {
         )}
       </div>
 
-      <div className="tabela-wrapper">
-        <Tabela
-          columns={[
-            "#PEDIDO",
-            "CLIENTE",
-            "ITENS",
-            "STATUS",
-            ""
-          ]}
-          sections={formattedSections}
-          onRowClick={handleRowClick}
-        />
-      </div>
+      {carregandoRetiradas ? (
+        <div className="retiradas-vazio" role="status">Carregando próximas retiradas…</div>
+      ) : erroRetiradas ? (
+        <div className="retiradas-vazio" role="alert">Não foi possível carregar as próximas retiradas.</div>
+      ) : pedidos.length === 0 ? (
+        <div className="retiradas-vazio" role="status">
+          Nenhuma retirada nos próximos {dias} dias.
+        </div>
+      ) : (
+        <>
+          <div className="tabela-wrapper">
+            <Tabela
+              columns={[
+                "#PEDIDO",
+                "CLIENTE",
+                "ITENS",
+                "STATUS",
+                ""
+              ]}
+              sections={formattedSections}
+              onRowClick={handleRowClick}
+            />
+          </div>
 
-      <Paginacao
-        paginaAtual={paginaAtual}
-        totalPaginas={totalPaginas}
-        onAnterior={irParaPaginaAnterior}
-        onProximo={irParaProximaPagina}
-      />
+          <Paginacao
+            paginaAtual={paginaAtual}
+            totalPaginas={totalPaginas}
+            onAnterior={irParaPaginaAnterior}
+            onProximo={irParaProximaPagina}
+          />
+        </>
+      )}
     </div>
   );
 }

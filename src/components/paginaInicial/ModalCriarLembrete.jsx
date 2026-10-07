@@ -47,6 +47,7 @@ function ModalCriarLembrete(props) {
       open={props.open}
       title="Novo lembrete"
       onClose={props.onClose}
+      variant="lembrete"
     >
 
       <form onSubmit={salvar}>

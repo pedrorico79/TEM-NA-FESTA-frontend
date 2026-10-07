@@ -18,6 +18,7 @@ function ModalExcluirLembrete(props) {
             open={props.open}
             title="Excluir lembrete"
             onClose={props.onClose}
+            variant="lembrete"
         >
 
             <p>

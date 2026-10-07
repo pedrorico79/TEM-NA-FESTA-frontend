@@ -211,6 +211,12 @@
     margin: 0;
 }
 
+.relatorio-tabela-wrapper table tr,
+.relatorio-tabela-wrapper table th,
+.relatorio-tabela-wrapper table td {
+    cursor: default;
+}
+
 .relatorio-tabela-wrapper th,
 .relatorio-tabela-wrapper td {
     overflow: hidden;

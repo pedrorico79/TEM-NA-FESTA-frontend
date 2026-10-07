@@ -11,7 +11,7 @@ function ModalVisualizarLembrete({ open, lembrete, onClose }) {
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Resumo do Lembrete">
+    <Modal open={open} onClose={onClose} title="Resumo do Lembrete" variant="lembrete">
       {lembrete && (
         <div className="lembrete-detalhes">
           <div className="lembrete-detalhe">
