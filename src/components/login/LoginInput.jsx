@@ -20,10 +20,22 @@ function LoginInput(props) {
         <legend>{props.label}</legend>
         <div className="input-wrapper">
 
-          <input type={ehSenha && mostrarSenha ? "text" : props.type} placeholder={props.placeholder} value={props.valor} onChange={alterarValor}/>
+          <input
+            type={ehSenha && mostrarSenha ? "text" : props.type}
+            placeholder={props.placeholder}
+            value={props.valor}
+            onChange={alterarValor}
+            autoComplete={props.type === "password" ? "current-password" : "email"}
+            aria-label={props.label}
+          />
 
           {ehSenha && (
-            <button type="button" className="mostrar-senha" onClick={exibirSenha}>
+            <button
+              type="button"
+              className="mostrar-senha"
+              onClick={exibirSenha}
+              aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+            >
               <ion-icon
                 name={mostrarSenha ? "eye-outline" : "eye-off-outline"}></ion-icon>
             </button>

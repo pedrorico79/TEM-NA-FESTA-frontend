@@ -5,8 +5,8 @@
 }
 
 .novoPedido-content {
-    width: calc(100% - 280px);
-    margin-left: 280px;
+    width: calc(100% - var(--sidebar-width, 280px));
+    margin-left: var(--sidebar-width, 280px);
     flex: 1;
     padding: 24px 40px 30px;
     min-width: 0;

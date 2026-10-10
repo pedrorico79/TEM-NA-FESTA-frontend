@@ -4,14 +4,19 @@ import LoginButton from "./LoginButton";
 
 function LoginForm(props) {
   return (
-    <div className="form-section">
+    <form
+      className="form-section"
+      onSubmit={(event) => {
+        event.preventDefault();
+        props.logar();
+      }}
+    >
       <LoginInput label="E-mail" type="email" placeholder="exemplo@email.com" valor={props.emailDigitado} setValor={props.setEmailDigitado} />
 
       <LoginInput label="Senha" type="password" placeholder="********" valor={props.senhaDigitada} setValor={props.setSenhaDigitada}/>
-      <a href="/" className="esqueceu-senha">Esqueci minha senha</a>
       <LembrarAcesso lembrarAcesso={props.lembrarAcesso} setLembrarAcesso={props.setLembrarAcesso}/>
       <LoginButton logar={props.logar} />
-    </div>
+    </form>
   );
 }
 

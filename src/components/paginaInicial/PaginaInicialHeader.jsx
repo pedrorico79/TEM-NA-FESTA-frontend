@@ -13,7 +13,7 @@ function PaginaInicialHeader() {
     <div className="paginaInicial-top">
       <h1>Tela Inicial</h1>
 
-      <BotaoAdicionar text="Novo Pedido" size = "small" onClick={() => handleNavigate("/NovoPedido")}/>
+      <BotaoAdicionar text="Novo Pedido" size = "small" onClick={() => handleNavigate("/novo-pedido")}/>
     </div>
   );
 }

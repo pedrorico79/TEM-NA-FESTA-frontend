@@ -45,7 +45,7 @@ function Menu(props) {
     try {
       await api.post("usuarios/logout");
       limparUsuarioAtualEmCache();
-      navigate("/");
+      navigate("/login");
     } catch (error) {
       console.error("Erro ao realizar logout:", error);
     }
@@ -87,14 +87,14 @@ function Menu(props) {
               icon="home-outline"
               text="Tela Inicial"
               active={props.active === "paginaInicial"}
-              onClick={() => handleNavigate("/PaginaInicial")}
+              onClick={() => handleNavigate("/pagina-inicial")}
             />
 
             <MenuItem
               icon="bag-outline"
               text="Pedidos"
               active={props.active === "pedidos"}
-              onClick={() => handleNavigate("/Pedidos")}
+              onClick={() => handleNavigate("/pedidos")}
             />
 
 
@@ -103,7 +103,7 @@ function Menu(props) {
               text="Produtos"
               active={props.active === "produtos"}
               subItem
-              onClick={() => handleNavigate("/Produtos")}
+              onClick={() => handleNavigate("/produtos")}
             />
 
             <MenuItem
@@ -111,7 +111,7 @@ function Menu(props) {
               text="Clientes"
               active={props.active === "clientes"}
               subItem
-              onClick={() => handleNavigate("/Clientes")}
+              onClick={() => handleNavigate("/clientes")}
             />
 
             <MenuItem
@@ -119,7 +119,7 @@ function Menu(props) {
               text="Eventos"
               active={props.active === "eventos"}
               subItem
-              onClick={() => handleNavigate("/Eventos")}
+              onClick={() => handleNavigate("/eventos")}
             />
 
 
@@ -127,15 +127,22 @@ function Menu(props) {
               icon="stats-chart-outline"
               text="Relatórios"
               active={props.active === "relatorios"}
-              onClick={() => handleNavigate("/Relatorios")}
+              onClick={() => handleNavigate("/relatorios")}
             />
 
-            {isAdmin && (
+            {isAdmin ? (
               <MenuItem
                 icon="id-card-outline"
                 text="Usuários"
                 active={props.active === "usuarios"}
-                onClick={() => handleNavigate("/Usuarios")}
+                onClick={() => handleNavigate("/usuarios")}
+              />
+            ) : (
+              <MenuItem
+                icon="person-circle-outline"
+                text="Meu perfil"
+                active={props.active === "meuPerfil"}
+                onClick={() => handleNavigate("/meu-perfil")}
               />
             )}
           </nav>

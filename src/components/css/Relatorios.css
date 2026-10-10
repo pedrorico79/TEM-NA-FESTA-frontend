@@ -13,8 +13,8 @@
     gap: 24px;
     overflow-y: auto;
     min-width: 0;
-    width: calc(100% - 280px);
-    margin-left: 280px;
+    width: calc(100% - var(--sidebar-width, 280px));
+    margin-left: var(--sidebar-width, 280px);
 }
 
 .relatorios h1 {
@@ -389,8 +389,9 @@
     }
 
     .relatorio-tabela-wrapper {
-        max-height: 300px;
+        max-height: 240px;
         overflow-x: auto;
+        overflow-y: auto;
     }
 
     .relatorio-tabela-wrapper table {
@@ -398,7 +399,7 @@
     }
 
     .relatorio-produtos-tabela-wrapper {
-        max-height: 300px;
+        max-height: 240px;
         overflow-x: hidden;
         overflow-y: auto;
     }
@@ -518,35 +519,6 @@
 .card-relatorio:nth-of-type(2) .relatorio-tabela-wrapper th:nth-child(5),
 .card-relatorio:nth-of-type(2) .relatorio-tabela-wrapper td:nth-child(5) {
     width: 90px;
-}
-
-.relatorio-tabela-wrapper::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-.relatorio-tabela-wrapper::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.relatorio-tabela-wrapper::-webkit-scrollbar-thumb {
-    background: #2c2421;
-    border-radius: 4px;
-}
-
-.relatorio-tabela-wrapper::-webkit-scrollbar-thumb:hover {
-    background: #422f24;
-}
-
-.relatorio-tabela-wrapper::-webkit-scrollbar-corner {
-    background: transparent;
-}
-
-@supports (scrollbar-width: thin) {
-    .relatorio-tabela-wrapper {
-        scrollbar-width: thin;
-        scrollbar-color: #2c2421 transparent;
-    }
 }
 
 .relatorio-pedidos-produtos {

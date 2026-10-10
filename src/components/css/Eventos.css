@@ -5,8 +5,8 @@
 }
 
 .eventos-content {
-  width: calc(100% - 280px);
-  margin-left: 280px;
+  width: calc(100% - var(--sidebar-width, 280px));
+  margin-left: var(--sidebar-width, 280px);
   flex: 1;
   padding: 40px;
   min-width: 0;
@@ -473,21 +473,22 @@
     gap: 6px;
   }
 
-  .acoes-eventos .switch {
+  .acoes-eventos .switch-status {
     width: 46px;
     min-width: 46px;
     max-width: 46px;
     height: 30px;
   }
 
-  .acoes-eventos .switch-bolinha {
-    top: 3px;
+  .acoes-eventos .switch-status-bolinha {
+    top: 50%;
     left: 3px;
     width: 24px;
     height: 24px;
+    transform: translateY(-50%);
   }
 
-  .acoes-eventos .switch.ativo .switch-bolinha {
+  .acoes-eventos .switch-status.ativo .switch-status-bolinha {
     left: 19px;
   }
 
@@ -581,4 +582,36 @@
     gap: 4px;
   }
 
+}
+
+@media (max-width: 768px) {
+  .modal-overlay:has(.form-grid),
+  .modal-overlay:has(.evento-detalhes),
+  .modal-overlay:has(.produto-confirmacao-conteudo) {
+    padding: 16px;
+  }
+
+  .modal-overlay:has(.form-grid) .modal-content,
+  .modal-overlay:has(.evento-detalhes) .modal-content,
+  .modal-overlay:has(.produto-confirmacao-conteudo) .modal-content {
+    width: 100%;
+    max-height: calc(100dvh - 32px);
+    padding: 20px;
+    border-radius: 20px;
+  }
+}
+
+@media (max-width: 380px) {
+  .modal-overlay:has(.form-grid),
+  .modal-overlay:has(.evento-detalhes),
+  .modal-overlay:has(.produto-confirmacao-conteudo) {
+    padding: 12px;
+  }
+
+  .modal-overlay:has(.form-grid) .modal-content,
+  .modal-overlay:has(.evento-detalhes) .modal-content,
+  .modal-overlay:has(.produto-confirmacao-conteudo) .modal-content {
+    max-height: calc(100dvh - 24px);
+    padding: 18px;
+  }
 }

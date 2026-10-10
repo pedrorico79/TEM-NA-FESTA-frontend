@@ -252,7 +252,7 @@ function Pedidos() {
             text="Novo Pedido"
             size="small"
             onClick={() =>
-              handleNavigate("/NovoPedido")
+              handleNavigate("/novo-pedido")
             }
           />
         </div>

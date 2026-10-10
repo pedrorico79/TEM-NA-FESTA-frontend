@@ -33,7 +33,7 @@ function CardPedido({ pedido }) {
         pedido.status === "CANCELADO";
 
     function handleClick() {
-        navigate(`/DetalhesPedido/${encodeURIComponent(pedido.id)}`);
+        navigate(`/pedidos/${encodeURIComponent(pedido.id)}`);
     }
 
     return (

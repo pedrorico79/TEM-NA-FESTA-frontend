@@ -1,7 +1,7 @@
 function LoginButton(props) {
 
   return (
-    <button type="button" className="login-button" onClick={props.logar}>ENTRAR</button>
+    <button type="submit" className="login-button">ENTRAR</button>
   );
 }
 

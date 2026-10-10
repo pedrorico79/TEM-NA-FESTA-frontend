@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function TelaAutenticacaoSenha({ onSucesso }) {
+function TelaAutenticacaoSenha({
+    onSucesso,
+    titulo = "Acesso Restrito",
+    subtitulo = "Esta área contém dados sensíveis. Confirme sua senha de administrador para liberar o acesso.",
+    textoBotao = "Confirmar Acesso",
+}) {
     const navigate = useNavigate();
 
     const [senha, setSenha] = useState("");
@@ -96,11 +101,10 @@ function TelaAutenticacaoSenha({ onSucesso }) {
                     </svg>
                 </div>
 
-                <h1>Acesso Restrito</h1>
+                <h1>{titulo}</h1>
 
                 <p className="autenticacao-subtitulo">
-                    Esta área contém dados sensíveis. Confirme sua senha de
-                    administrador para liberar o acesso.
+                    {subtitulo}
                 </p>
 
                 <form
@@ -217,7 +221,7 @@ function TelaAutenticacaoSenha({ onSucesso }) {
                         >
                             {carregando
                                 ? "Validando..."
-                                : "Confirmar Acesso"}
+                                : textoBotao}
                         </button>
 
                     </div>

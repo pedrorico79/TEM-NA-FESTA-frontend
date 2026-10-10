@@ -420,7 +420,7 @@ function ProximasRetiradas() {
           secao.rowIds[indiceNaSecao];
 
         navigate(
-          `/DetalhesPedido/${encodeURIComponent(pedidoId)}`
+          `/pedidos/${encodeURIComponent(pedidoId)}`
         );
 
         return;

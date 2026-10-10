@@ -415,7 +415,7 @@ function DetalhesPedido() {
                     <button
                         className="btn-voltar"
                         onClick={() =>
-                            navigate("/Pedidos")
+                            navigate("/pedidos")
                         }
                     >
                         <ion-icon name="arrow-back-outline"></ion-icon>
@@ -553,7 +553,7 @@ function DetalhesPedido() {
                     <button
                         className="btn-voltar"
                         onClick={() =>
-                            navigate("/Pedidos")
+                            navigate("/pedidos")
                         }
                     >
                         <ion-icon name="arrow-back-outline"></ion-icon>

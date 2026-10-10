@@ -8,6 +8,7 @@ import Relatorios from "./components/pages/Relatorios";
 import Clientes from "./components/pages/Clientes";
 import Eventos from "./components/pages/Eventos";
 import Usuarios from "./components/pages/Usuarios";
+import MeuPerfil from "./components/pages/MeuPerfil";
 import DetalhesPedido from "./components/pages/DetalhesPedido";
 
 import RotaLogin from "./RotaLogin";
@@ -15,47 +16,55 @@ import RotaLogin from "./RotaLogin";
 export const routes = createBrowserRouter([
   {
     path: "/",
-    element: <RotaLogin />,
+    element: <Navigate to="/login" replace />,
     errorElement: <div>Erro</div>,
-},
+  },
   {
-    path: "/PaginaInicial",
+    path: "/login",
+    element: <RotaLogin />,
+  },
+  {
+    path: "/pagina-inicial",
     element: <PaginaInicial />,
   },
   {
-    path: "/Pedidos",
+    path: "/pedidos",
     element: <Pedidos />,
   },
   {
-    path: "/Produtos",
+    path: "/produtos",
     element: <Produtos />,
   },
   {
-    path: "/NovoPedido",
+    path: "/novo-pedido",
     element: <NovoPedido />,
   },
   {
-    path: "/Relatorios",
+    path: "/relatorios",
     element: <Relatorios />,
   },
   {
-    path: "/Clientes",
+    path: "/clientes",
     element: <Clientes />,
   },
   {
-    path: "/Eventos",
+    path: "/eventos",
     element: <Eventos />,
   },
   {
-    path: "/Usuarios",
+    path: "/usuarios",
     element: <Usuarios />,
   },
   {
-    path: "/DetalhesPedido/:id",
+    path: "/meu-perfil",
+    element: <MeuPerfil />,
+  },
+  {
+    path: "/pedidos/:id",
     element: <DetalhesPedido />,
   },
   {
-  path: "/login",
-  element: <Navigate to="/" replace />,
-},
+    path: "*",
+    element: <Navigate to="/" replace />,
+  },
 ]);

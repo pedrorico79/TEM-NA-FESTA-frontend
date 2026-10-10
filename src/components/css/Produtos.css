@@ -9,8 +9,8 @@
 .produtos-content {
   flex: 1;
   min-width: 0;
-  width: calc(100% - 280px);
-  margin-left: 280px;
+  width: calc(100% - var(--sidebar-width, 280px));
+  margin-left: var(--sidebar-width, 280px);
   padding: 40px;
   box-sizing: border-box;
 }
@@ -479,21 +479,22 @@
     gap: 6px;
   }
 
-  .acoes-produto .switch {
+  .acoes-produto .switch-status {
     width: 46px;
     min-width: 46px;
     max-width: 46px;
     height: 30px;
   }
 
-  .acoes-produto .switch-bolinha {
-    top: 3px;
+  .acoes-produto .switch-status-bolinha {
+    top: 50%;
     left: 3px;
     width: 24px;
     height: 24px;
+    transform: translateY(-50%);
   }
 
-  .acoes-produto .switch.ativo .switch-bolinha {
+  .acoes-produto .switch-status.ativo .switch-status-bolinha {
     left: 19px;
   }
 

@@ -3,8 +3,8 @@
 }
 
 .pedidos-content {
-  width: calc(100% - 280px);
-  margin-left: 280px;
+  width: calc(100% - var(--sidebar-width, 280px));
+  margin-left: var(--sidebar-width, 280px);
   flex: 1;
   padding: 40px;
   box-sizing: border-box;
@@ -502,7 +502,7 @@
   display: none;
 }
 
-.pedido-status-mobile {
+.tabela-pedidos-wrapper .pedido-status-mobile {
   display: none;
 }
 

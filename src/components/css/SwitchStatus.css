@@ -1,4 +1,4 @@
-.switch {
+.switch-status {
   flex: none;
 
   width: 64px;
@@ -23,16 +23,21 @@
   outline: none;
 }
 
-.switch:focus {
+.switch-status:focus {
   outline: none;
   box-shadow: none;
 }
 
-.switch.ativo {
+.switch-status.ativo {
   background: #BC5A6C;
 }
 
-.switch-bolinha {
+.switch-status:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.switch-status-bolinha {
   width: 28px;
   height: 28px;
 
@@ -42,14 +47,15 @@
 
   position: absolute;
 
-  top: 2px;
+  top: 50%;
   left: 4px;
+  transform: translateY(-50%);
 
   transition: 0.25s;
 
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
 }
 
-.switch.ativo .switch-bolinha {
+.switch-status.ativo .switch-status-bolinha {
   left: 32px;
 }

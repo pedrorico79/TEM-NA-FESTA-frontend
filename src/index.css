@@ -6,7 +6,47 @@
     font-weight: 300;
 }
 
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #c9b8aa transparent;
+}
+
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+*::-webkit-scrollbar-track,
+*::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #c9b8aa;
+    border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: #a88d78;
+}
+
 input[type="date"],
 input[type="date"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
+}
+
+:root {
+    --sidebar-width: 280px;
+}
+
+@media (max-width: 1366px) {
+    :root {
+        --sidebar-width: 260px;
+    }
+}
+
+@media (max-width: 1200px) {
+    :root {
+        --sidebar-width: 240px;
+    }
 }

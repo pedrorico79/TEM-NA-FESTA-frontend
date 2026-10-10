@@ -28,7 +28,7 @@ function RotaLogin() {
     }
 
     if (autenticado) {
-        return <Navigate to="/PaginaInicial" replace />;
+        return <Navigate to="/pagina-inicial" replace />;
     }
 
     return <Login />;

@@ -1,9 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Modal from "../shared/modal/Modal";
 
 function ModalAlterarSenhaUsuario(props) {
     const [novaSenha, setNovaSenha] = useState("");
     const [confirmarSenha, setConfirmarSenha] = useState("");
+    const [mostrarSenha, setMostrarSenha] = useState(false);
+    const [mostrarConfirmacao, setMostrarConfirmacao] = useState(false);
+
+    useEffect(() => {
+        if (!props.open) {
+            setNovaSenha("");
+            setConfirmarSenha("");
+            setMostrarSenha(false);
+            setMostrarConfirmacao(false);
+        }
+    }, [props.open]);
 
     function salvar(e) {
         e.preventDefault();
@@ -30,7 +41,7 @@ function ModalAlterarSenhaUsuario(props) {
             })
             .catch((erro) => {
                 console.error(erro);
-                alert("Erro ao alterar senha do usuário.");
+                alert(erro.response?.data?.message || "Erro ao alterar senha do usuário.");
             });
     }
 
@@ -44,24 +55,36 @@ function ModalAlterarSenhaUsuario(props) {
                 <div className="form-grid">
                     <div className="form-group">
                         <label>Nova Senha *</label>
-                        <input
-                            type="password"
-                            name="novaSenha"
-                            value={novaSenha}
-                            onChange={(e) => setNovaSenha(e.target.value)}
-                            placeholder="Digite a nova senha"
-                        />
+                        <div className="senha-input-wrapper">
+                            <input
+                                type={mostrarSenha ? "text" : "password"}
+                                name="novaSenha"
+                                value={novaSenha}
+                                onChange={(e) => setNovaSenha(e.target.value)}
+                                placeholder="Digite a nova senha"
+                                autoComplete="new-password"
+                            />
+                            <button type="button" className="botao-mostrar-senha" onClick={() => setMostrarSenha((atual) => !atual)} aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}>
+                                <ion-icon name={mostrarSenha ? "eye-outline" : "eye-off-outline"}></ion-icon>
+                            </button>
+                        </div>
                     </div>
 
                     <div className="form-group">
                         <label>Confirmar Nova Senha *</label>
-                        <input
-                            type="password"
-                            name="confirmarSenha"
-                            value={confirmarSenha}
-                            onChange={(e) => setConfirmarSenha(e.target.value)}
-                            placeholder="Confirme a nova senha"
-                        />
+                        <div className="senha-input-wrapper">
+                            <input
+                                type={mostrarConfirmacao ? "text" : "password"}
+                                name="confirmarSenha"
+                                value={confirmarSenha}
+                                onChange={(e) => setConfirmarSenha(e.target.value)}
+                                placeholder="Confirme a nova senha"
+                                autoComplete="new-password"
+                            />
+                            <button type="button" className="botao-mostrar-senha" onClick={() => setMostrarConfirmacao((atual) => !atual)} aria-label={mostrarConfirmacao ? "Ocultar confirmação" : "Mostrar confirmação"}>
+                                <ion-icon name={mostrarConfirmacao ? "eye-outline" : "eye-off-outline"}></ion-icon>
+                            </button>
+                        </div>
                     </div>
                 </div>
 

@@ -4,11 +4,12 @@ function SwitchStatus({
   ativo,
   onClick,
   ariaLabel = ativo ? "Ativo" : "Inativo",
+  disabled = false,
 }) {
 
   return (
     <button
-      className={`switch ${
+      className={`switch-status ${
         ativo ? "ativo" : ""
       }`}
       type="button"
@@ -16,10 +17,11 @@ function SwitchStatus({
       aria-checked={ativo}
       aria-label={ariaLabel}
       title={ariaLabel}
+      disabled={disabled}
 
       onClick={onClick}
     >
-      <div className="switch-bolinha"></div>
+      <div className="switch-status-bolinha"></div>
     </button>
   );
 }

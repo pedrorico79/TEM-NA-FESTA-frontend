@@ -25,7 +25,7 @@ function Login() {
         console.log("Usuário logado!");
 
 
-        navigate("/PaginaInicial");
+        navigate("/pagina-inicial");
 
       })
       .catch((erro) => {

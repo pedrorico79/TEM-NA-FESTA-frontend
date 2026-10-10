@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import Modal from "../shared/modal/Modal";
+import { nomePerfilUsuario } from "../../utils/perfilUsuario";
 
 function ModalEditarUsuario(props) {
-
     const [UsuarioEditado, setUsuarioEditado] = useState({
         nome: "",
         email: "",
-        novaSenha: "",
+        perfilId: "",
     });
 
     useEffect(() => {
@@ -14,7 +14,7 @@ function ModalEditarUsuario(props) {
             setUsuarioEditado({
                 nome: props.Usuario.nome || "",
                 email: props.Usuario.email || "",
-                novaSenha: "",
+                perfilId: props.Usuario.perfil?.id != null ? String(props.Usuario.perfil.id) : "",
             });
         }
     }, [props.Usuario]);
@@ -31,8 +31,8 @@ function ModalEditarUsuario(props) {
     function salvar(e) {
         e.preventDefault();
 
-        if (!UsuarioEditado.nome.trim() || !UsuarioEditado.email.trim()) {
-            alert("Nome e E-mail são obrigatórios.");
+        if (!UsuarioEditado.nome.trim() || !UsuarioEditado.email.trim() || !UsuarioEditado.perfilId) {
+            alert("Nome, e-mail e perfil de acesso são obrigatórios.");
             return;
         }
 
@@ -40,12 +40,8 @@ function ModalEditarUsuario(props) {
             id: props.Usuario.id,
             nome: UsuarioEditado.nome,
             email: UsuarioEditado.email,
+            perfilId: Number(UsuarioEditado.perfilId),
         };
-
-        // Envia a senha apenas se o admin tiver digitado algo
-        if (UsuarioEditado.novaSenha.trim()) {
-            payload.novaSenha = UsuarioEditado.novaSenha;
-        }
 
         props.onSalvar(payload)
             .then(() => {
@@ -54,7 +50,7 @@ function ModalEditarUsuario(props) {
             })
             .catch((erro) => {
                 console.error(erro);
-                alert("Erro ao editar Usuário.");
+                alert(erro.response?.data?.message || "Erro ao editar usuário.");
             });
     }
 
@@ -66,7 +62,7 @@ function ModalEditarUsuario(props) {
         >
             <form onSubmit={salvar}>
 
-                <div className="form-grid">
+                <div className="form-grid form-usuarios-edicao">
 
                     <div className="form-group">
                         <label>Nome *</label>
@@ -88,16 +84,30 @@ function ModalEditarUsuario(props) {
                         />
                     </div>
 
-                    <div className="form-group">
-                        <label>Nova Senha (deixe em branco para não alterar)</label>
-                        <input
-                            type="password"
-                            name="novaSenha"
-                            value={UsuarioEditado.novaSenha}
-                            onChange={handleChange}
-                            placeholder="Digite uma nova senha caso queira redefinir"
-                        />
-                    </div>
+                    {!props.bloquearPerfil && (
+                        <div className="form-group">
+                            <label>Perfil de acesso *</label>
+                            <div className="usuario-select-wrap">
+                                <select
+                                    className="usuario-perfil-select"
+                                    name="perfilId"
+                                    value={UsuarioEditado.perfilId}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="">Selecione um perfil</option>
+                                    {(props.perfis || []).map((perfil) => (
+                                        <option key={perfil.id} value={perfil.id}>
+                                            {nomePerfilUsuario(perfil)}
+                                        </option>
+                                    ))}
+                                    {UsuarioEditado.perfilId && !(props.perfis || []).some((perfil) => String(perfil.id) === UsuarioEditado.perfilId) && (
+                                        <option value={UsuarioEditado.perfilId}>{nomePerfilUsuario(props.Usuario?.perfil) || `Perfil ${UsuarioEditado.perfilId}`}</option>
+                                    )}
+                                </select>
+                            </div>
+                        </div>
+                    )}
 
                 </div>
 

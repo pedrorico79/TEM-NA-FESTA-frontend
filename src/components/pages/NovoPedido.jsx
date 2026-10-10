@@ -301,7 +301,7 @@ function NovoPedido() {
     };
 
     const voltarPedidos = () => {
-        navigate("/Pedidos");
+        navigate("/pedidos");
     };
 
     const salvarPedido = async () => {
@@ -398,7 +398,7 @@ if (!pedido.status) {
 
             alert("Pedido criado com sucesso!");
 
-            navigate("/Pedidos");
+            navigate("/pedidos");
 
         } catch (error) {
             console.error(

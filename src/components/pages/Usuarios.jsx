@@ -7,6 +7,7 @@ import BotaoAdicionar from "../shared/botaoAdicionar/BotaoAdicionar";
 import TabelaUsuarios from "../usuarios/TabelaUsuarios";
 
 import ModalEditarUsuario from "../usuarios/ModalEditarUsuario";
+import ModalVisualizarUsuario from "../usuarios/ModalVisualizarUsuario";
 
 import ModalNovoUsuario from "../usuarios/ModalNovoUsuario";
 
@@ -17,6 +18,7 @@ import TelaAutenticacaoSenha from "../usuarios/TelaAutenticacaoSenha";
 import Paginacao from "../shared/paginacao/Paginacao";
 
 import { api } from "../../services/api";
+import { buscarUsuarioAtual, obterUsuarioAtualEmCache } from "../../services/usuarioAtual";
 
 import ModalConfirmacao from "../shared/modal/ModalConfirmacao";
 
@@ -26,11 +28,19 @@ function Usuarios() {
 
     const [acessoLiberado, setAcessoLiberado] = useState(false);
 
+    const [usuarioAtualId, setUsuarioAtualId] = useState(obterUsuarioAtualEmCache()?.id ?? null);
+
     const [usuarios, setUsuarios] = useState([]);
+
+    const [perfisDisponiveis, setPerfisDisponiveis] = useState([]);
 
     const [busca, setBusca] = useState("");
 
     const [modalOpen, setModalOpen] = useState(false);
+
+    const [modalVisualizarOpen, setModalVisualizarOpen] = useState(false);
+
+    const [usuarioVisualizado, setUsuarioVisualizado] = useState(null);
 
     const [modalNovoOpen, setModalNovoOpen] = useState(false);
 
@@ -42,6 +52,8 @@ function Usuarios() {
 
     const [paginaAtual, setPaginaAtual] = useState(1);
 
+    const [totalPaginas, setTotalPaginas] = useState(1);
+
     const [modalConfirmacaoOpen, setModalConfirmacaoOpen] = useState(false);
 
     const [usuarioConfirmacao, setUsuarioConfirmacao] = useState(null);
@@ -50,34 +62,28 @@ function Usuarios() {
 
     const usuariosPorPagina = 7;
 
-    function autenticarAcesso(senhaAcesso) {
+    async function autenticarAcesso(senhaAcesso) {
+        const usuarioAtual = await buscarUsuarioAtual();
 
-        const emailAdminLogado = localStorage.getItem("userEmail");
-
-        if (!emailAdminLogado) {
-
-            console.error("E-mail não encontrado no localStorage.");
-
-            return Promise.reject(
-                new Error("Sessão expirada. Faça login novamente.")
-            );
-
+        if (String(usuarioAtual?.perfil || "").toUpperCase() !== "ADMIN") {
+            throw new Error("Apenas administradores podem acessar esta página.");
         }
 
+        if (!usuarioAtual?.email) {
+            throw new Error("Não foi possível identificar o administrador da sessão.");
+        }
 
-        return api.post("/usuarios/login", {
-            email: emailAdminLogado,
+        await api.post("/usuarios/login", {
+            email: usuarioAtual.email,
             senha: senhaAcesso,
-            rememberMe: false
-        }).then(() => {
-
-            setAcessoLiberado(true);
-
+            jwtValidityRememberMe: false
         });
 
+        setUsuarioAtualId(usuarioAtual.id);
+        setAcessoLiberado(true);
     }
 
-    function buscarUsuarios() {
+    function buscarUsuarios(pagina = paginaAtual, termo = busca) {
 
         if (!acessoLiberado) {
 
@@ -89,21 +95,20 @@ function Usuarios() {
 
         api.get("/usuarios", {
             params: {
-                apenasAtivos: false
+                nome: termo.trim() || undefined,
+                page: pagina - 1,
+                size: usuariosPorPagina
             }
         })
-
-            .then((response) => {
-
-
-                setUsuarios(response.data);
-
+            .then(({ data }) => {
+                const lista = Array.isArray(data) ? data : data?.content;
+                setUsuarios(Array.isArray(lista) ? lista : []);
+                setTotalPaginas(Math.max(Number(data?.totalPages) || 1, 1));
             })
-
             .catch((erro) => {
-
                 console.error("ERRO AO BUSCAR USUÁRIOS:", erro);
-
+                setUsuarios([]);
+                setTotalPaginas(1);
             });
 
     }
@@ -116,36 +121,29 @@ function Usuarios() {
 
         }
 
+    }, [acessoLiberado, paginaAtual, busca]);
+
+    useEffect(() => {
+        if (!acessoLiberado) return;
+
+        api.get("/usuarios", { params: { page: 0, size: 1000 } })
+            .then(({ data }) => {
+                const lista = Array.isArray(data) ? data : data?.content;
+                const perfis = new Map();
+                (Array.isArray(lista) ? lista : []).forEach((usuario) => {
+                    if (usuario.perfil?.id != null) {
+                        perfis.set(String(usuario.perfil.id), usuario.perfil);
+                    }
+                });
+                setPerfisDisponiveis(Array.from(perfis.values()));
+            })
+            .catch((erro) => {
+                console.error("Erro ao carregar perfis dos usuários:", erro);
+                setPerfisDisponiveis([]);
+            });
     }, [acessoLiberado]);
 
-    const usuariosFiltrados = usuarios.filter((usuario) => {
-
-        const nome = usuario.nome
-            ?.toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "");
-
-        const buscaNormalizada = busca
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "");
-
-        return nome?.includes(buscaNormalizada);
-
-    });
-
-    const totalPaginas = Math.max(
-        1,
-        Math.ceil(usuariosFiltrados.length / usuariosPorPagina)
-    );
-
-    const indiceInicial = (paginaAtual - 1) * usuariosPorPagina;
-
-    const usuariosPaginados = usuariosFiltrados.slice(
-        indiceInicial,
-        indiceInicial + usuariosPorPagina
-    );
-
+    const usuariosPaginados = usuarios;
     function cadastrarUsuario(usuario) {
 
         return api.post("/usuarios", usuario)
@@ -153,8 +151,8 @@ function Usuarios() {
             .then((response) => {
 
                 setPaginaAtual(1);
-
-                buscarUsuarios();
+                setBusca("");
+                buscarUsuarios(1, "");
 
                 return response.data;
 
@@ -163,11 +161,15 @@ function Usuarios() {
     }
 
     function abrirModalEditar(usuario) {
-
         setUsuarioselecionado(usuario);
 
         setModalOpen(true);
 
+    }
+
+    function abrirModalVisualizar(usuario) {
+        setUsuarioVisualizado(usuario);
+        setModalVisualizarOpen(true);
     }
 
     function abrirModalAlterarSenha(usuario) {
@@ -179,8 +181,8 @@ function Usuarios() {
     }
 
     function editarUsuario(usuario) {
-
-        return api.put(`/usuarios/${usuario.id}`, usuario)
+        const { id, nome, email, perfilId } = usuario;
+        return api.put(`/usuarios/${id}`, { nome, email, perfilId })
 
             .then((response) => {
 
@@ -237,8 +239,11 @@ function Usuarios() {
 
     function confirmarAlteracaoStatus() {
 
+        const novoStatus = !(usuarioConfirmacao?.ativo ?? usuarioConfirmacao?.isAtivo);
+
         api.patch(
-            `/usuarios/${usuarioConfirmacao.id}/ativo`
+            `/usuarios/${usuarioConfirmacao.id}/ativo`,
+            { ativo: novoStatus }
         )
 
             .then(() => {
@@ -263,6 +268,7 @@ function Usuarios() {
                     "Erro ao alterar status do usuário:",
                     erro
                 );
+                alert(erro.response?.data?.message || "Erro ao alterar o status do usuário.");
 
             });
 
@@ -338,11 +344,14 @@ function Usuarios() {
 
                             <TabelaUsuarios
                                 usuarios={usuariosPaginados}
+                                usuarioAtualId={usuarioAtualId}
+                                onVisualizar={abrirModalVisualizar}
                                 onEditar={abrirModalEditar}
                                 onAlterarSenha={
                                     abrirModalAlterarSenha
                                 }
                                 onAlterarStatus={(u) => {
+                                    if (String(u.id) === String(usuarioAtualId)) return;
 
                                     setUsuarioConfirmacao(u);
 
@@ -379,6 +388,8 @@ function Usuarios() {
                     <ModalEditarUsuario
                         open={modalOpen}
                         Usuario={usuarioselecionado}
+                        bloquearPerfil={String(usuarioselecionado?.id) === String(usuarioAtualId)}
+                        perfis={perfisDisponiveis}
                         onClose={() =>
                             setModalOpen(false)
                         }
@@ -388,6 +399,13 @@ function Usuarios() {
                                 "Usuário editado com sucesso!"
                             )
                         }
+                    />
+
+                    <ModalVisualizarUsuario
+                        open={modalVisualizarOpen}
+                        usuario={usuarioVisualizado}
+                        usuarioAtualId={usuarioAtualId}
+                        onClose={() => setModalVisualizarOpen(false)}
                     />
 
                     <ModalAlterarSenhaUsuario
@@ -406,6 +424,7 @@ function Usuarios() {
 
                     <ModalNovoUsuario
                         open={modalNovoOpen}
+                        perfis={perfisDisponiveis}
                         onClose={() =>
                             setModalNovoOpen(false)
                         }

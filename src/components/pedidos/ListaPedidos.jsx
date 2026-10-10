@@ -122,7 +122,7 @@ function ListaPedidos({ pedidos, modoVisualizacao }) {
 
               if (pedido) {
                 navigate(
-                  `/DetalhesPedido/${encodeURIComponent(
+                  `/pedidos/${encodeURIComponent(
                     pedido.id
                   )}`
                 );
