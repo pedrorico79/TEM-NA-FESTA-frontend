@@ -39,6 +39,7 @@ function Pedidos() {
   const [eventos, setEventos] = useState({});
   const [opcoesEventos, setOpcoesEventos] = useState([]);
   const [carregando, setCarregando] = useState(true);
+  const [erroPedidos, setErroPedidos] = useState("");
 
   const handleNavigate = (path) => {
     navigate(path);
@@ -63,6 +64,7 @@ function Pedidos() {
     const timer = setTimeout(async () => {
       try {
         setCarregando(true);
+        setErroPedidos("");
 
         const params = {};
         const buscaNormalizada = busca.trim().replace(/^#/, "");
@@ -71,7 +73,7 @@ function Pedidos() {
         if (eventoFiltro !== "TODOS") params.evento = eventoFiltro;
 
         const response = await api.get("/pedidos", { params });
-        const pedidosRecebidos = response.data ?? [];
+        const pedidosRecebidos = Array.isArray(response.data) ? response.data : [];
         if (!ativa) return;
 
         setPedidos(pedidosRecebidos);
@@ -110,6 +112,13 @@ function Pedidos() {
         if (ativa) {
           console.error("Erro ao buscar pedidos:", error);
           setPedidos([]);
+          setErroPedidos(
+            error.response?.data?.message ||
+            (error.name === "ApiRespostaFormatoInvalidoError" || error.isApiUnavailable
+              ? error.message
+              : "") ||
+            "Não foi possível carregar os pedidos."
+          );
         }
       } finally {
         if (ativa) setCarregando(false);
@@ -292,6 +301,8 @@ function Pedidos() {
 
         {carregando ? (
           <LoadingState label="Carregando pedidos…" />
+        ) : erroPedidos ? (
+          <p className="pedidos-vazio" role="alert">{erroPedidos}</p>
         ) : pedidosFiltrados.length === 0 ? (
           <p className="pedidos-vazio">Nenhum pedido encontrado.</p>
         ) : (

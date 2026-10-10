@@ -120,10 +120,15 @@ function Relatorios() {
     const [exibirEvolucaoEvento, setExibirEvolucaoEvento] = useState(false);
     const [erroRelatorio, setErroRelatorio] = useState("");
     const [carregandoRelatorio, setCarregandoRelatorio] = useState(false);
+    const [chaveRelatorioCarregado, setChaveRelatorioCarregado] = useState("");
 
     const intervaloInvalido = Boolean(
         dataInicial && dataFinal && dataInicial > dataFinal
     );
+    const chaveRelatorioAtual = `${tipoFiltro}|${dataInicial}|${dataFinal}|${eventoSelecionado}`;
+    const relatorioPendente = carregandoRelatorio
+        || (tipoFiltro === "periodo" && !intervaloInvalido && chaveRelatorioCarregado !== chaveRelatorioAtual)
+        || (tipoFiltro === "evento" && Boolean(eventoSelecionado) && chaveRelatorioCarregado !== chaveRelatorioAtual);
     const nenhumEventoTemDados = tipoFiltro === "evento"
         && Array.isArray(eventosComDados)
         && eventosComDados.length === 0;
@@ -267,6 +272,7 @@ function Relatorios() {
                 setAgrupamentoEvento("NENHUM");
                 setExibirEvolucaoEvento(false);
                 setErroRelatorio("Este evento não tem um período completo para gerar o relatório.");
+                setChaveRelatorioCarregado(chaveRelatorioAtual);
                 setCarregandoRelatorio(false);
                 return;
             }
@@ -310,6 +316,7 @@ function Relatorios() {
                 falhas.forEach((falha) => console.error("Erro ao carregar dados do evento:", falha.reason?.response?.data || falha.reason));
                 setErroRelatorio("Alguns dados do evento não puderam ser carregados.");
             }
+            setChaveRelatorioCarregado(chaveRelatorioAtual);
             setCarregandoRelatorio(false);
         }
 
@@ -339,8 +346,9 @@ function Relatorios() {
             const falhas = respostas.filter((resposta) => resposta.status === "rejected");
             if (falhas.length) {
                 falhas.forEach((falha) => console.error("Erro ao carregar dados do relatório:", falha.reason?.response?.data || falha.reason));
-                setErroRelatorio("Alguns dados do relatório não puderam ser carregados.");
+                setErroRelatorio("Não foi possível carregar os relatórios.");
             }
+            setChaveRelatorioCarregado(chaveRelatorioAtual);
             setCarregandoRelatorio(false);
         }
 
@@ -348,7 +356,7 @@ function Relatorios() {
         else carregarPorPeriodo();
 
         return () => { ativo = false; };
-        }, [dataInicial, dataFinal, intervaloInvalido, tipoFiltro, eventoSelecionado, eventos]);
+        }, [dataInicial, dataFinal, intervaloInvalido, tipoFiltro, eventoSelecionado, eventos, chaveRelatorioAtual]);
 
     return (
         <div className="relatorios-layout">
@@ -380,11 +388,11 @@ function Relatorios() {
                     </p>
                 )}
 
-                {erroRelatorio && (
-                    <p className="relatorio-erro-filtro" role="alert">{erroRelatorio}</p>
+                {!relatorioPendente && !verificandoEventos && erroRelatorio && (
+                    <p className="relatorio-erro-card" role="alert">{erroRelatorio}</p>
                 )}
 
-                {carregandoRelatorio && (
+                {relatorioPendente && (
                     <LoadingState className="relatorio-carregando" label="Carregando relatório…" />
                 )}
 
@@ -404,7 +412,7 @@ function Relatorios() {
                     <p className="relatorio-estado-vazio" role="status">Este evento ainda não possui pedidos dentro do período dele.</p>
                 )}
 
-                {!carregandoRelatorio && relatorioSemPedidos && (tipoFiltro === "periodo" || (!eventoSelecionadoSemDados && !nenhumEventoTemDados)) && (
+                {!relatorioPendente && relatorioSemPedidos && (tipoFiltro === "periodo" || (!eventoSelecionadoSemDados && !nenhumEventoTemDados)) && (
                     <section className="relatorio-vazio-card" role="status">
                         <span className="relatorio-vazio-icone" aria-hidden="true">
                             <ion-icon name="bar-chart-outline"></ion-icon>
@@ -420,7 +428,7 @@ function Relatorios() {
                     </section>
                 )}
 
-                {!carregandoRelatorio && !relatorioSemPedidos && (tipoFiltro === "periodo" || (tipoFiltro === "evento" && eventoSelecionado && !eventoSelecionadoSemDados && !nenhumEventoTemDados)) && <>
+                {!relatorioPendente && kpis !== null && !erroRelatorio && !relatorioSemPedidos && (tipoFiltro === "periodo" || (tipoFiltro === "evento" && eventoSelecionado && !eventoSelecionadoSemDados && !nenhumEventoTemDados)) && <>
                 <section className="kpis">
 
                     <Kpi

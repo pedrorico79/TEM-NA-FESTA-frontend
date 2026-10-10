@@ -12,6 +12,7 @@ import MeuPerfil from "./components/pages/MeuPerfil";
 import DetalhesPedido from "./components/pages/DetalhesPedido";
 
 import RotaLogin from "./RotaLogin";
+import RotaProtegida from "./RotaProtegida";
 
 export const routes = createBrowserRouter([
   {
@@ -24,44 +25,19 @@ export const routes = createBrowserRouter([
     element: <RotaLogin />,
   },
   {
-    path: "/pagina-inicial",
-    element: <PaginaInicial />,
-  },
-  {
-    path: "/pedidos",
-    element: <Pedidos />,
-  },
-  {
-    path: "/produtos",
-    element: <Produtos />,
-  },
-  {
-    path: "/novo-pedido",
-    element: <NovoPedido />,
-  },
-  {
-    path: "/relatorios",
-    element: <Relatorios />,
-  },
-  {
-    path: "/clientes",
-    element: <Clientes />,
-  },
-  {
-    path: "/eventos",
-    element: <Eventos />,
-  },
-  {
-    path: "/usuarios",
-    element: <Usuarios />,
-  },
-  {
-    path: "/meu-perfil",
-    element: <MeuPerfil />,
-  },
-  {
-    path: "/pedidos/:id",
-    element: <DetalhesPedido />,
+    element: <RotaProtegida />,
+    children: [
+      { path: "/pagina-inicial", element: <PaginaInicial /> },
+      { path: "/pedidos", element: <Pedidos /> },
+      { path: "/produtos", element: <Produtos /> },
+      { path: "/novo-pedido", element: <NovoPedido /> },
+      { path: "/relatorios", element: <Relatorios /> },
+      { path: "/clientes", element: <Clientes /> },
+      { path: "/eventos", element: <Eventos /> },
+      { path: "/usuarios", element: <Usuarios /> },
+      { path: "/meu-perfil", element: <MeuPerfil /> },
+      { path: "/pedidos/:id", element: <DetalhesPedido /> },
+    ],
   },
   {
     path: "*",

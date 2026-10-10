@@ -113,15 +113,18 @@ function PaginaInicial() {
 
         setKpis({
           pedidosAtivos:
-            (res.data.AGUARDANDO_SINAL || 0) +
-            (res.data.CONFIRMADO || 0) +
-            (res.data.EM_PRODUCAO || 0) +
-            (res.data.PRONTO_PARA_ENTREGA || 0),
-          aguardandoPreparo: res.data.CONFIRMADO,
-          emProducao: res.data.EM_PRODUCAO,
-          pagamentosPendentes: res.data.AGUARDANDO_SINAL
+            (res.data?.AGUARDANDO_SINAL || 0) +
+            (res.data?.CONFIRMADO || 0) +
+            (res.data?.EM_PRODUCAO || 0) +
+            (res.data?.PRONTO_PARA_ENTREGA || 0),
+          aguardandoPreparo: res.data?.CONFIRMADO || 0,
+          emProducao: res.data?.EM_PRODUCAO || 0,
+          pagamentosPendentes: res.data?.AGUARDANDO_SINAL || 0
         });
 
+      })
+      .catch((erro) => {
+        console.error("Erro ao carregar os indicadores da página inicial:", erro);
       });
 
 

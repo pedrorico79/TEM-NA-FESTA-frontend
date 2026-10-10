@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { api } from "./services/api";
 import Login from "./components/pages/Login";
 
 function RotaLogin() {
+    const location = useLocation();
     const [carregando, setCarregando] = useState(true);
     const [autenticado, setAutenticado] = useState(false);
 
@@ -28,10 +29,10 @@ function RotaLogin() {
     }
 
     if (autenticado) {
-        return <Navigate to="/pagina-inicial" replace />;
+        return <Navigate to={location.state?.from || "/pagina-inicial"} replace />;
     }
 
-    return <Login />;
+    return <Login destinoAposLogin={location.state?.from} />;
 }
 
 export default RotaLogin;

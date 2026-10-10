@@ -39,6 +39,41 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     --sidebar-width: 280px;
 }
 
+.api-estado {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 24px;
+    background: #FFFBF2;
+    color: #2c2421;
+    text-align: center;
+}
+
+.api-estado h1 {
+    font-family: "DM Serif Display", serif;
+    font-size: clamp(28px, 5vw, 40px);
+}
+
+.api-estado p {
+    color: #756b67;
+    font-size: 16px;
+}
+
+.api-estado button {
+    min-height: 44px;
+    margin-top: 6px;
+    padding: 0 20px;
+    border: 0;
+    border-radius: 14px;
+    background: #6f432a;
+    color: #fff;
+    font-size: 15px;
+    cursor: pointer;
+}
+
 @media (max-width: 1366px) {
     :root {
         --sidebar-width: 260px;

@@ -14,6 +14,22 @@ function TelaAutenticacaoSenha({
     const [carregando, setCarregando] = useState(false);
     const [mostrarSenha, setMostrarSenha] = useState(false);
 
+    function mensagemDoErro(err) {
+        const status = err.response?.status;
+        if (status === 400 || status === 401) return "Senha incorreta. Confira e tente novamente.";
+        if (status === 403) return "Seu usuário não tem permissão para acessar esta área.";
+        if (!err.response) {
+            if (err.isApiUnavailable) return "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.";
+            return err.message || "Não foi possível confirmar o acesso. Tente novamente.";
+        }
+        if (status >= 500) return "O servidor está indisponível no momento. Tente novamente em instantes.";
+
+        const mensagemApi = err.response.data?.message;
+        if (typeof mensagemApi === "string" && mensagemApi.trim()) return mensagemApi;
+        if (typeof err.message === "string" && err.message.trim()) return err.message;
+        return "Não foi possível confirmar o acesso. Tente novamente.";
+    }
+
     function handleSubmit(e) {
         e.preventDefault();
 
@@ -29,7 +45,7 @@ function TelaAutenticacaoSenha({
         onSucesso(senha)
             .catch((err) => {
                 console.error(err);
-                setErro("Senha incorreta ou acesso não autorizado.");
+                setErro(mensagemDoErro(err));
             })
             .finally(() => {
                 setCarregando(false);

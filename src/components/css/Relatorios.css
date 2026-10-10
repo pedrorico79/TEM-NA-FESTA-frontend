@@ -85,11 +85,21 @@
     color: #756b67;
 }
 
-.relatorio-carregando {
-    padding: 14px 18px;
+.relatorio-erro-card {
+    margin: 24px 0;
+    padding: 24px;
     border: 1px solid #e7e0da;
-    border-radius: 12px;
-    background: #fff;
+    border-radius: 16px;
+    background: white;
+    color: #7f6c63;
+    text-align: center;
+}
+
+.relatorio-carregando {
+    padding: 14px 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
 }
 
 .relatorio-vazio-card {

@@ -63,14 +63,22 @@ function Usuarios() {
     const usuariosPorPagina = 7;
 
     async function autenticarAcesso(senhaAcesso) {
-        const usuarioAtual = await buscarUsuarioAtual();
+        let usuarioAtual;
+        try {
+            usuarioAtual = await buscarUsuarioAtual();
+        } catch (apiErro) {
+            if (!apiErro.response || apiErro.isApiUnavailable || apiErro.response.status >= 500) {
+                throw apiErro;
+            }
+            throw new Error("Ocorreu um erro no sistema. Tente novamente mais tarde.", { cause: apiErro });
+        }
 
         if (String(usuarioAtual?.perfil || "").toUpperCase() !== "ADMIN") {
             throw new Error("Apenas administradores podem acessar esta página.");
         }
 
         if (!usuarioAtual?.email) {
-            throw new Error("Não foi possível identificar o administrador da sessão.");
+            throw new Error("Ocorreu um erro no sistema. Tente novamente mais tarde.");
         }
 
         await api.post("/usuarios/login", {

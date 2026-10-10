@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../services/api";
 
-function Login() {
+function Login({ destinoAposLogin }) {
 
   const [emailDigitado, setEmailDigitado] = useState("");
   const [senhaDigitada, setSenhaDigitada] = useState("");
@@ -25,7 +25,7 @@ function Login() {
         console.log("Usuário logado!");
 
 
-        navigate("/pagina-inicial");
+        navigate(destinoAposLogin || "/pagina-inicial", { replace: true });
 
       })
       .catch((erro) => {

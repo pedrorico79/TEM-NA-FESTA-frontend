@@ -37,7 +37,7 @@ function Clientes() {
     const [modalVisualizarOpen, setModalVisualizarOpen] = useState(false);
     const [clienteVisualizado, setClienteVisualizado] = useState(null);
     const requisicaoBuscaAtual = useRef(0);
-    const [carregando, setCarregando] = useState(false);
+    const [carregando, setCarregando] = useState(true);
     const [erroBusca, setErroBusca] = useState("");
 
     const itensPorPagina = 7;
@@ -72,7 +72,7 @@ function Clientes() {
         })
             .then((response) => {
                 if (requisicao === requisicaoBuscaAtual.current) {
-                    setClientes(response.data);
+                    setClientes(Array.isArray(response.data) ? response.data : []);
                     setCarregando(false);
                 }
             })
@@ -278,10 +278,7 @@ function Clientes() {
                     {carregando ? (
                         <LoadingState className="clientes-estado" label="Carregando clientes…" />
                     ) : erroBusca ? (
-                        <div className="clientes-estado clientes-estado-erro" role="alert">
-                            <span>{erroBusca}</span>
-                            <button type="button" onClick={() => buscarClientes(busca)}>Tentar novamente</button>
-                        </div>
+                        <p className="clientes-estado" role="alert">{erroBusca}</p>
                     ) : clientesPaginados.length > 0 ? (
                         <TabelaClientes
                             clientes={clientesPaginados}

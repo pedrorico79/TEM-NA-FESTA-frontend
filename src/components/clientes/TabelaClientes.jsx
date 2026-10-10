@@ -30,6 +30,7 @@ function TabelaClientes({
     onRemover,
     onVisualizar
 }) {
+    const listaClientes = Array.isArray(clientes) ? clientes : [];
 
     function formatarEndereco(endereco) {
         if (!endereco) {
@@ -45,7 +46,7 @@ function TabelaClientes({
         return `${logradouro}, ${numero}${complemento}`;
     }
 
-    const data = clientes.map((cliente) => [
+    const data = listaClientes.map((cliente) => [
         <div className="cliente-identificacao">
             <span className="cliente-nome-tabela">{truncarTexto(cliente.nome, 25)}</span>
             <span className="cliente-contatos-mobile">
@@ -114,7 +115,7 @@ function TabelaClientes({
                 ]}
                 data={data}
                 onRowClick={(row, index) =>
-                    onVisualizar(clientes[index])
+                    onVisualizar(listaClientes[index])
                 }
             />
         </div>
