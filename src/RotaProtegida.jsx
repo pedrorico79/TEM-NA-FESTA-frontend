@@ -17,7 +17,8 @@ function RotaProtegida() {
             })
             .catch((erro) => {
                 if (!ativo) return;
-                setEstado(erro.response?.status === 401 ? "nao-autenticado" : "erro");
+                const status = erro.response?.status;
+                setEstado(status === 401 || status === 403 ? "nao-autenticado" : "erro");
             });
 
         return () => { ativo = false; };
