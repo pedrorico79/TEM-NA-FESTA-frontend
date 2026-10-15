@@ -99,6 +99,7 @@ api.interceptors.response.use(
             window.location.replace("/login");
         }
 
+
         if (!erro.response) {
             erro.message = "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.";
             erro.isApiUnavailable = true;
