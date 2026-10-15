@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Modal from "../shared/modal/Modal";
 import { nomePerfilUsuario } from "../../utils/perfilUsuario";
+import { mensagemErroApi } from "../../utils/mensagemErroApi";
 
 function ModalNovoUsuario(props) {
     const [mostrarSenha, setMostrarSenha] = useState(false);
@@ -32,6 +33,10 @@ function ModalNovoUsuario(props) {
             alert("Preencha nome, e-mail, senha e perfil.");
             return;
         }
+        if (novoUsuario.senha.length < 8 || novoUsuario.senha.length > 72) {
+            alert("A senha deve ter entre 8 e 72 caracteres.");
+            return;
+        }
 
         props.onSalvar({
             nome: novoUsuario.nome,
@@ -52,7 +57,7 @@ function ModalNovoUsuario(props) {
             })
             .catch((erro) => {
                 console.error(erro);
-                alert(erro.response?.data?.message || "Erro ao cadastrar usuário.");
+                alert(mensagemErroApi(erro, "Erro ao cadastrar usuário."));
             });
     }
 
@@ -93,6 +98,9 @@ function ModalNovoUsuario(props) {
                                 value={novoUsuario.senha}
                                 onChange={handleChange}
                                 autoComplete="new-password"
+                                minLength={8}
+                                maxLength={72}
+                                required
                             />
                             <button
                                 type="button"
@@ -103,6 +111,7 @@ function ModalNovoUsuario(props) {
                                 <ion-icon name={mostrarSenha ? "eye-outline" : "eye-off-outline"}></ion-icon>
                             </button>
                         </div>
+                        <small>A senha deve ter entre 8 e 72 caracteres.</small>
                     </div>
                     <div className="form-group">
                         <label>Perfil *</label>

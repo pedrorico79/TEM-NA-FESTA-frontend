@@ -18,7 +18,8 @@ import TelaAutenticacaoSenha from "../usuarios/TelaAutenticacaoSenha";
 import Paginacao from "../shared/paginacao/Paginacao";
 
 import { api } from "../../services/api";
-import { buscarUsuarioAtual, obterUsuarioAtualEmCache } from "../../services/usuarioAtual";
+import { buscarUsuarioAtual, limparUsuarioAtualEmCache, obterUsuarioAtualEmCache } from "../../services/usuarioAtual";
+import { mensagemErroApi } from "../../utils/mensagemErroApi";
 
 import ModalConfirmacao from "../shared/modal/ModalConfirmacao";
 
@@ -31,6 +32,8 @@ function Usuarios() {
     const [usuarioAtualId, setUsuarioAtualId] = useState(obterUsuarioAtualEmCache()?.id ?? null);
 
     const [usuarios, setUsuarios] = useState([]);
+
+    const [erroUsuarios, setErroUsuarios] = useState("");
 
     const [perfisDisponiveis, setPerfisDisponiveis] = useState([]);
 
@@ -101,6 +104,7 @@ function Usuarios() {
         }
 
 
+        setErroUsuarios("");
         api.get("/usuarios", {
             params: {
                 nome: termo.trim() || undefined,
@@ -117,6 +121,7 @@ function Usuarios() {
                 console.error("ERRO AO BUSCAR USUÁRIOS:", erro);
                 setUsuarios([]);
                 setTotalPaginas(1);
+                setErroUsuarios(mensagemErroApi(erro, "Não foi possível carregar os usuários."));
             });
 
     }
@@ -190,15 +195,19 @@ function Usuarios() {
 
     function editarUsuario(usuario) {
         const { id, nome, email, perfilId } = usuario;
-        return api.put(`/usuarios/${id}`, { nome, email, perfilId })
+        const editandoProprioPerfil = String(id) === String(usuarioAtualId);
+        const endpoint = editandoProprioPerfil ? "/usuarios/me" : `/usuarios/${id}`;
+        const dados = editandoProprioPerfil ? { nome, email } : { nome, email, perfilId };
 
-            .then((response) => {
-
-                buscarUsuarios();
-
-                return response.data;
-
-            });
+        return api.put(endpoint, dados).then(async (response) => {
+            if (editandoProprioPerfil) {
+                limparUsuarioAtualEmCache();
+                const usuarioAtualizado = await buscarUsuarioAtual();
+                setUsuarioAtualId(usuarioAtualizado.id);
+            }
+            buscarUsuarios();
+            return response.data;
+        });
 
     }
 
@@ -239,7 +248,7 @@ function Usuarios() {
 
                 console.error(erro);
 
-                alert("Erro ao remover usuário.");
+                alert(mensagemErroApi(erro, "Erro ao remover usuário."));
 
             });
 
@@ -276,7 +285,7 @@ function Usuarios() {
                     "Erro ao alterar status do usuário:",
                     erro
                 );
-                alert(erro.response?.data?.message || "Erro ao alterar o status do usuário.");
+                alert(mensagemErroApi(erro, "Erro ao alterar o status do usuário."));
 
             });
 
@@ -350,6 +359,8 @@ function Usuarios() {
 
                             </div>
 
+                        {erroUsuarios && <p className="usuarios-erro-lista" role="alert">{erroUsuarios}</p>}
+
                             <TabelaUsuarios
                                 usuarios={usuariosPaginados}
                                 usuarioAtualId={usuarioAtualId}
@@ -397,6 +408,7 @@ function Usuarios() {
                         open={modalOpen}
                         Usuario={usuarioselecionado}
                         bloquearPerfil={String(usuarioselecionado?.id) === String(usuarioAtualId)}
+                        proprioUsuario={String(usuarioselecionado?.id) === String(usuarioAtualId)}
                         perfis={perfisDisponiveis}
                         onClose={() =>
                             setModalOpen(false)

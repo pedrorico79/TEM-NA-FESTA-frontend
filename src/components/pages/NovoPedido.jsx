@@ -49,11 +49,11 @@ function NovoPedido() {
                     eventosResponse
                 ] = await Promise.all([
 
-                    api.get("/clientes"),
+                    api.get("/clientes", { params: { ativos: true } }),
 
-                    api.get("/produtos"),
+                    api.get("/produtos", { params: { ativos: true } }),
 
-                    api.get("/eventos"),
+                    api.get("/eventos", { params: { ativos: true } }),
 
                 ]);
 

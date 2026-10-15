@@ -16,7 +16,8 @@ function TelaAutenticacaoSenha({
 
     function mensagemDoErro(err) {
         const status = err.response?.status;
-        if (status === 400 || status === 401) return "Senha incorreta. Confira e tente novamente.";
+        if (status === 401) return "E-mail ou senha inválidos. Confira e tente novamente.";
+        if (status === 429) return "Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.";
         if (status === 403) return "Seu usuário não tem permissão para acessar esta área.";
         if (!err.response) {
             if (err.isApiUnavailable) return "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.";

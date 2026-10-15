@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Modal from "../shared/modal/Modal";
 import { nomePerfilUsuario } from "../../utils/perfilUsuario";
+import { mensagemErroApi } from "../../utils/mensagemErroApi";
 
 function ModalEditarUsuario(props) {
     const [UsuarioEditado, setUsuarioEditado] = useState({
@@ -50,7 +51,7 @@ function ModalEditarUsuario(props) {
             })
             .catch((erro) => {
                 console.error(erro);
-                alert(erro.response?.data?.message || "Erro ao editar usuário.");
+                alert(mensagemErroApi(erro, "Erro ao editar usuário."));
             });
     }
 
@@ -82,6 +83,15 @@ function ModalEditarUsuario(props) {
                             value={UsuarioEditado.email}
                             onChange={handleChange}
                         />
+                        {UsuarioEditado.email.trim()
+                            && UsuarioEditado.email.trim().toLowerCase() !== (props.Usuario?.email || "").trim().toLowerCase()
+                            && (
+                            <small className="usuario-aviso-email">
+                                {props.proprioUsuario
+                                    ? "Sua sessão será atualizada com o novo e-mail."
+                                    : "A pessoa precisará entrar novamente com o novo e-mail."}
+                            </small>
+                        )}
                     </div>
 
                     {!props.bloquearPerfil && (

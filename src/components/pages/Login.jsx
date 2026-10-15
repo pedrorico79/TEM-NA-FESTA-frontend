@@ -33,7 +33,20 @@ function Login({ destinoAposLogin }) {
         console.log(erro.response?.data);
         console.log(erro.response?.status);
 
-        alert("Email ou senha inválidos");
+        if (erro.response?.status === 429) {
+          const segundos = Number(erro.response.headers?.["retry-after"]);
+          alert(segundos
+            ? `Muitas tentativas. Aguarde ${Math.ceil(segundos / 60)} minuto(s) antes de tentar novamente.`
+            : "Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.");
+          return;
+        }
+
+        if (erro.response?.status === 401) {
+          alert("E-mail ou senha inválidos.");
+          return;
+        }
+
+        alert("Não foi possível entrar. Tente novamente em instantes.");
       });
   }
 

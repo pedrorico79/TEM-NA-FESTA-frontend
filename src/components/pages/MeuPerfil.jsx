@@ -97,6 +97,10 @@ function MeuPerfil() {
             setErroSenha("Informe a nova senha.");
             return;
         }
+        if (novaSenha.length < 8 || novaSenha.length > 72) {
+            setErroSenha("A senha deve ter entre 8 e 72 caracteres.");
+            return;
+        }
         if (novaSenha !== confirmarSenha) {
             setErroSenha("As senhas não coincidem.");
             return;
@@ -188,12 +192,15 @@ function MeuPerfil() {
                                                     value={novaSenha}
                                                     onChange={(event) => setNovaSenha(event.target.value)}
                                                     autoComplete="new-password"
+                                                    minLength={8}
+                                                    maxLength={72}
                                                     required
                                                 />
                                                 <button type="button" className="botao-mostrar-senha" onClick={() => setMostrarSenha((atual) => !atual)} aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}>
                                                     <ion-icon name={mostrarSenha ? "eye-outline" : "eye-off-outline"}></ion-icon>
                                                 </button>
                                             </div>
+                                            <small>A senha deve ter entre 8 e 72 caracteres.</small>
                                         </div>
                                         <div className="meu-perfil-campo">
                                             <label htmlFor="meu-perfil-confirmar-senha">Confirmar nova senha *</label>
@@ -205,6 +212,7 @@ function MeuPerfil() {
                                                     value={confirmarSenha}
                                                     onChange={(event) => setConfirmarSenha(event.target.value)}
                                                     autoComplete="new-password"
+                                                    maxLength={72}
                                                     required
                                                 />
                                                 <button type="button" className="botao-mostrar-senha" onClick={() => setMostrarConfirmacao((atual) => !atual)} aria-label={mostrarConfirmacao ? "Ocultar confirmação" : "Mostrar confirmação"}>

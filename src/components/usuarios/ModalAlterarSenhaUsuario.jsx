@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Modal from "../shared/modal/Modal";
+import { mensagemErroApi } from "../../utils/mensagemErroApi";
 
 function ModalAlterarSenhaUsuario(props) {
     const [novaSenha, setNovaSenha] = useState("");
@@ -23,6 +24,10 @@ function ModalAlterarSenhaUsuario(props) {
             alert("A nova senha é obrigatória.");
             return;
         }
+        if (novaSenha.length < 8 || novaSenha.length > 72) {
+            alert("A senha deve ter entre 8 e 72 caracteres.");
+            return;
+        }
 
         if (novaSenha !== confirmarSenha) {
             alert("As senhas não coincidem.");
@@ -41,7 +46,7 @@ function ModalAlterarSenhaUsuario(props) {
             })
             .catch((erro) => {
                 console.error(erro);
-                alert(erro.response?.data?.message || "Erro ao alterar senha do usuário.");
+                alert(mensagemErroApi(erro, "Erro ao alterar senha do usuário."));
             });
     }
 
@@ -63,11 +68,15 @@ function ModalAlterarSenhaUsuario(props) {
                                 onChange={(e) => setNovaSenha(e.target.value)}
                                 placeholder="Digite a nova senha"
                                 autoComplete="new-password"
+                                minLength={8}
+                                maxLength={72}
+                                required
                             />
                             <button type="button" className="botao-mostrar-senha" onClick={() => setMostrarSenha((atual) => !atual)} aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}>
                                 <ion-icon name={mostrarSenha ? "eye-outline" : "eye-off-outline"}></ion-icon>
                             </button>
                         </div>
+                        <small>A senha deve ter entre 8 e 72 caracteres.</small>
                     </div>
 
                     <div className="form-group">
@@ -80,6 +89,8 @@ function ModalAlterarSenhaUsuario(props) {
                                 onChange={(e) => setConfirmarSenha(e.target.value)}
                                 placeholder="Confirme a nova senha"
                                 autoComplete="new-password"
+                                maxLength={72}
+                                required
                             />
                             <button type="button" className="botao-mostrar-senha" onClick={() => setMostrarConfirmacao((atual) => !atual)} aria-label={mostrarConfirmacao ? "Ocultar confirmação" : "Mostrar confirmação"}>
                                 <ion-icon name={mostrarConfirmacao ? "eye-outline" : "eye-off-outline"}></ion-icon>
