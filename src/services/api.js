@@ -90,6 +90,14 @@ api.interceptors.response.use(
         return Promise.reject(erro);
     },
     (erro) => {
+        const caminho = caminhoDaRequisicao(erro.config);
+        if (erro.response?.status === 401
+            && caminho !== "/usuarios/login"
+            && typeof window !== "undefined"
+            && window.location.pathname.replace(/\/+$/, "") !== "/login") {
+            window.location.replace("/login");
+        }
+
         if (!erro.response) {
             erro.message = "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.";
             erro.isApiUnavailable = true;

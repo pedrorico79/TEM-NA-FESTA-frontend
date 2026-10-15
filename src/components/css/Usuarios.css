@@ -780,6 +780,23 @@
   z-index: 9999;
 }
 
+.usuarios-erro-lista {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  border: 1px solid #f3b4bd;
+  border-radius: 12px;
+  background: #fff1f2;
+  color: #8f2639;
+  line-height: 1.45;
+}
+
+.usuario-aviso-email {
+  display: block;
+  margin-top: 7px;
+  color: #745d50;
+  line-height: 1.4;
+}
+
 .input-valor {
   display: flex;
   align-items: center;

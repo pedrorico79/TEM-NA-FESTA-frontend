@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Modal from "../shared/modal/Modal";
+import { mensagemErroApi } from "../../utils/mensagemErroApi";
 
 function ModalAlterarSenhaUsuario(props) {
     const [novaSenha, setNovaSenha] = useState("");
@@ -41,7 +42,7 @@ function ModalAlterarSenhaUsuario(props) {
             })
             .catch((erro) => {
                 console.error(erro);
-                alert(erro.response?.data?.message || "Erro ao alterar senha do usuário.");
+                alert(mensagemErroApi(erro, "Erro ao alterar senha do usuário."));
             });
     }
 

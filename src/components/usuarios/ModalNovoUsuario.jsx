@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Modal from "../shared/modal/Modal";
 import { nomePerfilUsuario } from "../../utils/perfilUsuario";
+import { mensagemErroApi } from "../../utils/mensagemErroApi";
 
 function ModalNovoUsuario(props) {
     const [mostrarSenha, setMostrarSenha] = useState(false);
@@ -52,7 +53,7 @@ function ModalNovoUsuario(props) {
             })
             .catch((erro) => {
                 console.error(erro);
-                alert(erro.response?.data?.message || "Erro ao cadastrar usuário.");
+                alert(mensagemErroApi(erro, "Erro ao cadastrar usuário."));
             });
     }
 

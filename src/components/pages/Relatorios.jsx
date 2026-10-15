@@ -136,12 +136,17 @@ function Relatorios() {
         && Boolean(eventoSelecionado)
         && Array.isArray(eventosComDados)
         && !eventosComDados.includes(eventoSelecionado);
+    const possuiFaturamentoOuProdutos = Number(kpis?.faturamentoTotal || 0) > 0
+        || produtosMaisVendidos.length > 0;
     const relatorioSemPedidos = kpis !== null
         && !carregandoRelatorio
         && !erroRelatorio
         && (tipoFiltro === "evento"
-            ? Boolean(eventoSelecionado) && Number(kpis?.totalPedidos || 0) === 0
-            : Number(kpis?.totalPedidos || 0) === 0);
+            ? Boolean(eventoSelecionado)
+                && Number(kpis?.totalPedidos || 0) === 0
+                && !possuiFaturamentoOuProdutos
+            : Number(kpis?.totalPedidos || 0) === 0
+                && !possuiFaturamentoOuProdutos);
 
     function obterEventoMaisRecente(listaEventos) {
         const comDataFim = listaEventos.filter((evento) => evento.dataFim);
@@ -212,26 +217,33 @@ function Relatorios() {
 
         let ativo = true;
         setVerificandoEventos(true);
-        api.get("/pedidos")
-            .then((response) => {
+        const eventosComPeriodo = eventos.filter((evento) => evento.dataInicio && evento.dataFim);
+        Promise.allSettled(eventosComPeriodo.map((evento) =>
+            api.get("/relatorios/kpis", {
+                params: {
+                    de: evento.dataInicio,
+                    ate: evento.dataFim,
+                    eventoId: evento.id,
+                },
+            })
+        ))
+            .then((respostas) => {
                 if (!ativo) return;
-                const pedidos = response.data || [];
-                const eventosQueTemPedidos = eventos.filter((evento) => {
-                    const inicio = evento.dataInicio || "";
-                    const fim = evento.dataFim || "9999-12-31";
-                    return pedidos.some((pedido) => {
-                        if (String(pedido.eventoId) !== String(evento.id)) return false;
-                        const dataPedido = String(pedido.dataPedido || pedido.dataEntrega || "").slice(0, 10);
-                        return dataPedido && dataPedido >= inicio && dataPedido <= fim;
-                    });
+                const eventosQueTemDados = respostas.flatMap((resposta, index) => {
+                    if (resposta.status !== "fulfilled") return [];
+                    const dados = resposta.value.data;
+                    return Number(dados?.totalPedidos || 0) > 0
+                        || Number(dados?.faturamentoTotal || 0) > 0
+                        ? [String(eventosComPeriodo[index].id)]
+                        : [];
                 });
-                setEventosComDados(eventosQueTemPedidos.map((evento) => String(evento.id)));
+                setEventosComDados(eventosQueTemDados);
             })
             .catch((error) => {
-                console.error("Erro ao verificar eventos com pedidos:", error.response?.data || error);
+                console.error("Erro ao verificar eventos com dados:", error.response?.data || error);
                 if (ativo) {
                     setEventosComDados(false);
-                    setErroRelatorio("Não foi possível verificar quais eventos têm pedidos.");
+                    setErroRelatorio("Não foi possível verificar quais eventos têm dados.");
                 }
             })
             .finally(() => {
@@ -451,9 +463,11 @@ function Relatorios() {
 
                     <Kpi
                         icon="checkmark-circle"
-                        title="FATURAMENTO TOTAL"
+                        title="FATURAMENTO"
                         value={`R$ ${kpis?.faturamentoTotal ?? 0}`}
-                        description={`${kpis?.totalEntregues ?? 0} entregue(s)`}
+                        description={tipoFiltro === "evento"
+                            ? "Vendas pelo valor dos pedidos deste evento"
+                            : "Vendas pelo valor dos pedidos no período"}
                         iconColor="#22c55e"
                         iconBackground="#dcfce7"
                     />
