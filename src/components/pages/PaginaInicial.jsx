@@ -119,7 +119,7 @@ function PaginaInicial() {
             (res.data?.PRONTO_PARA_ENTREGA || 0),
           aguardandoPreparo: res.data?.CONFIRMADO || 0,
           emProducao: res.data?.EM_PRODUCAO || 0,
-          pagamentosPendentes: res.data?.AGUARDANDO_SINAL || 0
+          pagamentosPendentes: res.data?.PAGAMENTOS_PENDENTES || 0
         });
 
       })

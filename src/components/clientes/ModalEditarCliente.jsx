@@ -9,10 +9,13 @@ function normalizarTexto(valor = "") {
 }
 
 function ModalEditarCliente(props) {
+    const somenteDadosCliente = Boolean(props.somenteDadosCliente);
+    const modoPaginaUnica = Boolean(props.modoPaginaUnica || somenteDadosCliente);
     const [buscandoCep, setBuscandoCep] = useState(false);
     const [buscandoRua, setBuscandoRua] = useState(false);
     const [enderecosEncontrados, setEnderecosEncontrados] = useState([]);
     const [erroEndereco, setErroEndereco] = useState("");
+    const [erroFormulario, setErroFormulario] = useState("");
     const buscaAtual = useRef(0);
     const buscaRuaTimer = useRef(null);
     const formRef = useRef(null);
@@ -61,6 +64,7 @@ function ModalEditarCliente(props) {
         setBuscandoRua(false);
         setEnderecosEncontrados([]);
         setErroEndereco("");
+        setErroFormulario("");
         setEtapa(1);
         if (!props.open || !props.cliente) return;
 
@@ -81,6 +85,7 @@ function ModalEditarCliente(props) {
     }, [props.open, props.cliente]);
 
     function handleChange(e) {
+        setErroFormulario("");
         const { name } = e.target;
         const value = ["telefone", "whatsapp"].includes(name)
             ? aplicarMascaraTelefone(e.target.value)
@@ -235,17 +240,22 @@ function ModalEditarCliente(props) {
 
     function validarDados() {
         if (!clienteEditado.nome.trim()) {
-            props.onErro("O nome do cliente é obrigatório.");
+            reportarErro("O nome do cliente é obrigatório.");
             return false;
         }
 
         if (![clienteEditado.telefone, clienteEditado.whatsapp, clienteEditado.instagram]
             .some((contato) => contato.trim())) {
-            props.onErro("Informe pelo menos um meio de contato: telefone, WhatsApp ou Instagram.");
+            reportarErro("Informe pelo menos um meio de contato: telefone, WhatsApp ou Instagram.");
             return false;
         }
 
         return true;
+    }
+
+    function reportarErro(mensagem) {
+        setErroFormulario(mensagem);
+        props.onErro?.(mensagem);
     }
 
     function irParaEndereco(e) {
@@ -264,37 +274,52 @@ function ModalEditarCliente(props) {
         e.preventDefault();
         if (!validarDados()) return;
 
-        const endereco = [clienteEditado.cep, clienteEditado.logradouro, clienteEditado.numero,
-            clienteEditado.complemento, clienteEditado.bairro, clienteEditado.cidade, clienteEditado.estado];
-        if (endereco.some((campo) => campo.trim()) && endereco.some((campo, indice) =>
-            indice !== 3 && !campo.trim())) {
-            props.onErro("Para salvar o endereço, preencha CEP, logradouro, número, bairro, cidade e estado.");
-            return;
-        }
+        if (!somenteDadosCliente) {
+            const endereco = [clienteEditado.cep, clienteEditado.logradouro, clienteEditado.numero,
+                clienteEditado.complemento, clienteEditado.bairro, clienteEditado.cidade, clienteEditado.estado];
+            if (endereco.some((campo) => campo.trim()) && endereco.some((campo, indice) =>
+                indice !== 3 && !campo.trim())) {
+                reportarErro("Para salvar o endereço, preencha CEP, logradouro, número, bairro, cidade e estado.");
+                return;
+            }
 
-        if (endereco.some((campo) => campo.trim()) && normalizarCep(clienteEditado.cep).length !== 8) {
-            props.onErro("O CEP deve conter 8 números.");
-            return;
-        }
+            if (endereco.some((campo) => campo.trim()) && normalizarCep(clienteEditado.cep).length !== 8) {
+                reportarErro("O CEP deve conter 8 números.");
+                return;
+            }
 
-        if (enderecosEncontrados.length > 0) {
-            props.onErro("Escolha um dos endereços sugeridos antes de salvar.");
-            return;
+            if (enderecosEncontrados.length > 0) {
+                reportarErro("Escolha um dos endereços sugeridos antes de salvar.");
+                return;
+            }
         }
 
         props.onSalvar({
             id: props.cliente.id,
-            enderecoId: props.cliente.endereco?.id,
-            ...clienteEditado,
+            nome: clienteEditado.nome,
+            telefone: clienteEditado.telefone,
+            whatsapp: clienteEditado.whatsapp,
+            anotacoes: clienteEditado.anotacoes,
             instagram: clienteEditado.instagram ? `@${clienteEditado.instagram}` : "",
+            ...(!somenteDadosCliente && {
+                enderecoId: props.cliente.endereco?.id,
+                cep: clienteEditado.cep,
+                logradouro: clienteEditado.logradouro,
+                numero: clienteEditado.numero,
+                complemento: clienteEditado.complemento,
+                bairro: clienteEditado.bairro,
+                cidade: clienteEditado.cidade,
+                estado: clienteEditado.estado,
+            }),
         })
             .then(() => {
+                setErroFormulario("");
                 props.onClose();
                 props.onSucesso();
             })
             .catch((erro) => {
                 console.error(erro);
-                props.onErro(erro.response?.data?.message || erro.response?.data?.detail ||
+                reportarErro(erro.response?.data?.message || erro.response?.data?.detail ||
                     "Não foi possível editar o cliente. Confira os dados e tente novamente.");
             });
     }
@@ -305,15 +330,28 @@ function ModalEditarCliente(props) {
             onClose={props.onClose}
             title="Editar Cliente"
         >
-            <form ref={formRef} className="form-cliente" onSubmit={etapa === 1 ? irParaEndereco : salvar}>
+            <form
+                ref={formRef}
+                className={`form-cliente${modoPaginaUnica ? " form-cliente-pagina-unica" : ""}`}
+                onSubmit={modoPaginaUnica ? salvar : etapa === 1 ? irParaEndereco : salvar}
+            >
 
-                <div className="cliente-etapa-indicador">
+                {props.descricaoContexto && (
+                    <p className="cliente-edicao-contexto">{props.descricaoContexto}</p>
+                )}
+                {props.mostrarErroInline && erroFormulario && (
+                    <p className="cliente-edicao-erro" role="alert">{erroFormulario}</p>
+                )}
+
+                {!modoPaginaUnica && <div className="cliente-etapa-indicador">
                     <span>Etapa {etapa} de 2</span>
                     <strong>{etapa === 1 ? "Dados do cliente" : "Endereço"}</strong>
-                </div>
+                </div>}
 
-                {etapa === 1 && (
+                {(modoPaginaUnica || etapa === 1) && (
                     <>
+
+                {modoPaginaUnica && <h3 className="cliente-form-secao-titulo">Dados do cliente</h3>}
 
                 <div className="form-grid">
 
@@ -377,20 +415,29 @@ function ModalEditarCliente(props) {
                     />
                 </div>
 
-                <div className="modal-actions">
+                {!modoPaginaUnica && <div className="modal-actions">
                     <button type="button" className="secondary-button" onClick={props.onClose}>
                         Cancelar
                     </button>
                     <button type="submit" className="primary-button">
                         Próximo
                     </button>
-                </div>
+                </div>}
+                {somenteDadosCliente && <div className="modal-actions">
+                    <button type="button" className="secondary-button" onClick={props.onClose}>
+                        Cancelar
+                    </button>
+                    <button type="submit" className="primary-button">
+                        Confirmar
+                    </button>
+                </div>}
 
                     </>
                 )}
 
-                {etapa === 2 && (
+                {!somenteDadosCliente && (modoPaginaUnica || etapa === 2) && (
                     <>
+                {modoPaginaUnica && <h3 className="cliente-form-secao-titulo cliente-form-secao-endereco">Endereço</h3>}
                 <div className="form-grid">
 
                     <div className="form-group">
@@ -512,13 +559,11 @@ function ModalEditarCliente(props) {
                     <button type="button" className="secondary-button" onClick={props.onClose}>
                         Cancelar
                     </button>
-                    <button
+                    {!modoPaginaUnica && <button
                         type="button"
                         className="secondary-button"
                         onClick={voltarParaDados}
-                    >
-                        Voltar
-                    </button>
+                    >Voltar</button>}
 
                     <button
                         type="submit"

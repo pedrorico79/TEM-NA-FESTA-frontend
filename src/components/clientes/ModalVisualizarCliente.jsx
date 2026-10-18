@@ -21,6 +21,11 @@ function ModalVisualizarCliente({
                         <p>{cliente.nome || "-"}</p>
                     </div>
 
+                    <div className="cliente-detalhe cliente-anotacoes">
+                        <strong>Anotações</strong>
+                        <p>{cliente.anotacoes?.trim() || "Nenhuma anotação cadastrada."}</p>
+                    </div>
+
                     <div className="form-grid">
 
                         <div className="cliente-detalhe">
@@ -80,13 +85,6 @@ function ModalVisualizarCliente({
                                     cliente.endereco.estado || ""
                                 } · CEP ${cliente.endereco.cep || "-"}`
                                 : "-"}
-                        </p>
-                    </div>
-
-                    <div className="cliente-detalhe">
-                        <strong>Anotações</strong>
-                        <p>
-                            {cliente.anotacoes || "-"}
                         </p>
                     </div>
 

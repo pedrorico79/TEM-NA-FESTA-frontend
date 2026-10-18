@@ -400,6 +400,18 @@
   background: #f8f2eb;
 }
 
+.cliente-anotacao-preview {
+  display: -webkit-box;
+  max-width: 320px;
+  overflow: hidden;
+  color: #756b67;
+  font-size: 12px;
+  line-height: 1.35;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 .alerta-cliente {
   position: fixed;
   top: 20px;
@@ -446,6 +458,12 @@
   color: #2c2421;
   font-size: 17px;
   line-height: 1.5;
+}
+
+.cliente-anotacoes {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #f8f2eb;
 }
 
 .cliente-detalhes .form-grid {

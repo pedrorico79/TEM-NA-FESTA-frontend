@@ -6,40 +6,21 @@ import Menu from "../shared/menu/Menu";
 import LoadingState from "../shared/LoadingState";
 
 import DadosCliente from "../detalhesPedido/DadosCliente";
-import EnderecoPedido from "../detalhesPedido/EnderecoPedido";
+import InformacoesPedido from "../detalhesPedido/InformacoesPedido";
+import ModalEditarDadosPedido from "../detalhesPedido/ModalEditarDadosPedido";
 import ModalEditarItensPedido from "../detalhesPedido/ModalEditarItensPedido";
 import ModalEditarCliente from "../clientes/ModalEditarCliente";
-import Modal from "../shared/modal/Modal";
-
 import ItensPedido from "../detalhesPedido/ItensPedido";
 
 import PagamentosPedido from "../detalhesPedido/PagamentosPedido";
+import ModalAdicionarPagamento from "../detalhesPedido/ModalAdicionarPagamento";
+import ModalConfirmacao from "../shared/modal/ModalConfirmacao";
+import FiltroDropdown from "../pedidos/FiltroDropdown";
 
 
 import { api } from "../../services/api";
 
 import "../css/DetalhesPedido.css";
-
-function formatarEndereco(endereco) {
-    if (!endereco) {
-        return "Não informado";
-    }
-
-    return `${endereco.logradouro}, ${endereco.numero}${
-        endereco.complemento
-            ? ` - ${endereco.complemento}`
-            : ""
-    } - ${endereco.bairro}, ${endereco.cidade} - ${
-        endereco.estado
-    }, ${endereco.cep}`;
-}
-
-function dataLocalParaInput(data) {
-    const ano = data.getFullYear();
-    const mes = String(data.getMonth() + 1).padStart(2, "0");
-    const dia = String(data.getDate()).padStart(2, "0");
-    return `${ano}-${mes}-${dia}`;
-}
 
 function dataEntregaParaAtualizacao(dataEntrega) {
     if (!dataEntrega) return dataEntrega;
@@ -54,16 +35,34 @@ function mensagemErroPedido(error, fallback) {
     return resposta?.message || resposta?.erro || fallback;
 }
 
+function mensagemErroStatusPedido(error) {
+    if (error.response?.status === 409) {
+        const detalhe = mensagemErroPedido(error, "");
+        const detalheGenerico = !detalhe
+            || detalhe === "Os dados enviados conflitam com um registro existente."
+            || detalhe.startsWith("Não foi possível concluir a operação devido a um conflito")
+            || detalhe.startsWith("O banco recusou a operação por uma restrição de integridade")
+            || detalhe.startsWith("O banco recusou a operação por um conflito de integridade que não pôde ser identificado.");
+        if (!detalheGenerico) {
+            return detalhe;
+        }
+        return "O status não foi alterado: o backend rejeitou a gravação por uma restrição de dados. Atualize o pedido e tente novamente. Se persistir, verifique o log do backend para identificar a restrição exata.";
+    }
+    return mensagemErroPedido(error, "Não foi possível atualizar o status do pedido.");
+}
+
 function formatarItensPedido(itens = []) {
     return itens.map((item) => ({
         id: item.id,
         produtoId: item.produto?.id ?? item.produtoId,
         produto: item.produto?.nome ?? "Produto não encontrado",
         descricao: item.produto?.descricao ?? "",
+        precoBaseProduto: Number(
+            item.produto?.precoVenda ?? item.produto?.preco ?? item.precoUnitario ?? 0
+        ),
         observacaoItem: item.observacaoItem ?? "",
         qtd: Number(item.quantidade ?? 0),
         precoUnitario: Number(item.precoUnitario ?? 0),
-        desconto: 0,
         subtotal: Number(item.precoUnitario ?? 0) * Number(item.quantidade ?? 0),
     }));
 }
@@ -77,6 +76,34 @@ function formatarItensParaApi(itens = []) {
     }));
 }
 
+function classeStatusPedido(status) {
+    const classes = {
+        RASCUNHO: "rascunho",
+        AGUARDANDO_SINAL: "aguardandoSinal",
+        CONFIRMADO: "confirmado",
+        EM_PRODUCAO: "producao",
+        PRONTO_PARA_ENTREGA: "pronto",
+        ENTREGUE: "entregue",
+        CANCELADO: "cancelado",
+    };
+
+    return classes[status] ?? "";
+}
+
+function formatarPagamentoApi(pagamento, metodos = []) {
+    const tipos = { SINAL: "Sinal", QUITACAO: "Quitação", INTEGRAL: "Integral" };
+    const situacoes = { CONFIRMADO: "Recebido", PENDENTE: "Aguardando confirmação", CANCELADO: "Cancelado" };
+    const metodo = metodos.find((item) => Number(item.id) === Number(pagamento.metodoPagamentoId));
+    return {
+        ...pagamento,
+        data: formatarDataCompleta(pagamento.dataPagamento),
+        valor: Number(pagamento.valor ?? 0),
+        metodo: metodo?.nome || `Método ${pagamento.metodoPagamentoId ?? "não informado"}`,
+        tipoLabel: tipos[pagamento.tipoPagamento] || pagamento.tipoPagamento || "Não informado",
+        statusLabel: situacoes[pagamento.statusPagamento] || pagamento.statusPagamento || "Não informado",
+    };
+}
+
 function DetalhesPedido() {
     const navigate = useNavigate();
 
@@ -87,14 +114,22 @@ function DetalhesPedido() {
     const [enderecoPedido, setEnderecoPedido] = useState(null);
     const [clienteEditavel, setClienteEditavel] = useState(null);
     const [modalEditarClienteOpen, setModalEditarClienteOpen] = useState(false);
-    const [modalDataRetiradaOpen, setModalDataRetiradaOpen] = useState(false);
+    const [modalEditarDadosPedidoOpen, setModalEditarDadosPedidoOpen] = useState(false);
+    const [secaoModalDadosPedido, setSecaoModalDadosPedido] = useState("resumo");
     const [modalEditarItensOpen, setModalEditarItensOpen] = useState(false);
-    const [dataRetiradaEditada, setDataRetiradaEditada] = useState("");
-    const [erroEdicaoPedido, setErroEdicaoPedido] = useState("");
-    const [salvandoPedido, setSalvandoPedido] = useState(false);
     const [mensagemSucesso, setMensagemSucesso] = useState("");
+    const [mensagemErroNotificacao, setMensagemErroNotificacao] = useState("");
     const [statusAtualizando, setStatusAtualizando] = useState(false);
-    const [erroStatusPedido, setErroStatusPedido] = useState("");
+    const [statusSelecionado, setStatusSelecionado] = useState(null);
+    const [metodosPagamento, setMetodosPagamento] = useState([]);
+    const [erroMetodosPagamento, setErroMetodosPagamento] = useState("");
+    const [modalAdicionarPagamentoOpen, setModalAdicionarPagamentoOpen] = useState(false);
+    const [pagamentoParaCancelar, setPagamentoParaCancelar] = useState(null);
+    const [salvandoPagamentoId, setSalvandoPagamentoId] = useState(null);
+    const [erroPagamento, setErroPagamento] = useState("");
+    const [eventos, setEventos] = useState([]);
+    const [erroEventos, setErroEventos] = useState("");
+    const [erroClienteEdicao, setErroClienteEdicao] = useState("");
 
     const [carregando, setCarregando] = useState(true);
 
@@ -172,15 +207,13 @@ function DetalhesPedido() {
                     status:
                         pedidoRecebido.statusProducao,
 
+                    eventoNome:
+                        evento?.nome ?? "Sem evento",
+
                     dadosCliente: {
                         nome:
                             cliente?.nome ??
                             "Cliente não encontrado",
-
-                        evento:
-                            evento?.nome ??
-                            evento?.descricao ??
-                            "Sem evento",
 
                         telefone:
                             cliente?.telefone ??
@@ -193,7 +226,10 @@ function DetalhesPedido() {
 
                         instagram:
                             cliente?.instagram ??
-                            "Não informado"
+                            "Não informado",
+
+                        anotacoes:
+                            cliente?.anotacoes ?? ""
                     },
 
                     datas: {
@@ -210,26 +246,8 @@ function DetalhesPedido() {
 
                     itens: formatarItensPedido(pedidoRecebido.itens),
 
-                    pagamentos:
-                        (pedidoRecebido.pagamentos ?? []).map(
-                            (pagamento) => ({
-                                id: pagamento.id,
-
-                                data:
-                                    formatarDataCompleta(
-                                        pagamento.dataPagamento
-                                    ),
-
-                                valor:
-                                    Number(
-                                        pagamento.valor ?? 0
-                                    ),
-
-                                metodo:
-                                    pagamento.tipoPagamento ??
-                                    "Não informado"
-                            })
-                        )
+                    pagamentos: (pedidoRecebido.pagamentos ?? []).map((pagamento) =>
+                        formatarPagamentoApi(pagamento, metodosPagamento))
                 };
 
                 setPedido(pedidoFormatado);
@@ -249,6 +267,100 @@ function DetalhesPedido() {
         buscarPedido();
     }, [id]);
 
+    useEffect(() => {
+        api.get("/eventos", { params: { ativos: true } })
+            .then((response) => {
+                setEventos(Array.isArray(response.data) ? response.data : []);
+                setErroEventos("");
+            })
+            .catch((error) => {
+                console.error("Erro ao carregar eventos para o pedido:", error);
+                setErroEventos("Não foi possível carregar a lista de eventos.");
+            });
+
+        api.get("/metodos-pagamento")
+            .then((response) => {
+                const metodos = Array.isArray(response.data) ? response.data : [];
+                setMetodosPagamento(metodos);
+            })
+            .catch((error) => {
+                console.error("Erro ao buscar métodos de pagamento:", error);
+                setErroMetodosPagamento("Não foi possível carregar os métodos de pagamento.");
+            });
+    }, []);
+
+    useEffect(() => {
+        if (!metodosPagamento.length) return;
+        setPedido((atual) => atual ? ({
+            ...atual,
+            pagamentos: (atual.pagamentos || []).map((pagamento) =>
+                formatarPagamentoApi(pagamento, metodosPagamento)),
+        }) : atual);
+    }, [metodosPagamento]);
+
+    function aplicarPedidoComPagamentos(pedidoRecebido) {
+        setPedidoApi(pedidoRecebido);
+        setPedido((atual) => ({
+            ...atual,
+            status: pedidoRecebido.statusProducao,
+            statusProducao: pedidoRecebido.statusProducao,
+            valorTotal: Number(pedidoRecebido.valorTotal ?? atual.valorTotal ?? 0),
+            taxaEntrega: Number(pedidoRecebido.taxaEntrega ?? atual.taxaEntrega ?? 0),
+            deletado: Boolean(pedidoRecebido.deletado),
+            pagamentos: (pedidoRecebido.pagamentos || []).map((pagamento) =>
+                formatarPagamentoApi(pagamento, metodosPagamento)),
+        }));
+    }
+
+    async function salvarPagamento(payload) {
+        setErroPagamento("");
+        const { chaveIdempotencia, ...dadosPagamento } = payload;
+        const response = await api.post(
+            `/pedidos/${pedidoApi.id}/pagamentos`,
+            dadosPagamento,
+            { headers: { "Idempotency-Key": chaveIdempotencia } }
+        );
+        aplicarPedidoComPagamentos(response.data);
+        setMensagemSucesso("Pagamento registrado com sucesso!");
+        window.setTimeout(() => setMensagemSucesso(""), 3000);
+    }
+
+    async function confirmarPagamento(pagamento) {
+        setErroPagamento("");
+        setSalvandoPagamentoId(pagamento.id);
+        try {
+            const response = await api.patch(
+                `/pedidos/${pedidoApi.id}/pagamentos/${pagamento.id}/confirmar`
+            );
+            aplicarPedidoComPagamentos(response.data);
+            setMensagemSucesso("Pagamento confirmado com sucesso!");
+            window.setTimeout(() => setMensagemSucesso(""), 3000);
+        } catch (error) {
+            setErroPagamento(mensagemErroPedido(error, "Não foi possível confirmar o pagamento."));
+        } finally {
+            setSalvandoPagamentoId(null);
+        }
+    }
+
+    async function cancelarPagamento() {
+        if (!pagamentoParaCancelar) return;
+        setErroPagamento("");
+        setSalvandoPagamentoId(pagamentoParaCancelar.id);
+        try {
+            const response = await api.patch(
+                `/pedidos/${pedidoApi.id}/pagamentos/${pagamentoParaCancelar.id}/cancelar`
+            );
+            aplicarPedidoComPagamentos(response.data);
+            setPagamentoParaCancelar(null);
+            setMensagemSucesso("Pagamento cancelado com sucesso!");
+            window.setTimeout(() => setMensagemSucesso(""), 3000);
+        } catch (error) {
+            setErroPagamento(mensagemErroPedido(error, "Não foi possível cancelar o pagamento."));
+        } finally {
+            setSalvandoPagamentoId(null);
+        }
+    }
+
     async function editarCliente(cliente) {
         const dadosCliente = {
             nome: cliente.nome,
@@ -256,15 +368,8 @@ function DetalhesPedido() {
             whatsapp: cliente.whatsapp,
             instagram: cliente.instagram,
             anotacoes: cliente.anotacoes,
-            endereco: {
-                cep: cliente.cep?.replace(/\D/g, ""),
-                logradouro: cliente.logradouro,
-                numero: cliente.numero,
-                complemento: cliente.complemento,
-                bairro: cliente.bairro,
-                cidade: cliente.cidade,
-                estado: cliente.estado
-            }
+            // A edição neste modal não altera o endereço do cadastro do cliente.
+            endereco: clienteEditavel?.endereco ?? null,
         };
 
         const response = await api.put(
@@ -280,10 +385,10 @@ function DetalhesPedido() {
             dadosCliente: {
                 ...pedidoAtual.dadosCliente,
                 nome: clienteAtualizado.nome,
-                endereco: formatarEndereco(clienteAtualizado.endereco),
                 telefone: clienteAtualizado.telefone,
                 whatsapp: clienteAtualizado.whatsapp ?? clienteAtualizado.telefone,
-                instagram: clienteAtualizado.instagram
+                instagram: clienteAtualizado.instagram,
+                anotacoes: clienteAtualizado.anotacoes ?? ""
             }
         }));
 
@@ -291,102 +396,108 @@ function DetalhesPedido() {
     }
 
     function mostrarSucessoEdicaoCliente() {
+        setErroClienteEdicao("");
         setMensagemSucesso("Cliente editado com sucesso!");
         window.setTimeout(() => setMensagemSucesso(""), 3000);
     }
 
-    function abrirEdicaoDataRetirada() {
-        setDataRetiradaEditada(pedidoApi?.dataEntrega?.slice(0, 10) || "");
-        setErroEdicaoPedido("");
-        setModalDataRetiradaOpen(true);
+    function abrirEdicaoDadosPedido(secao = "resumo") {
+        setSecaoModalDadosPedido(secao);
+        setModalEditarDadosPedidoOpen(true);
     }
 
-    async function salvarDataRetirada(e) {
-        e.preventDefault();
-        if (!dataRetiradaEditada || !pedidoApi) return;
+    function enderecoParaApi(endereco) {
+        if (!endereco) return null;
+        return {
+            cep: String(endereco.cep ?? "").replace(/\D/g, ""),
+            logradouro: endereco.logradouro ?? "",
+            numero: endereco.numero ?? "",
+            complemento: endereco.complemento ?? "",
+            bairro: endereco.bairro ?? "",
+            cidade: endereco.cidade ?? "",
+            estado: endereco.estado ?? "",
+        };
+    }
 
-        setSalvandoPedido(true);
-        setErroEdicaoPedido("");
+    async function salvarDadosPedido(alteracoes = {}) {
+        if (!pedidoApi) throw new Error("Pedido ainda não carregado.");
+        const enderecoAtual = pedidoApi.enderecoEntrega ?? clienteEditavel?.endereco ?? null;
+        const payload = {
+            dataEntrega: alteracoes.dataEntrega ?? dataEntregaParaAtualizacao(pedidoApi.dataEntrega),
+            taxaEntrega: alteracoes.taxaEntrega ?? pedidoApi.taxaEntrega ?? 0,
+            observacao: alteracoes.observacao ?? pedidoApi.observacao ?? "",
+            eventoId: Object.hasOwn(alteracoes, "eventoId") ? alteracoes.eventoId : pedidoApi.eventoId ?? null,
+            enderecoEntrega: Object.hasOwn(alteracoes, "enderecoEntrega")
+                ? enderecoParaApi(alteracoes.enderecoEntrega)
+                : enderecoParaApi(enderecoAtual),
+            itens: alteracoes.itens ?? formatarItensParaApi(pedidoApi.itens),
+        };
         try {
-            const payload = {
-                dataEntrega: `${dataRetiradaEditada}T23:59:59`,
-                taxaEntrega: pedidoApi.taxaEntrega ?? 0,
-                observacao: pedidoApi.observacao ?? "",
-                eventoId: pedidoApi.eventoId ?? null,
-                enderecoEntregaId: pedidoApi.enderecoEntregaId ?? null,
-                itens: formatarItensParaApi(pedidoApi.itens),
-            };
-
-            const response = await api.put(
-                `/pedidos/${pedidoApi.id}`,
-                payload
-            );
+            const response = await api.put(`/pedidos/${pedidoApi.id}`, payload);
             const pedidoAtualizado = response.data;
+            const nomeEvento = pedidoAtualizado.eventoId == null
+                ? "Sem evento"
+                : eventos.find((evento) => Number(evento.id) === Number(pedidoAtualizado.eventoId))?.nome
+                    ?? pedido.eventoNome
+                    ?? "Evento não encontrado";
             setPedidoApi(pedidoAtualizado);
-            setEnderecoPedido(pedidoAtualizado.enderecoEntrega ?? enderecoPedido);
+            setEnderecoPedido(pedidoAtualizado.enderecoEntrega ?? clienteEditavel?.endereco ?? null);
             setPedido((atual) => ({
                 ...atual,
                 dataEntrega: pedidoAtualizado.dataEntrega,
+                eventoId: pedidoAtualizado.eventoId,
+                eventoNome: nomeEvento,
+                taxaEntrega: Number(pedidoAtualizado.taxaEntrega ?? 0),
+                observacao: pedidoAtualizado.observacao ?? "",
+                valorTotal: Number(pedidoAtualizado.valorTotal ?? 0),
                 datas: {
                     ...atual.datas,
                     dataRetirada: formatarDataCompleta(pedidoAtualizado.dataEntrega),
                 },
+                itens: formatarItensPedido(response.data.itens),
             }));
-            setModalDataRetiradaOpen(false);
-            setMensagemSucesso("Data de retirada atualizada com sucesso!");
+            setModalEditarDadosPedidoOpen(false);
+            setMensagemSucesso("Pedido atualizado com sucesso!");
             window.setTimeout(() => setMensagemSucesso(""), 3000);
+            return pedidoAtualizado;
         } catch (error) {
-            console.error("Erro ao atualizar data de retirada:", error);
-            setErroEdicaoPedido(mensagemErroPedido(error, "Não foi possível atualizar a data de retirada."));
-        } finally {
-            setSalvandoPedido(false);
+            console.error("Erro ao atualizar pedido:", error);
+            throw new Error(mensagemErroPedido(error, "Não foi possível atualizar o pedido."));
         }
     }
 
     async function salvarItensPedido(itens) {
-        if (!pedidoApi) throw new Error("Pedido ainda não carregado.");
-        const payload = {
-            dataEntrega: dataEntregaParaAtualizacao(pedidoApi.dataEntrega),
-            taxaEntrega: pedidoApi.taxaEntrega ?? 0,
-            observacao: pedidoApi.observacao ?? "",
-            eventoId: pedidoApi.eventoId ?? null,
-            enderecoEntregaId: pedidoApi.enderecoEntregaId ?? null,
-            itens,
-        };
-
-        try {
-            const response = await api.put(`/pedidos/${pedidoApi.id}`, payload);
-            setPedidoApi(response.data);
-            setPedido((atual) => ({
-                ...atual,
-                itens: formatarItensPedido(response.data.itens),
-            }));
-            setMensagemSucesso("Itens do pedido atualizados com sucesso!");
-            window.setTimeout(() => setMensagemSucesso(""), 3000);
-        } catch (error) {
-            console.error("Erro ao atualizar itens do pedido:", error);
-            throw new Error(mensagemErroPedido(error, "Não foi possível atualizar os itens do pedido."));
-        }
+        await salvarDadosPedido({ itens });
     }
 
-    async function alterarStatusPedido(novoStatus) {
+    async function confirmarAlteracaoStatus() {
+        const novoStatus = statusSelecionado;
         const statusAtual = pedidoApi?.statusProducao;
         if (!statusAtual || !novoStatus || novoStatus === statusAtual) return;
 
         setStatusAtualizando(true);
-        setErroStatusPedido("");
         try {
             const response = await api.patch(`/pedidos/${pedidoApi.id}/status`, {
                 novoStatus,
                 observacao: "",
             });
             setPedidoApi((atual) => ({ ...atual, ...response.data }));
-            setPedido((atual) => ({ ...atual, status: response.data.statusProducao }));
+            setPedido((atual) => ({
+                ...atual,
+                status: response.data.statusProducao,
+                statusProducao: response.data.statusProducao,
+            }));
+            setStatusSelecionado(null);
+            setMensagemErroNotificacao("");
             setMensagemSucesso("Status do pedido atualizado com sucesso!");
             window.setTimeout(() => setMensagemSucesso(""), 3000);
         } catch (error) {
             console.error("Erro ao atualizar status do pedido:", error);
-            setErroStatusPedido(mensagemErroPedido(error, "Não foi possível atualizar o status do pedido."));
+            const mensagem = mensagemErroStatusPedido(error);
+            setStatusSelecionado(null);
+            setMensagemSucesso("");
+            setMensagemErroNotificacao(mensagem);
+            window.setTimeout(() => setMensagemErroNotificacao(""), 5000);
         } finally {
             setStatusAtualizando(false);
         }
@@ -419,28 +530,47 @@ function DetalhesPedido() {
                         }
                     >
                         <ion-icon name="arrow-back-outline"></ion-icon>
-
-                        Voltar Para Todos Pedidos
+                        <span className="btn-voltar-texto-desktop">Voltar Para Todos Pedidos</span>
+                        <span className="btn-voltar-texto-mobile">Voltar</span>
                     </button>
                 </div>
             </div>
         );
     }
 
-    const totalPedido = pedido.itens.reduce(
+    const subtotalItens = pedido.itens.reduce(
         (acc, item) =>
             acc + Number(item.subtotal ?? 0),
         0
     );
+    const totalPedido = Number(pedido.valorTotal ?? (subtotalItens + Number(pedido.taxaEntrega ?? 0)));
 
     const totalPago = pedido.pagamentos.reduce(
         (acc, pagamento) =>
-            acc + Number(pagamento.valor ?? 0),
+            pagamento.statusPagamento === "CONFIRMADO" ? acc + Number(pagamento.valor ?? 0) : acc,
+        0
+    );
+    const totalPendente = pedido.pagamentos.reduce(
+        (acc, pagamento) =>
+            pagamento.statusPagamento === "PENDENTE" ? acc + Number(pagamento.valor ?? 0) : acc,
+        0
+    );
+    const totalComprometido = pedido.pagamentos.reduce(
+        (acc, pagamento) =>
+            pagamento.statusPagamento !== "CANCELADO" ? acc + Number(pagamento.valor ?? 0) : acc,
         0
     );
 
-    const totalAPagar =
-        totalPedido - totalPago;
+    const totalAPagar = Math.max(totalPedido - totalPago, 0);
+    const saldoDisponivel = Math.max(totalPedido - totalComprometido, 0);
+    const podeExibirAcaoPagamento = !pedido.deletado
+        && pedido.statusProducao !== "CANCELADO";
+    const podeAdicionarPagamento = podeExibirAcaoPagamento && saldoDisponivel > 0;
+    const podeEditarDadosPedido = !pedido.deletado
+        && !["ENTREGUE", "CANCELADO"].includes(pedido.statusProducao);
+    const podeEditarItens = !pedido.deletado
+        && !["EM_PRODUCAO", "PRONTO_PARA_ENTREGA", "ENTREGUE", "CANCELADO"].includes(pedido.statusProducao);
+    const statusExibido = statusSelecionado ?? pedido.status;
 
     return (
         <div className="produtos-layout">
@@ -449,6 +579,11 @@ function DetalhesPedido() {
             {mensagemSucesso && (
                 <div className="pedido-cliente-sucesso" role="status">
                     {mensagemSucesso}
+                </div>
+            )}
+            {mensagemErroNotificacao && (
+                <div className="pedido-cliente-erro" role="alert">
+                    {mensagemErroNotificacao}
                 </div>
             )}
 
@@ -469,35 +604,19 @@ function DetalhesPedido() {
                         </h1>
 
                         <div className="status-pedido-control">
-                            <select
-                                className={`badge-status badge-status-select ${
-                                    pedido.status === "RASCUNHO"
-                                        ? "rascunho"
-                                        : pedido.status === "AGUARDANDO_SINAL" || pedido.status === "CONFIRMADO"
-                                            ? "naoIniciado"
-                                            : pedido.status === "EM_PRODUCAO"
-                                                ? "producao"
-                                                : pedido.status === "PRONTO_PARA_ENTREGA"
-                                                    ? "pronto"
-                                                    : pedido.status === "ENTREGUE"
-                                                        ? "entregue"
-                                                        : pedido.status === "CANCELADO"
-                                                            ? "cancelado"
-                                                            : ""
-                                }`}
-                                value={pedido.status}
-                                onChange={(event) => alterarStatusPedido(event.target.value)}
+                            <FiltroDropdown
+                                className={`status-pedido-dropdown badge-status ${classeStatusPedido(statusExibido)}`}
+                                value={statusExibido}
+                                onChange={(valor) => {
+                                    setStatusSelecionado(valor === pedido.status ? null : valor);
+                                }}
                                 disabled={statusAtualizando || !pedidoApi || !proximosStatusPermitidos(pedido.status).length}
-                                aria-label="Alterar status do pedido"
-                            >
-                                <option value={pedido.status}>{formatarStatus(pedido.status)}</option>
-                                {proximosStatusPermitidos(pedido.status).map((status) => (
-                                    <option key={status} value={status}>{formatarStatus(status)}</option>
-                                ))}
-                            </select>
-                            {erroStatusPedido && (
-                                <p className="erro-status-pedido" role="alert">{erroStatusPedido}</p>
-                            )}
+                                label="Alterar status do pedido"
+                                options={[pedido.status, ...proximosStatusPermitidos(pedido.status)].map((status) => ({
+                                    value: status,
+                                    label: formatarStatus(status),
+                                }))}
+                            />
                         </div>
 
                         </div>
@@ -508,7 +627,7 @@ function DetalhesPedido() {
 
                                 <div className="dado-data">
 
-                                    <span className="dado-label">
+                                    <span className="dado-label" title="Data criada automaticamente; não pode ser alterada.">
                                         Data do Pedido
                                     </span>
 
@@ -528,18 +647,15 @@ function DetalhesPedido() {
                                         <span className="dado-valor">
                                             {pedido.datas.dataRetirada}
                                         </span>
-                                        <button
+                                        {podeEditarDadosPedido && <button
                                             type="button"
                                             className="btn-editar-data-retirada"
-                                            onClick={abrirEdicaoDataRetirada}
-                                            disabled={["ENTREGUE", "CANCELADO"].includes(pedidoApi?.statusProducao)}
+                                            onClick={() => abrirEdicaoDadosPedido("dataEntrega")}
                                             aria-label="Editar data de retirada"
-                                            title={["ENTREGUE", "CANCELADO"].includes(pedidoApi?.statusProducao)
-                                                ? "Não é possível alterar um pedido entregue ou cancelado"
-                                                : "Editar data de retirada"}
+                                            title="Editar dados do pedido"
                                         >
                                             <ion-icon name="pencil-outline"></ion-icon>
-                                        </button>
+                                        </button>}
                                     </div>
 
                                 </div>
@@ -557,8 +673,8 @@ function DetalhesPedido() {
                         }
                     >
                         <ion-icon name="arrow-back-outline"></ion-icon>
-
-                        Voltar Para Todos Pedidos
+                        <span className="btn-voltar-texto-desktop">Voltar Para Todos Pedidos</span>
+                        <span className="btn-voltar-texto-mobile">Voltar</span>
                     </button>
 
                 </div>
@@ -571,47 +687,53 @@ function DetalhesPedido() {
 
                         <ItensPedido
                             itens={pedido.itens}
-                            total={totalPedido}
-                            onEditar={() => setModalEditarItensOpen(true)}
+                            total={subtotalItens}
+                            onEditar={podeEditarItens ? () => setModalEditarItensOpen(true) : undefined}
+                            mensagemBloqueio={!podeEditarItens ? "Os itens só podem ser alterados antes do início da produção." : undefined}
                         />
 
                         <PagamentosPedido
                             pagamentos={pedido.pagamentos}
+                            totalPedido={totalPedido}
                             totalAPagar={totalAPagar}
                             totalPago={totalPago}
+                            totalPendente={totalPendente}
+                            saldoDisponivel={saldoDisponivel}
+                            podeExibirAcao={podeExibirAcaoPagamento}
+                            podeAdicionar={podeAdicionarPagamento}
+                            podeConfirmar={podeExibirAcaoPagamento}
+                            onAdicionar={() => {
+                                setErroPagamento("");
+                                setModalAdicionarPagamentoOpen(true);
+                            }}
+                            onConfirmar={confirmarPagamento}
+                            onCancelar={(pagamento) => setPagamentoParaCancelar(pagamento)}
+                            salvandoPagamentoId={salvandoPagamentoId}
                         />
+                        {erroPagamento && <p className="erro-edicao-pedido" role="alert">{erroPagamento}</p>}
 
                     </div>
 
                     <div className="pedido-col-direita">
-
-                        {/* <h2>Datas do Pedido</h2> */}
-
-
-
+                        <InformacoesPedido
+                            evento={pedido.eventoNome}
+                            taxaEntrega={pedido.taxaEntrega}
+                            observacao={pedido.observacao}
+                            onEditar={podeEditarDadosPedido ? () => abrirEdicaoDadosPedido("resumo") : undefined}
+                            bloqueado={!podeEditarDadosPedido}
+                        />
+                        {erroClienteEdicao && <p className="erro-edicao-pedido" role="alert">{erroClienteEdicao}</p>}
                         <DadosCliente
                             cliente={pedido.dadosCliente}
+                            endereco={enderecoPedido}
                             onEditar={clienteEditavel
-                                ? () => setModalEditarClienteOpen(true)
+                                ? () => {
+                                    setErroClienteEdicao("");
+                                    setModalEditarClienteOpen(true);
+                                }
                                 : undefined}
+                            onEditarEndereco={podeEditarDadosPedido ? () => abrirEdicaoDadosPedido("endereco") : undefined}
                         />
-
-                        <EnderecoPedido endereco={enderecoPedido} />
-
-                        {/* <div className="recibo-secao">
-
-                            <h2 className="recibo-titulo-main">
-                                Recibo
-                            </h2>
-
-                            <ReciboPedido
-                                pedido={pedido}
-                                totalPedido={totalPedido}
-                                totalPago={totalPago}
-                                totalAPagar={totalAPagar}
-                            />
-
-                        </div> */}
 
                     </div>
 
@@ -625,6 +747,19 @@ function DetalhesPedido() {
                 onClose={() => setModalEditarClienteOpen(false)}
                 onSalvar={editarCliente}
                 onSucesso={mostrarSucessoEdicaoCliente}
+                onErro={setErroClienteEdicao}
+                somenteDadosCliente
+            />
+
+            <ModalEditarDadosPedido
+                open={modalEditarDadosPedidoOpen}
+                pedido={pedidoApi ? { ...pedidoApi, eventoNome: pedido.eventoNome } : null}
+                enderecoPadrao={clienteEditavel?.endereco}
+                eventos={eventos}
+                erroEventos={erroEventos}
+                secao={secaoModalDadosPedido}
+                onClose={() => setModalEditarDadosPedidoOpen(false)}
+                onSalvar={salvarDadosPedido}
             />
 
             <ModalEditarItensPedido
@@ -634,46 +769,33 @@ function DetalhesPedido() {
                 onSalvar={salvarItensPedido}
             />
 
-            <Modal
-                open={modalDataRetiradaOpen}
-                onClose={() => setModalDataRetiradaOpen(false)}
-                title="Editar data de retirada"
-            >
-                <form onSubmit={salvarDataRetirada}>
-                    <div className="form-group">
-                        <label htmlFor="data-retirada-pedido">Data de retirada *</label>
-                        <input
-                            id="data-retirada-pedido"
-                            type="date"
-                            min={dataLocalParaInput(new Date())}
-                            value={dataRetiradaEditada}
-                            onClick={(e) => e.currentTarget.showPicker?.()}
-                            onChange={(e) => setDataRetiradaEditada(e.target.value)}
-                            required
-                        />
-                    </div>
-                    {erroEdicaoPedido && (
-                        <p role="alert" className="erro-edicao-pedido">{erroEdicaoPedido}</p>
-                    )}
-                    <div className="modal-actions">
-                        <button
-                            type="button"
-                            className="secondary-button"
-                            onClick={() => setModalDataRetiradaOpen(false)}
-                            disabled={salvandoPedido}
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            type="submit"
-                            className="primary-button"
-                            disabled={salvandoPedido}
-                        >
-                            {salvandoPedido ? "Salvando…" : "Salvar"}
-                        </button>
-                    </div>
-                </form>
-            </Modal>
+            <ModalAdicionarPagamento
+                open={modalAdicionarPagamentoOpen}
+                onClose={() => setModalAdicionarPagamentoOpen(false)}
+                onSalvar={salvarPagamento}
+                metodos={metodosPagamento}
+                saldoDisponivel={saldoDisponivel}
+                erroMetodos={erroMetodosPagamento}
+            />
+
+            <ModalConfirmacao
+                open={Boolean(statusSelecionado && statusSelecionado !== pedido.status)}
+                titulo="Confirmar alteração de status"
+                onClose={() => setStatusSelecionado(null)}
+                onConfirmar={confirmarAlteracaoStatus}
+                confirmando={statusAtualizando}
+                mensagem={`Deseja alterar o status de “${formatarStatus(pedido.status)}” para “${formatarStatus(statusSelecionado)}”?`}
+            />
+
+            <ModalConfirmacao
+                open={Boolean(pagamentoParaCancelar)}
+                onClose={() => setPagamentoParaCancelar(null)}
+                onConfirmar={cancelarPagamento}
+                erro={erroPagamento}
+                confirmando={Boolean(salvandoPagamentoId)}
+                mensagem="Deseja cancelar este pagamento? O valor será removido do total recebido e o registro ficará no histórico."
+            />
+
         </div>
     );
 }
@@ -718,7 +840,7 @@ function formatarDataCompleta(data) {
 function formatarStatus(status) {
     const statusMap = {
         RASCUNHO: "Rascunho",
-        AGUARDANDO_SINAL: "Não iniciado",
+        AGUARDANDO_SINAL: "Aguardando sinal",
         CONFIRMADO: "Confirmado",
         EM_PRODUCAO: "Em Produção",
         PRONTO_PARA_ENTREGA: "Pronto",

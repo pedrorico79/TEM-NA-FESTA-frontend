@@ -49,6 +49,11 @@ function TabelaClientes({
     const data = listaClientes.map((cliente) => [
         <div className="cliente-identificacao">
             <span className="cliente-nome-tabela">{truncarTexto(cliente.nome, 25)}</span>
+            {cliente.anotacoes?.trim() && (
+                <span className="cliente-anotacao-preview" title={cliente.anotacoes}>
+                    {truncarTexto(cliente.anotacoes.trim(), 70)}
+                </span>
+            )}
             <span className="cliente-contatos-mobile">
                 {formatarContatoMobile(cliente)}
             </span>

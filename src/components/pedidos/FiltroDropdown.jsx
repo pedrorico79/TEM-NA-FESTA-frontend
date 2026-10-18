@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-function FiltroDropdown({ value, options, onChange, label }) {
+function FiltroDropdown({ value, options, onChange, label, className = "", disabled = false }) {
   const [aberto, setAberto] = useState(false);
   const [posicao, setPosicao] = useState({ top: 0, left: 0, width: 0, maxHeight: 280 });
   const botaoRef = useRef(null);
@@ -44,6 +44,7 @@ function FiltroDropdown({ value, options, onChange, label }) {
   }, [aberto]);
 
   function alternarMenu() {
+    if (disabled) return;
     if (aberto) {
       setAberto(false);
       return;
@@ -69,8 +70,9 @@ function FiltroDropdown({ value, options, onChange, label }) {
       <button
         ref={botaoRef}
         type="button"
-        className="filtro-dropdown"
+        className={`filtro-dropdown ${className}`.trim()}
         onClick={alternarMenu}
+        disabled={disabled}
         aria-haspopup="listbox"
         aria-expanded={aberto}
         aria-controls={id}

@@ -1,6 +1,6 @@
 import { aplicarMascaraCep } from "../../utils/cep";
 
-function EnderecoPedido({ endereco }) {
+function EnderecoPedido({ endereco, onEditar }) {
   const campos = [
     ["Logradouro", endereco?.logradouro],
     ["Número", endereco?.numero],
@@ -15,6 +15,17 @@ function EnderecoPedido({ endereco }) {
     <div className="card-padrao endereco-pedido-card">
       <div className="dados-cliente-header">
         <h2 className="secao-titulo">Endereço</h2>
+        {onEditar && (
+          <button
+            type="button"
+            className="btn-editar-dados-cliente"
+            onClick={onEditar}
+            aria-label="Editar endereço do pedido"
+            title="Editar endereço do pedido"
+          >
+            <ion-icon name="pencil-outline"></ion-icon>
+          </button>
+        )}
       </div>
       <div className="endereco-pedido-grid">
         {campos.map(([label, valor]) => (
