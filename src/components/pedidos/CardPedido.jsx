@@ -81,9 +81,15 @@ function CardPedido({ pedido }) {
                     {pedido.itens} {pedido.itens === 1 ? "item" : "itens"}
                 </span>
 
-                <span>
+                <span className="pedido-data-retirada-card">
                     <ion-icon name="calendar-outline"></ion-icon>
                     {pedido.retirada}
+                    {pedido.atrasado && (
+                        <span className="pedido-aviso-atrasado" title="A retirada deste pedido está atrasada">
+                            <ion-icon name="alert-circle-outline"></ion-icon>
+                            Atrasado
+                        </span>
+                    )}
                 </span>
 
                 <span>

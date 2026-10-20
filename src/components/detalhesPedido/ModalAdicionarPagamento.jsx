@@ -10,7 +10,7 @@ function criarChaveIdempotencia() {
     });
 }
 
-function ModalAdicionarPagamento({ open, onClose, onSalvar, metodos, saldoDisponivel, erroMetodos }) {
+function ModalAdicionarPagamento({ open, onClose, onSalvar, metodos, saldoDisponivel, erroMetodos, onErro }) {
     const [valor, setValor] = useState("");
     const [tipoPagamento, setTipoPagamento] = useState("SINAL");
     const [statusPagamento, setStatusPagamento] = useState("CONFIRMADO");
@@ -73,7 +73,7 @@ function ModalAdicionarPagamento({ open, onClose, onSalvar, metodos, saldoDispon
             chaveRef.current = null;
             onClose();
         } catch (apiErro) {
-            setErro(mensagemErroApi(apiErro, "Não foi possível registrar o pagamento."));
+            onErro?.(mensagemErroApi(apiErro, "Não foi possível registrar o pagamento."));
         } finally {
             setSalvando(false);
         }

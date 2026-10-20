@@ -80,6 +80,10 @@ function ListaPedidos({ pedidos, modoVisualizacao }) {
           <span className="pedido-mobile-retirada">
           <ion-icon name="calendar-outline"></ion-icon>
           {pedido.retirada}
+          {pedido.atrasado && <span className="pedido-aviso-atrasado">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            Atrasado
+          </span>}
           </span>
         </div>
       </div>,
@@ -93,7 +97,15 @@ function ListaPedidos({ pedidos, modoVisualizacao }) {
         </span>
       </div>,
 
-      pedido.retirada,
+      <div className="pedido-retirada-tabela">
+        <span>{pedido.retirada}</span>
+        {pedido.atrasado && (
+          <span className="pedido-aviso-atrasado" title="A retirada deste pedido está atrasada">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            Atrasado
+          </span>
+        )}
+      </div>,
 
       pedido.total,
 

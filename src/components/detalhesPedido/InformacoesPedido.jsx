@@ -1,8 +1,4 @@
-function moeda(valor) {
-  return Number(valor || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
-
-function InformacoesPedido({ evento, taxaEntrega, observacao, onEditar, bloqueado = false }) {
+function InformacoesPedido({ evento, observacao, onEditar, bloqueado = false, mensagemBloqueio, atrasado = false }) {
   return (
     <section className="card-padrao informacoes-pedido-card">
       <div className="dados-cliente-header">
@@ -20,16 +16,14 @@ function InformacoesPedido({ evento, taxaEntrega, observacao, onEditar, bloquead
         )}
       </div>
       {bloqueado && (
-        <p className="pedido-campo-bloqueado">Edição indisponível para pedidos entregues ou cancelados.</p>
+        <p className={`pedido-campo-bloqueado${atrasado ? " pedido-campo-atrasado" : ""}`}>
+          {mensagemBloqueio || "Edição indisponível para pedidos entregues ou cancelados."}
+        </p>
       )}
       <div className="informacoes-pedido-grid resumo-pedido-campos">
-        <div className="informacao-pedido-campo">
+        <div className="informacao-pedido-campo informacao-pedido-evento">
           <span className="dado-label">Evento</span>
           <span className="dado-valor">{evento || "Sem evento"}</span>
-        </div>
-        <div className="informacao-pedido-campo">
-          <span className="dado-label">Taxa de entrega</span>
-          <span className="dado-valor">{moeda(taxaEntrega)}</span>
         </div>
         {observacao?.trim() && (
           <div className="informacao-pedido-campo informacao-pedido-observacao">

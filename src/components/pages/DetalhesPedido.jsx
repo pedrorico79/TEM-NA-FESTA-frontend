@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -25,6 +25,15 @@ import "../css/DetalhesPedido.css";
 function dataEntregaParaAtualizacao(dataEntrega) {
     if (!dataEntrega) return dataEntrega;
     return `${String(dataEntrega).slice(0, 10)}T23:59:59`;
+}
+
+function dataEstaAtrasada(dataEntrega) {
+    if (!dataEntrega) return false;
+    const entrega = new Date(dataEntrega);
+    const hoje = new Date();
+    entrega.setHours(0, 0, 0, 0);
+    hoje.setHours(0, 0, 0, 0);
+    return entrega < hoje;
 }
 
 function mensagemErroPedido(error, fallback) {
@@ -61,16 +70,19 @@ function formatarItensPedido(itens = []) {
             item.produto?.precoVenda ?? item.produto?.preco ?? item.precoUnitario ?? 0
         ),
         observacaoItem: item.observacaoItem ?? "",
+        acrescimo: Number(item.acrescimo ?? 0),
         qtd: Number(item.quantidade ?? 0),
         precoUnitario: Number(item.precoUnitario ?? 0),
-        subtotal: Number(item.precoUnitario ?? 0) * Number(item.quantidade ?? 0),
+        subtotal: Number(item.precoUnitario ?? 0) * Number(item.quantidade ?? 0) + Number(item.acrescimo ?? 0),
     }));
 }
 
 function formatarItensParaApi(itens = []) {
     return itens.map((item) => ({
+        itemId: item.id,
         produtoId: item.produto?.id ?? item.produtoId,
         precoUnitario: Number(item.precoUnitario ?? 0),
+        acrescimo: Number(item.acrescimo ?? 0),
         quantidade: Number(item.quantidade ?? 1),
         observacaoItem: item.observacaoItem ?? "",
     }));
@@ -119,21 +131,26 @@ function DetalhesPedido() {
     const [modalEditarItensOpen, setModalEditarItensOpen] = useState(false);
     const [mensagemSucesso, setMensagemSucesso] = useState("");
     const [mensagemErroNotificacao, setMensagemErroNotificacao] = useState("");
+    const timeoutNotificacaoErro = useRef(null);
     const [statusAtualizando, setStatusAtualizando] = useState(false);
     const [statusSelecionado, setStatusSelecionado] = useState(null);
+    const [unidadeAjusteItens, setUnidadeAjusteItens] = useState("R$");
     const [metodosPagamento, setMetodosPagamento] = useState([]);
-    const [erroMetodosPagamento, setErroMetodosPagamento] = useState("");
     const [modalAdicionarPagamentoOpen, setModalAdicionarPagamentoOpen] = useState(false);
     const [pagamentoParaCancelar, setPagamentoParaCancelar] = useState(null);
     const [salvandoPagamentoId, setSalvandoPagamentoId] = useState(null);
-    const [erroPagamento, setErroPagamento] = useState("");
     const [eventos, setEventos] = useState([]);
-    const [erroEventos, setErroEventos] = useState("");
-    const [erroClienteEdicao, setErroClienteEdicao] = useState("");
 
     const [carregando, setCarregando] = useState(true);
 
     const [erro, setErro] = useState(false);
+
+    function mostrarErroNotificacao(mensagem) {
+        window.clearTimeout(timeoutNotificacaoErro.current);
+        setMensagemSucesso("");
+        setMensagemErroNotificacao(mensagem);
+        timeoutNotificacaoErro.current = window.setTimeout(() => setMensagemErroNotificacao(""), 5000);
+    }
 
     useEffect(() => {
         const buscarPedido = async () => {
@@ -271,11 +288,10 @@ function DetalhesPedido() {
         api.get("/eventos", { params: { ativos: true } })
             .then((response) => {
                 setEventos(Array.isArray(response.data) ? response.data : []);
-                setErroEventos("");
             })
             .catch((error) => {
                 console.error("Erro ao carregar eventos para o pedido:", error);
-                setErroEventos("Não foi possível carregar a lista de eventos.");
+                mostrarErroNotificacao("Não foi possível carregar os eventos. Tente novamente mais tarde.");
             });
 
         api.get("/metodos-pagamento")
@@ -285,7 +301,7 @@ function DetalhesPedido() {
             })
             .catch((error) => {
                 console.error("Erro ao buscar métodos de pagamento:", error);
-                setErroMetodosPagamento("Não foi possível carregar os métodos de pagamento.");
+                mostrarErroNotificacao("Não foi possível carregar os métodos de pagamento. Tente novamente mais tarde.");
             });
     }, []);
 
@@ -306,6 +322,7 @@ function DetalhesPedido() {
             statusProducao: pedidoRecebido.statusProducao,
             valorTotal: Number(pedidoRecebido.valorTotal ?? atual.valorTotal ?? 0),
             taxaEntrega: Number(pedidoRecebido.taxaEntrega ?? atual.taxaEntrega ?? 0),
+            descontoPedido: Number(pedidoRecebido.descontoPedido ?? atual.descontoPedido ?? 0),
             deletado: Boolean(pedidoRecebido.deletado),
             pagamentos: (pedidoRecebido.pagamentos || []).map((pagamento) =>
                 formatarPagamentoApi(pagamento, metodosPagamento)),
@@ -313,7 +330,6 @@ function DetalhesPedido() {
     }
 
     async function salvarPagamento(payload) {
-        setErroPagamento("");
         const { chaveIdempotencia, ...dadosPagamento } = payload;
         const response = await api.post(
             `/pedidos/${pedidoApi.id}/pagamentos`,
@@ -326,7 +342,6 @@ function DetalhesPedido() {
     }
 
     async function confirmarPagamento(pagamento) {
-        setErroPagamento("");
         setSalvandoPagamentoId(pagamento.id);
         try {
             const response = await api.patch(
@@ -336,7 +351,7 @@ function DetalhesPedido() {
             setMensagemSucesso("Pagamento confirmado com sucesso!");
             window.setTimeout(() => setMensagemSucesso(""), 3000);
         } catch (error) {
-            setErroPagamento(mensagemErroPedido(error, "Não foi possível confirmar o pagamento."));
+            mostrarErroNotificacao(mensagemErroPedido(error, "Não foi possível confirmar o pagamento."));
         } finally {
             setSalvandoPagamentoId(null);
         }
@@ -344,7 +359,6 @@ function DetalhesPedido() {
 
     async function cancelarPagamento() {
         if (!pagamentoParaCancelar) return;
-        setErroPagamento("");
         setSalvandoPagamentoId(pagamentoParaCancelar.id);
         try {
             const response = await api.patch(
@@ -355,7 +369,7 @@ function DetalhesPedido() {
             setMensagemSucesso("Pagamento cancelado com sucesso!");
             window.setTimeout(() => setMensagemSucesso(""), 3000);
         } catch (error) {
-            setErroPagamento(mensagemErroPedido(error, "Não foi possível cancelar o pagamento."));
+            mostrarErroNotificacao(mensagemErroPedido(error, "Não foi possível cancelar o pagamento."));
         } finally {
             setSalvandoPagamentoId(null);
         }
@@ -396,7 +410,6 @@ function DetalhesPedido() {
     }
 
     function mostrarSucessoEdicaoCliente() {
-        setErroClienteEdicao("");
         setMensagemSucesso("Cliente editado com sucesso!");
         window.setTimeout(() => setMensagemSucesso(""), 3000);
     }
@@ -425,6 +438,7 @@ function DetalhesPedido() {
         const payload = {
             dataEntrega: alteracoes.dataEntrega ?? dataEntregaParaAtualizacao(pedidoApi.dataEntrega),
             taxaEntrega: alteracoes.taxaEntrega ?? pedidoApi.taxaEntrega ?? 0,
+            descontoPedido: alteracoes.descontoPedido ?? pedidoApi.descontoPedido ?? 0,
             observacao: alteracoes.observacao ?? pedidoApi.observacao ?? "",
             eventoId: Object.hasOwn(alteracoes, "eventoId") ? alteracoes.eventoId : pedidoApi.eventoId ?? null,
             enderecoEntrega: Object.hasOwn(alteracoes, "enderecoEntrega")
@@ -448,6 +462,7 @@ function DetalhesPedido() {
                 eventoId: pedidoAtualizado.eventoId,
                 eventoNome: nomeEvento,
                 taxaEntrega: Number(pedidoAtualizado.taxaEntrega ?? 0),
+                descontoPedido: Number(pedidoAtualizado.descontoPedido ?? 0),
                 observacao: pedidoAtualizado.observacao ?? "",
                 valorTotal: Number(pedidoAtualizado.valorTotal ?? 0),
                 datas: {
@@ -466,8 +481,8 @@ function DetalhesPedido() {
         }
     }
 
-    async function salvarItensPedido(itens) {
-        await salvarDadosPedido({ itens });
+    async function salvarItensPedido({ itens, descontoPedido, taxaEntrega }) {
+        await salvarDadosPedido({ itens, descontoPedido, taxaEntrega });
     }
 
     async function confirmarAlteracaoStatus() {
@@ -496,8 +511,7 @@ function DetalhesPedido() {
             const mensagem = mensagemErroStatusPedido(error);
             setStatusSelecionado(null);
             setMensagemSucesso("");
-            setMensagemErroNotificacao(mensagem);
-            window.setTimeout(() => setMensagemErroNotificacao(""), 5000);
+            mostrarErroNotificacao(mensagem);
         } finally {
             setStatusAtualizando(false);
         }
@@ -543,7 +557,9 @@ function DetalhesPedido() {
             acc + Number(item.subtotal ?? 0),
         0
     );
-    const totalPedido = Number(pedido.valorTotal ?? (subtotalItens + Number(pedido.taxaEntrega ?? 0)));
+    const totalPedido = Number(pedido.valorTotal ?? (
+        subtotalItens + Number(pedido.taxaEntrega ?? 0) - Number(pedido.descontoPedido ?? 0)
+    ));
 
     const totalPago = pedido.pagamentos.reduce(
         (acc, pagamento) =>
@@ -566,9 +582,13 @@ function DetalhesPedido() {
     const podeExibirAcaoPagamento = !pedido.deletado
         && pedido.statusProducao !== "CANCELADO";
     const podeAdicionarPagamento = podeExibirAcaoPagamento && saldoDisponivel > 0;
-    const podeEditarDadosPedido = !pedido.deletado
+    const pedidoAtrasado = dataEstaAtrasada(pedido.dataEntrega)
         && !["ENTREGUE", "CANCELADO"].includes(pedido.statusProducao);
-    const podeEditarItens = !pedido.deletado
+    const podeEditarDataRetirada = !pedido.deletado
+        && !["ENTREGUE", "CANCELADO"].includes(pedido.statusProducao);
+    const podeEditarDadosPedido = !pedidoAtrasado && !pedido.deletado
+        && !["ENTREGUE", "CANCELADO"].includes(pedido.statusProducao);
+    const podeEditarItens = !pedidoAtrasado && !pedido.deletado
         && !["EM_PRODUCAO", "PRONTO_PARA_ENTREGA", "ENTREGUE", "CANCELADO"].includes(pedido.statusProducao);
     const statusExibido = statusSelecionado ?? pedido.status;
 
@@ -647,12 +667,16 @@ function DetalhesPedido() {
                                         <span className="dado-valor">
                                             {pedido.datas.dataRetirada}
                                         </span>
-                                        {podeEditarDadosPedido && <button
+                                        {pedidoAtrasado && <span className="pedido-aviso-atrasado" title="A retirada deste pedido está atrasada">
+                                            <ion-icon name="alert-circle-outline"></ion-icon>
+                                            Atrasado
+                                        </span>}
+                                        {podeEditarDataRetirada && <button
                                             type="button"
                                             className="btn-editar-data-retirada"
                                             onClick={() => abrirEdicaoDadosPedido("dataEntrega")}
                                             aria-label="Editar data de retirada"
-                                            title="Editar dados do pedido"
+                                            title="Editar data de retirada"
                                         >
                                             <ion-icon name="pencil-outline"></ion-icon>
                                         </button>}
@@ -688,8 +712,17 @@ function DetalhesPedido() {
                         <ItensPedido
                             itens={pedido.itens}
                             total={subtotalItens}
+                            taxaEntrega={pedido.taxaEntrega}
+                            descontoPedido={pedidoApi?.descontoPedido ?? pedido.descontoPedido ?? 0}
+                            totalAntesDesconto={subtotalItens + Number(pedido.taxaEntrega ?? 0)}
+                            unidadeAjuste={unidadeAjusteItens}
+                            onAlterarUnidadeAjuste={setUnidadeAjusteItens}
                             onEditar={podeEditarItens ? () => setModalEditarItensOpen(true) : undefined}
-                            mensagemBloqueio={!podeEditarItens ? "Os itens só podem ser alterados antes do início da produção." : undefined}
+                            mensagemBloqueio={!podeEditarItens
+                                ? pedidoAtrasado
+                                    ? "Pedido atrasado. Apenas a data de retirada pode ser alterada."
+                                    : "Os itens só podem ser alterados antes do início da produção."
+                                : undefined}
                         />
 
                         <PagamentosPedido
@@ -703,32 +736,29 @@ function DetalhesPedido() {
                             podeAdicionar={podeAdicionarPagamento}
                             podeConfirmar={podeExibirAcaoPagamento}
                             onAdicionar={() => {
-                                setErroPagamento("");
                                 setModalAdicionarPagamentoOpen(true);
                             }}
                             onConfirmar={confirmarPagamento}
                             onCancelar={(pagamento) => setPagamentoParaCancelar(pagamento)}
                             salvandoPagamentoId={salvandoPagamentoId}
                         />
-                        {erroPagamento && <p className="erro-edicao-pedido" role="alert">{erroPagamento}</p>}
 
                     </div>
 
                     <div className="pedido-col-direita">
                         <InformacoesPedido
                             evento={pedido.eventoNome}
-                            taxaEntrega={pedido.taxaEntrega}
                             observacao={pedido.observacao}
                             onEditar={podeEditarDadosPedido ? () => abrirEdicaoDadosPedido("resumo") : undefined}
                             bloqueado={!podeEditarDadosPedido}
+                            mensagemBloqueio={pedidoAtrasado ? "Pedido atrasado. Apenas a data de retirada pode ser alterada." : undefined}
+                            atrasado={pedidoAtrasado}
                         />
-                        {erroClienteEdicao && <p className="erro-edicao-pedido" role="alert">{erroClienteEdicao}</p>}
                         <DadosCliente
                             cliente={pedido.dadosCliente}
                             endereco={enderecoPedido}
                             onEditar={clienteEditavel
                                 ? () => {
-                                    setErroClienteEdicao("");
                                     setModalEditarClienteOpen(true);
                                 }
                                 : undefined}
@@ -747,7 +777,7 @@ function DetalhesPedido() {
                 onClose={() => setModalEditarClienteOpen(false)}
                 onSalvar={editarCliente}
                 onSucesso={mostrarSucessoEdicaoCliente}
-                onErro={setErroClienteEdicao}
+                onErro={mostrarErroNotificacao}
                 somenteDadosCliente
             />
 
@@ -756,17 +786,23 @@ function DetalhesPedido() {
                 pedido={pedidoApi ? { ...pedidoApi, eventoNome: pedido.eventoNome } : null}
                 enderecoPadrao={clienteEditavel?.endereco}
                 eventos={eventos}
-                erroEventos={erroEventos}
                 secao={secaoModalDadosPedido}
                 onClose={() => setModalEditarDadosPedidoOpen(false)}
                 onSalvar={salvarDadosPedido}
+                onErro={mostrarErroNotificacao}
             />
 
             <ModalEditarItensPedido
                 open={modalEditarItensOpen}
                 itens={pedidoApi?.itens ?? []}
+                descontoPedido={pedidoApi?.descontoPedido ?? 0}
+                taxaEntrega={pedidoApi?.taxaEntrega ?? 0}
+                totalComprometido={(pedidoApi?.pagamentos ?? [])
+                    .filter((pagamento) => pagamento.statusPagamento !== "CANCELADO")
+                    .reduce((soma, pagamento) => soma + Number(pagamento.valor ?? 0), 0)}
                 onClose={() => setModalEditarItensOpen(false)}
                 onSalvar={salvarItensPedido}
+                onErro={mostrarErroNotificacao}
             />
 
             <ModalAdicionarPagamento
@@ -775,7 +811,7 @@ function DetalhesPedido() {
                 onSalvar={salvarPagamento}
                 metodos={metodosPagamento}
                 saldoDisponivel={saldoDisponivel}
-                erroMetodos={erroMetodosPagamento}
+                onErro={mostrarErroNotificacao}
             />
 
             <ModalConfirmacao
@@ -791,7 +827,6 @@ function DetalhesPedido() {
                 open={Boolean(pagamentoParaCancelar)}
                 onClose={() => setPagamentoParaCancelar(null)}
                 onConfirmar={cancelarPagamento}
-                erro={erroPagamento}
                 confirmando={Boolean(salvandoPagamentoId)}
                 mensagem="Deseja cancelar este pagamento? O valor será removido do total recebido e o registro ficará no histórico."
             />

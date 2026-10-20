@@ -29,7 +29,7 @@ function EnderecoPedido({ endereco, onEditar }) {
       </div>
       <div className="endereco-pedido-grid">
         {campos.map(([label, valor]) => (
-          <div className="endereco-pedido-campo" key={label}>
+          <div className={`endereco-pedido-campo ${label === "Logradouro" ? "linha-cheia" : ""}`} key={label}>
             <span className="dado-label">{label}</span>
             <span className="dado-valor">
               {valor

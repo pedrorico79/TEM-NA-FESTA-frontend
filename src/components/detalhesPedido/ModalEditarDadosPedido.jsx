@@ -12,11 +12,10 @@ function hojeLocal() {
   return `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, "0")}-${String(agora.getDate()).padStart(2, "0")}`;
 }
 
-function ModalEditarDadosPedido({ open, pedido, enderecoPadrao, eventos = [], erroEventos, secao = "resumo", onClose, onSalvar }) {
+function ModalEditarDadosPedido({ open, pedido, enderecoPadrao, eventos = [], erroEventos, secao = "resumo", onClose, onSalvar, onErro }) {
   const [form, setForm] = useState({
     dataEntrega: "",
     eventoId: "",
-    taxaEntrega: "0",
     observacao: "",
     cep: "",
     logradouro: "",
@@ -86,7 +85,6 @@ function ModalEditarDadosPedido({ open, pedido, enderecoPadrao, eventos = [], er
     setForm({
       dataEntrega: pedido.dataEntrega?.slice(0, 10) || "",
       eventoId: pedido.eventoId == null ? "" : String(pedido.eventoId),
-      taxaEntrega: String(pedido.taxaEntrega ?? 0),
       observacao: pedido.observacao || "",
       ...enderecoOriginal.current,
     });
@@ -256,13 +254,28 @@ function ModalEditarDadosPedido({ open, pedido, enderecoPadrao, eventos = [], er
       }
       alteracoes = { dataEntrega: `${form.dataEntrega}T23:59:59` };
     } else if (secao === "resumo") {
-      if (Number(form.taxaEntrega) < 0 || !Number.isFinite(Number(form.taxaEntrega))) {
-        setErro("A taxa de entrega não pode ser negativa.");
+      const totalItens = (pedido?.itens || []).reduce((soma, item) => {
+        const subtotal = item.subtotal != null
+          ? Number(item.subtotal)
+          : Number(item.precoUnitario || 0) * Number(item.quantidade || 0) + Number(item.acrescimo || 0);
+        return soma + (Number.isFinite(subtotal) ? subtotal : 0);
+      }, 0);
+      const totalBruto = totalItens + Number(pedido?.taxaEntrega || 0);
+      const descontoAtual = Number(pedido?.descontoPedido || 0);
+      if (descontoAtual > totalBruto) {
+        setErro("A taxa de entrega deixa o desconto atual acima do total. Ajuste o desconto na seção Itens do Pedido.");
+        return;
+      }
+      const totalDepoisDesconto = totalBruto - descontoAtual;
+      const totalComprometido = (pedido?.pagamentos || [])
+        .filter((pagamento) => pagamento.statusPagamento !== "CANCELADO")
+        .reduce((soma, pagamento) => soma + Number(pagamento.valor || 0), 0);
+      if (totalComprometido > totalDepoisDesconto) {
+        setErro("O desconto deixaria o total abaixo dos pagamentos já registrados. Reduza o desconto ou revise os pagamentos.");
         return;
       }
       alteracoes = {
         eventoId: form.eventoId ? Number(form.eventoId) : null,
-        taxaEntrega: Number(form.taxaEntrega),
         observacao: form.observacao.trim(),
       };
     } else {
@@ -296,7 +309,7 @@ function ModalEditarDadosPedido({ open, pedido, enderecoPadrao, eventos = [], er
       await onSalvar(alteracoes);
       onClose();
     } catch (error) {
-      setErro(error.message || "Não foi possível atualizar os dados do pedido.");
+      onErro?.(error.message || "Não foi possível atualizar os dados do pedido.");
     } finally {
       setSalvando(false);
     }
@@ -319,23 +332,17 @@ function ModalEditarDadosPedido({ open, pedido, enderecoPadrao, eventos = [], er
         )}
 
         {secao === "resumo" && <>
-          <div className="form-grid">
-            <div className="form-group">
-              <label htmlFor="pedido-evento">Evento</label>
-              <select id="pedido-evento" name="eventoId" value={form.eventoId} onChange={alterar}>
-                <option value="">Sem evento</option>
-                {form.eventoId && !eventos.some((evento) => String(evento.id) === form.eventoId) && pedido?.eventoNome && (
-                  <option value={form.eventoId}>{pedido.eventoNome} (atual)</option>
-                )}
-                {eventos.map((evento) => (
-                  <option key={evento.id} value={evento.id}>{evento.nome}{!evento.ativo ? " (inativo)" : ""}</option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <label htmlFor="pedido-taxa-entrega">Taxa de entrega (R$)</label>
-              <input id="pedido-taxa-entrega" name="taxaEntrega" type="number" min="0" step="0.01" value={form.taxaEntrega} onChange={alterar} />
-            </div>
+          <div className="form-group">
+            <label htmlFor="pedido-evento">Evento</label>
+            <select id="pedido-evento" name="eventoId" value={form.eventoId} onChange={alterar}>
+              <option value="">Sem evento</option>
+              {form.eventoId && !eventos.some((evento) => String(evento.id) === form.eventoId) && pedido?.eventoNome && (
+                <option value={form.eventoId}>{pedido.eventoNome} (atual)</option>
+              )}
+              {eventos.map((evento) => (
+                <option key={evento.id} value={evento.id}>{evento.nome}{!evento.ativo ? " (inativo)" : ""}</option>
+              ))}
+            </select>
           </div>
           {erroEventos && <p className="erro-edicao-pedido" role="status">{erroEventos}</p>}
           <div className="form-group">

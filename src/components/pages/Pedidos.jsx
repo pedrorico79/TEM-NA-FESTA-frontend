@@ -167,6 +167,15 @@ function Pedidos() {
     return `${diferenca}d restante`;
   };
 
+  const pedidoEstaAtrasado = (pedido) => {
+    if (!pedido.dataEntrega || ["ENTREGUE", "CANCELADO"].includes(pedido.statusProducao)) return false;
+    const hoje = new Date();
+    const entrega = new Date(pedido.dataEntrega);
+    hoje.setHours(0, 0, 0, 0);
+    entrega.setHours(0, 0, 0, 0);
+    return entrega < hoje;
+  };
+
   const formatarValor = (valor) => {
     return Number(valor ?? 0).toLocaleString("pt-BR", {
       style: "currency",
@@ -202,6 +211,8 @@ function Pedidos() {
       ) ?? 0,
 
       retirada: formatarData(pedido.dataEntrega),
+
+      atrasado: pedidoEstaAtrasado(pedido),
 
       restante: calcularRestante(pedido.dataEntrega),
 
