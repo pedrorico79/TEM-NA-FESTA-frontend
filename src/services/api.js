@@ -42,6 +42,17 @@ function normalizarRespostaDeLista(response, caminho) {
     const dados = response.data;
     if (Array.isArray(dados)) return response;
 
+    const params = response.config?.params;
+    const requisicaoPaginada = params && (
+        Object.prototype.hasOwnProperty.call(params, "page") ||
+        Object.prototype.hasOwnProperty.call(params, "size")
+    );
+
+    // As telas com paginação server-side precisam do envelope completo do Spring
+    // (content, totalPages e totalElements), enquanto os demais consumidores
+    // continuam recebendo apenas o array de conteúdo.
+    if (requisicaoPaginada && Array.isArray(dados?.content)) return response;
+
     // Alguns endpoints podem devolver uma página do Spring, mesmo quando a tela
     // consome uma lista simples.
     if (Array.isArray(dados?.content)) {

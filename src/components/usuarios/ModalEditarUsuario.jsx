@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Modal from "../shared/modal/Modal";
 import { nomePerfilUsuario } from "../../utils/perfilUsuario";
 import { mensagemErroApi } from "../../utils/mensagemErroApi";
+import { notificar } from "../../utils/notificacoes";
 
 function ModalEditarUsuario(props) {
     const [UsuarioEditado, setUsuarioEditado] = useState({
@@ -33,7 +34,7 @@ function ModalEditarUsuario(props) {
         e.preventDefault();
 
         if (!UsuarioEditado.nome.trim() || !UsuarioEditado.email.trim() || !UsuarioEditado.perfilId) {
-            alert("Nome, e-mail e perfil de acesso são obrigatórios.");
+            notificar("Nome, e-mail e perfil de acesso são obrigatórios.");
             return;
         }
 
@@ -51,7 +52,7 @@ function ModalEditarUsuario(props) {
             })
             .catch((erro) => {
                 console.error(erro);
-                alert(mensagemErroApi(erro, "Erro ao editar usuário."));
+                notificar(mensagemErroApi(erro, "Erro ao editar usuário."));
             });
     }
 

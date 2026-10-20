@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Modal from "../shared/modal/Modal";
+import { notificar } from "../../utils/notificacoes";
 
 function ModalEditarProduto(props) {
 
@@ -35,15 +36,15 @@ function ModalEditarProduto(props) {
 
         const precoVenda = Number(produtoEditado.precoVenda);
         if (!produtoEditado.nome.trim()) {
-            alert("O nome do produto é obrigatório.");
+            notificar("O nome do produto é obrigatório.");
             return;
         }
         if (!produtoEditado.precoVenda || !Number.isFinite(precoVenda) || precoVenda <= 0) {
-            alert("O preço de venda deve ser maior que zero.");
+            notificar("O preço de venda deve ser maior que zero.");
             return;
         }
         if (precoVenda > 99999999.99) {
-            alert("O preço deve ter no máximo 8 dígitos inteiros e 2 casas decimais.");
+            notificar("O preço deve ter no máximo 8 dígitos inteiros e 2 casas decimais.");
             return;
         }
 
@@ -60,7 +61,7 @@ function ModalEditarProduto(props) {
             })
             .catch((erro) => {
                 console.error(erro);
-                alert(erro.response?.data?.message || erro.response?.data?.detail || "Erro ao editar produto.");
+                notificar(erro.response?.data?.message || erro.response?.data?.detail || "Erro ao editar produto.");
             });
     }
 

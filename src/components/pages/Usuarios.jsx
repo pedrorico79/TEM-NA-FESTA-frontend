@@ -22,6 +22,8 @@ import { buscarUsuarioAtual, limparUsuarioAtualEmCache, obterUsuarioAtualEmCache
 import { mensagemErroApi } from "../../utils/mensagemErroApi";
 
 import ModalConfirmacao from "../shared/modal/ModalConfirmacao";
+import EstadoErro from "../shared/EstadoErro";
+import { notificar } from "../../utils/notificacoes";
 
 import "../css/Usuarios.css";
 
@@ -248,7 +250,7 @@ function Usuarios() {
 
                 console.error(erro);
 
-                alert(mensagemErroApi(erro, "Erro ao remover usuário."));
+                notificar(mensagemErroApi(erro, "Erro ao remover usuário."));
 
             });
 
@@ -285,7 +287,7 @@ function Usuarios() {
                     "Erro ao alterar status do usuário:",
                     erro
                 );
-                alert(mensagemErroApi(erro, "Erro ao alterar o status do usuário."));
+                notificar(mensagemErroApi(erro, "Erro ao alterar o status do usuário."));
 
             });
 
@@ -359,7 +361,7 @@ function Usuarios() {
 
                             </div>
 
-                        {erroUsuarios && <p className="usuarios-erro-lista" role="alert">{erroUsuarios}</p>}
+                        {erroUsuarios && <EstadoErro mensagem={erroUsuarios} titulo="Não foi possível carregar os usuários" onTentarNovamente={() => buscarUsuarios(paginaAtual, busca)} />}
 
                             <TabelaUsuarios
                                 usuarios={usuariosPaginados}

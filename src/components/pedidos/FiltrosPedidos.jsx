@@ -97,8 +97,7 @@ function FiltrosPedidos({
                             { value: "CONFIRMADO", label: "Confirmado" },
                             { value: "EM_PRODUCAO", label: "Em Produção" },
                             { value: "PRONTO_PARA_ENTREGA", label: "Pronto" },
-                            { value: "ENTREGUE", label: "Entregue" },
-                            { value: "CANCELADO", label: "Cancelado" }
+                            { value: "ENTREGUE", label: "Entregue" }
                         ]}
                     />
 

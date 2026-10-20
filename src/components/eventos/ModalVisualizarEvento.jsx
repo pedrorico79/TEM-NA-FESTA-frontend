@@ -1,5 +1,6 @@
 import Modal from "../shared/modal/Modal";
 import LoadingState from "../shared/LoadingState";
+import EstadoErro from "../shared/EstadoErro";
 
 function formatarData(data) {
     if (!data) return "-";
@@ -13,7 +14,7 @@ function ModalVisualizarEvento({ open, evento, carregando, erro, onClose }) {
             {carregando ? (
                 <LoadingState className="evento-detalhe-estado loading-state--compact" label="Carregando evento…" />
             ) : erro ? (
-                <p className="evento-detalhe-estado" role="alert">{erro}</p>
+                <EstadoErro titulo="Não foi possível carregar o evento" mensagem={erro} />
             ) : evento ? (
                 <div className="evento-detalhes">
                     <div className="evento-detalhe">

@@ -4,6 +4,7 @@ import "../css/login.css";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../services/api";
+import { notificar } from "../../utils/notificacoes";
 
 function Login({ destinoAposLogin }) {
 
@@ -35,18 +36,18 @@ function Login({ destinoAposLogin }) {
 
         if (erro.response?.status === 429) {
           const segundos = Number(erro.response.headers?.["retry-after"]);
-          alert(segundos
+          notificar(segundos
             ? `Muitas tentativas. Aguarde ${Math.ceil(segundos / 60)} minuto(s) antes de tentar novamente.`
             : "Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.");
           return;
         }
 
         if (erro.response?.status === 401) {
-          alert("E-mail ou senha inválidos.");
+          notificar("E-mail ou senha inválidos.");
           return;
         }
 
-        alert("Não foi possível entrar. Tente novamente em instantes.");
+        notificar("Não foi possível entrar. Tente novamente em instantes.");
       });
   }
 

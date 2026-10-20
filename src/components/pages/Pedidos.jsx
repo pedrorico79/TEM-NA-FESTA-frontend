@@ -8,6 +8,7 @@ import FiltrosPedidos from "../pedidos/FiltrosPedidos";
 import ListaPedidos from "../pedidos/ListaPedidos";
 import Paginacao from "../shared/paginacao/Paginacao";
 import LoadingState from "../shared/LoadingState";
+import EstadoErro from "../shared/EstadoErro";
 
 import { api } from "../../services/api";
 
@@ -35,6 +36,7 @@ function Pedidos() {
 }, [modoVisualizacao]);
 
   const [pedidos, setPedidos] = useState([]);
+  const [totalPaginas, setTotalPaginas] = useState(0);
   const [clientes, setClientes] = useState({});
   const [eventos, setEventos] = useState({});
   const [opcoesEventos, setOpcoesEventos] = useState([]);
@@ -71,12 +73,20 @@ function Pedidos() {
         if (buscaNormalizada) params.busca = buscaNormalizada;
         if (statusFiltro !== "TODOS") params.status = statusFiltro;
         if (eventoFiltro !== "TODOS") params.evento = eventoFiltro;
+        params.page = paginaAtual - 1;
+        params.size = itensPorPagina;
 
         const response = await api.get("/pedidos", { params });
-        const pedidosRecebidos = Array.isArray(response.data) ? response.data : [];
+        const paginaResposta = response.data;
+        const pedidosRecebidos = Array.isArray(paginaResposta?.content)
+          ? paginaResposta.content
+          : Array.isArray(paginaResposta) ? paginaResposta : [];
         if (!ativa) return;
 
         setPedidos(pedidosRecebidos);
+        setTotalPaginas(Number.isFinite(paginaResposta?.totalPages)
+          ? paginaResposta.totalPages
+          : Math.ceil(pedidosRecebidos.length / itensPorPagina));
 
         const clienteIds = [
           ...new Set(
@@ -112,6 +122,7 @@ function Pedidos() {
         if (ativa) {
           console.error("Erro ao buscar pedidos:", error);
           setPedidos([]);
+          setTotalPaginas(0);
           setErroPedidos(
             error.response?.data?.message ||
             (error.name === "ApiRespostaFormatoInvalidoError" || error.isApiUnavailable
@@ -129,7 +140,15 @@ function Pedidos() {
       ativa = false;
       clearTimeout(timer);
     };
-  }, [busca, statusFiltro, eventoFiltro]);
+  }, [busca, statusFiltro, eventoFiltro, paginaAtual, itensPorPagina]);
+
+  useEffect(() => {
+    if (totalPaginas === 0 && paginaAtual !== 1) {
+      setPaginaAtual(1);
+    } else if (totalPaginas > 0 && paginaAtual > totalPaginas) {
+      setPaginaAtual(totalPaginas);
+    }
+  }, [paginaAtual, totalPaginas]);
 
   const formatarData = (data) => {
     if (!data) return "";
@@ -247,18 +266,7 @@ function Pedidos() {
     return 0;
   });
 
-  const totalPaginas = Math.ceil(
-    pedidosFiltrados.length / itensPorPagina
-  );
-
-  const indiceInicial = (paginaAtual - 1) * itensPorPagina;
-
-  const indiceFinal = indiceInicial + itensPorPagina;
-
-  const pedidosPaginados = pedidosFiltrados.slice(
-    indiceInicial,
-    indiceFinal
-  );
+  const pedidosPaginados = pedidosFiltrados;
 
   return (
     <div className="pedidos-layout">
@@ -313,7 +321,7 @@ function Pedidos() {
         {carregando ? (
           <LoadingState label="Carregando pedidos…" />
         ) : erroPedidos ? (
-          <p className="pedidos-vazio" role="alert">{erroPedidos}</p>
+          <EstadoErro mensagem={erroPedidos} titulo="Não foi possível carregar os pedidos" />
         ) : pedidosFiltrados.length === 0 ? (
           <p className="pedidos-vazio">Nenhum pedido encontrado.</p>
         ) : (

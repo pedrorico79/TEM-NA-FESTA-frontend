@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Modal from "../shared/modal/Modal";
 import { nomePerfilUsuario } from "../../utils/perfilUsuario";
 import { mensagemErroApi } from "../../utils/mensagemErroApi";
+import { notificar } from "../../utils/notificacoes";
 
 function ModalNovoUsuario(props) {
     const [mostrarSenha, setMostrarSenha] = useState(false);
@@ -30,11 +31,11 @@ function ModalNovoUsuario(props) {
         e.preventDefault();
 
         if (!novoUsuario.nome.trim() || !novoUsuario.email.trim() || !novoUsuario.senha.trim() || !novoUsuario.perfilId) {
-            alert("Preencha nome, e-mail, senha e perfil.");
+            notificar("Preencha nome, e-mail, senha e perfil.");
             return;
         }
         if (novoUsuario.senha.length < 8 || novoUsuario.senha.length > 72) {
-            alert("A senha deve ter entre 8 e 72 caracteres.");
+            notificar("A senha deve ter entre 8 e 72 caracteres.");
             return;
         }
 
@@ -57,7 +58,7 @@ function ModalNovoUsuario(props) {
             })
             .catch((erro) => {
                 console.error(erro);
-                alert(mensagemErroApi(erro, "Erro ao cadastrar usuário."));
+                notificar(mensagemErroApi(erro, "Erro ao cadastrar usuário."));
             });
     }
 

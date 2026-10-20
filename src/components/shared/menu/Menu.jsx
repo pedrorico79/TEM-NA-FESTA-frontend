@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 
 import { api } from "../../../services/api";
 import { buscarUsuarioAtual, limparUsuarioAtualEmCache, obterUsuarioAtualEmCache } from "../../../services/usuarioAtual";
+import { notificar } from "../../../utils/notificacoes";
+import { mensagemErroApi } from "../../../utils/mensagemErroApi";
 
 import cupcakeIcon from "../../../assets/cupcake-svgrepo-com.svg";
 import campanhaIcon from "../../../assets/logo-campanha.png";
@@ -48,6 +50,7 @@ function Menu(props) {
       navigate("/login");
     } catch (error) {
       console.error("Erro ao realizar logout:", error);
+      notificar(mensagemErroApi(error, "Não foi possível encerrar a sessão. Tente novamente."));
     }
   };
 

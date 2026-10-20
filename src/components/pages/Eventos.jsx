@@ -10,6 +10,8 @@ import Paginacao from "../shared/paginacao/Paginacao";
 import LoadingState from "../shared/LoadingState";
 import { api } from "../../services/api";
 import ModalConfirmacao from "../shared/modal/ModalConfirmacao";
+import EstadoErro from "../shared/EstadoErro";
+import { mensagemErroApi } from "../../utils/mensagemErroApi";
 import "../css/Eventos.css";
 
 function Eventos() {
@@ -42,7 +44,7 @@ function Eventos() {
             })
             .catch((erro) => {
                 console.error("ERRO AO BUSCAR EVENTOS:", erro);
-                setErroEventos(erro.response?.data?.message || "Não foi possível carregar os eventos.");
+                setErroEventos(mensagemErroApi(erro, "Não foi possível carregar os eventos."));
             })
             .finally(() => {
                 setCarregandoEventos(false);
@@ -115,7 +117,7 @@ function Eventos() {
             .then((response) => setEventoVisualizado(response.data))
             .catch((erro) => {
                 console.error("ERRO AO BUSCAR DETALHES DO EVENTO:", erro);
-                setErroDetalhe(erro.response?.data?.message || "Não foi possível carregar os detalhes do evento.");
+                setErroDetalhe(mensagemErroApi(erro, "Não foi possível carregar os detalhes do evento."));
             })
             .finally(() => setCarregandoDetalhe(false));
     }
@@ -253,7 +255,7 @@ function Eventos() {
                     {carregandoEventos ? (
                         <LoadingState className="eventos-estado" label="Carregando eventos…" />
                     ) : erroEventos ? (
-                        <p className="eventos-estado" role="alert">{erroEventos}</p>
+                        <EstadoErro mensagem={erroEventos} titulo="Não foi possível carregar os eventos" onTentarNovamente={buscarEventos} />
                     ) : eventosFiltrados.length === 0 ? (
                         <p className="eventos-estado">
                             {busca ? "Nenhum evento encontrado para essa busca." : "Nenhum evento cadastrado."}

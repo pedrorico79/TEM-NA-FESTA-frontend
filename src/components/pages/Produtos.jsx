@@ -11,6 +11,9 @@ import LoadingState from "../shared/LoadingState";
 import { api } from "../../services/api";
 import ModalConfirmacao from "../shared/modal/ModalConfirmacao";
 import ModalVisualizarProduto from "../produtos/ModalVisualizarProduto";
+import { notificar } from "../../utils/notificacoes";
+import { mensagemErroApi } from "../../utils/mensagemErroApi";
+import EstadoErro from "../shared/EstadoErro";
 
 import "../css/Produtos.css";
 
@@ -27,6 +30,8 @@ function Produtos() {
     const [mensagemSucesso, setMensagemSucesso] = useState("");
 
     const [paginaAtual, setPaginaAtual] = useState(1);
+    const [totalPaginas, setTotalPaginas] = useState(0);
+    const [versaoLista, setVersaoLista] = useState(0);
 
     const [modalConfirmacaoOpen, setModalConfirmacaoOpen] = useState(false);
 
@@ -42,17 +47,7 @@ function Produtos() {
     const [modalVisualizarOpen, setModalVisualizarOpen] = useState(false);
     const [produtoVisualizado, setProdutoVisualizado] = useState(null);
 
-    const totalPaginas = Math.ceil(
-        produtos.length / itensPorPagina
-    );
-
-    const indiceInicial = (paginaAtual - 1) * itensPorPagina;
-    const indiceFinal = indiceInicial + itensPorPagina;
-
-    const produtosPaginados = produtos.slice(
-        indiceInicial,
-        indiceFinal
-    );
+    const produtosPaginados = produtos;
 
     useEffect(() => {
         if (totalPaginas === 0 && paginaAtual !== 1) {
@@ -62,18 +57,28 @@ function Produtos() {
         }
     }, [paginaAtual, totalPaginas]);
 
-    function buscarProdutos(nome = "") {
+    function buscarProdutos(nome = busca, pagina = paginaAtual) {
         const sequenciaAtual = ++buscaSequencia.current;
         setCarregandoProdutos(true);
         setErroProdutos("");
         return api.get("/produtos", {
             params: {
-                nome: nome || undefined
+                nome: nome || undefined,
+                page: pagina - 1,
+                size: itensPorPagina,
+                sort: "ativo,desc"
             }
         })
             .then((response) => {
                 if (sequenciaAtual === buscaSequencia.current) {
-                    setProdutos(Array.isArray(response.data) ? response.data : []);
+                    const paginaResposta = response.data;
+                    const conteudo = Array.isArray(paginaResposta?.content)
+                        ? paginaResposta.content
+                        : Array.isArray(paginaResposta) ? paginaResposta : [];
+                    setProdutos(conteudo);
+                    setTotalPaginas(Number.isFinite(paginaResposta?.totalPages)
+                        ? paginaResposta.totalPages
+                        : Math.ceil(conteudo.length / itensPorPagina));
                     setCarregandoProdutos(false);
                 }
             })
@@ -81,21 +86,27 @@ function Produtos() {
                 console.error(erro);
                 if (sequenciaAtual === buscaSequencia.current) {
                     setErroProdutos(erro.response?.data?.message || "Não foi possível carregar os produtos.");
+                    setProdutos([]);
+                    setTotalPaginas(0);
                     setCarregandoProdutos(false);
                 }
             });
     }
 
     useEffect(() => {
-        buscarProdutos();
-    }, []);
+        buscarProdutos(busca, paginaAtual);
+    }, [busca, paginaAtual, versaoLista]);
+
+    function recarregarProdutos() {
+        setVersaoLista((versao) => versao + 1);
+    }
 
 
     function cadastrarProduto(produto) {
         return api.post("/produtos", produto)
             .then((response) => {
                 setPaginaAtual(1);
-                buscarProdutos(busca);
+                recarregarProdutos();
                 return response.data;
             })
             .catch((erro) => {
@@ -119,7 +130,7 @@ function Produtos() {
             ativo: produto.ativo,
         })
             .then((response) => {
-                buscarProdutos(busca);
+                recarregarProdutos();
                 return response.data;
             })
             .catch((erro) => {
@@ -137,7 +148,7 @@ function Produtos() {
     function removerProduto() {
         api.delete(`/produtos/${produtoRemocao.id}`)
             .then(() => {
-                buscarProdutos(busca);
+                recarregarProdutos();
 
                 setProdutoRemocao(null);
 
@@ -149,7 +160,7 @@ function Produtos() {
             })
             .catch((erro) => {
                 console.error(erro);
-                alert(erro.response?.data?.message || "Erro ao remover produto.");
+                notificar(mensagemErroApi(erro, "Erro ao remover produto."));
             });
     }
 
@@ -168,7 +179,7 @@ function Produtos() {
         }
     )
         .then(() => {
-            buscarProdutos(busca);
+            recarregarProdutos();
 
             setModalConfirmacaoOpen(false);
 
@@ -184,7 +195,7 @@ function Produtos() {
         })
         .catch((erro) => {
             console.error(erro);
-            alert(erro.response?.data?.message || "Erro ao alterar o status do produto.");
+            notificar(mensagemErroApi(erro, "Erro ao alterar o status do produto."));
         });
 }
 
@@ -230,7 +241,6 @@ function Produtos() {
 
                                 setBusca(valor);
                                 setPaginaAtual(1);
-                                buscarProdutos(valor);
                             }}
                         />
 
@@ -239,7 +249,7 @@ function Produtos() {
                     {carregandoProdutos ? (
                         <LoadingState className="produtos-vazio" label="Carregando produtos…" />
                     ) : erroProdutos ? (
-                        <p className="produtos-vazio" role="alert">{erroProdutos}</p>
+                        <EstadoErro mensagem={erroProdutos} titulo="Não foi possível carregar os produtos" onTentarNovamente={() => buscarProdutos(busca, paginaAtual)} />
                     ) : produtosPaginados.length > 0 ? (
                         <>
                             <TabelaProdutos

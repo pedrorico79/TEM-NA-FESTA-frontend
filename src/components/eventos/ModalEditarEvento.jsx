@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import Modal from "../shared/modal/Modal";
+import { notificar } from "../../utils/notificacoes";
+import { mensagemErroApi } from "../../utils/mensagemErroApi";
 
 function ModalEditarEvento(props) {
 
@@ -32,7 +34,7 @@ function ModalEditarEvento(props) {
         e.preventDefault();
 
         if (!EventoEditado.nome.trim() || !EventoEditado.dataInicio || !EventoEditado.dataFim) {
-            alert("Nome, Data de Início e Data de Fim são obrigatórios.");
+            notificar("Nome, Data de Início e Data de Fim são obrigatórios.");
             return;
         }
 
@@ -48,7 +50,7 @@ function ModalEditarEvento(props) {
             })
             .catch((erro) => {
                 console.error(erro);
-                alert("Erro ao editar Evento.");
+                notificar(mensagemErroApi(erro, "Não foi possível editar o evento."));
             });
     }
 

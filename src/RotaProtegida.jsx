@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { api } from "./services/api";
 import LoadingState from "./components/shared/LoadingState";
+import EstadoErro from "./components/shared/EstadoErro";
 
 function RotaProtegida() {
     const [estado, setEstado] = useState("carregando");
@@ -34,15 +35,11 @@ function RotaProtegida() {
 
     if (estado === "erro") {
         return (
-            <main className="api-estado" role="alert">
-                <h1>Não foi possível carregar esta página</h1>
-                <p>Verifique se o servidor está disponível e tente novamente.</p>
-                <button type="button" onClick={() => {
+            <main className="api-estado">
+                <EstadoErro titulo="Não foi possível carregar esta página" mensagem="Verifique se o servidor está disponível e tente novamente." onTentarNovamente={() => {
                     setEstado("carregando");
                     setTentativa((valor) => valor + 1);
-                }}>
-                    Tentar novamente
-                </button>
+                }} />
             </main>
         );
     }

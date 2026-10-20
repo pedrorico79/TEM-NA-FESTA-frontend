@@ -1,5 +1,7 @@
 import { useState } from "react";
 import Modal from "../shared/modal/Modal";
+import { notificar } from "../../utils/notificacoes";
+import { mensagemErroApi } from "../../utils/mensagemErroApi";
 
 function ModalNovoEvento(props) {
     const [novoEvento, setNovoEvento] = useState({
@@ -22,7 +24,7 @@ function ModalNovoEvento(props) {
         if (!novoEvento.nome.trim() || !novoEvento.dataInicio || !novoEvento.dataFim) {
             const mensagem = "Nome, Data de Início e Data de Fim são obrigatórios.";
             if (props.onErro) props.onErro(mensagem);
-            else alert(mensagem);
+            else notificar(mensagem);
             return;
         }
 
@@ -43,9 +45,9 @@ function ModalNovoEvento(props) {
             })
             .catch((erro) => {
                 console.error(erro);
-                const mensagem = erro.response?.data?.message || erro.response?.data?.detail || "Não foi possível cadastrar o evento. Confira os dados e tente novamente.";
+                const mensagem = mensagemErroApi(erro, "Não foi possível cadastrar o evento. Confira os dados e tente novamente.");
                 if (props.onErro) props.onErro(mensagem);
-                else alert(mensagem);
+                else notificar(mensagem);
             });
     }
 

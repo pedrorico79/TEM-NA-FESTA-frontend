@@ -10,6 +10,8 @@ import Paginacao from "../shared/paginacao/Paginacao";
 import LoadingState from "../shared/LoadingState";
 import { api } from "../../services/api";
 import ModalConfirmacao from "../shared/modal/ModalConfirmacao";
+import EstadoErro from "../shared/EstadoErro";
+import { mensagemErroApi } from "../../utils/mensagemErroApi";
 
 import "../css/Clientes.css";
 
@@ -26,6 +28,8 @@ function Clientes() {
     const timeoutAlerta = useRef(null);
 
     const [paginaAtual, setPaginaAtual] = useState(1);
+    const [totalPaginas, setTotalPaginas] = useState(0);
+    const [versaoLista, setVersaoLista] = useState(0);
 
     const [modalConfirmacaoOpen, setModalConfirmacaoOpen] = useState(false);
     const [clienteConfirmacao, setClienteConfirmacao] = useState(null);
@@ -42,18 +46,7 @@ function Clientes() {
 
     const itensPorPagina = 7;
 
-    const clientesFiltrados = clientes;
-
-    const totalPaginas = Math.ceil(
-        clientesFiltrados.length / itensPorPagina
-    );
-
-    const indiceInicial = (paginaAtual - 1) * itensPorPagina;
-
-    const clientesPaginados = clientesFiltrados.slice(
-        indiceInicial,
-        indiceInicial + itensPorPagina
-    );
+    const clientesPaginados = clientes;
 
     function mostrarAlerta(mensagem, tipo = "sucesso") {
         window.clearTimeout(timeoutAlerta.current);
@@ -61,39 +54,57 @@ function Clientes() {
         timeoutAlerta.current = window.setTimeout(() => setAlerta(null), 3000);
     }
 
-    function buscarClientes(busca = "") {
+    function buscarClientes(termoBusca = busca, pagina = paginaAtual) {
         const requisicao = ++requisicaoBuscaAtual.current;
         setCarregando(true);
         setErroBusca("");
         api.get("/clientes", {
             params: {
-                busca: busca || undefined
+                busca: termoBusca || undefined,
+                page: pagina - 1,
+                size: itensPorPagina,
+                sort: "ativo,desc"
             }
         })
             .then((response) => {
                 if (requisicao === requisicaoBuscaAtual.current) {
-                    setClientes(Array.isArray(response.data) ? response.data : []);
+                    const paginaResposta = response.data;
+                    const conteudo = Array.isArray(paginaResposta?.content)
+                        ? paginaResposta.content
+                        : Array.isArray(paginaResposta) ? paginaResposta : [];
+                    setClientes(conteudo);
+                    setTotalPaginas(Number.isFinite(paginaResposta?.totalPages)
+                        ? paginaResposta.totalPages
+                        : Math.ceil(conteudo.length / itensPorPagina));
                     setCarregando(false);
                 }
             })
             .catch((erro) => {
                 if (requisicao === requisicaoBuscaAtual.current) {
                     console.error("Erro ao buscar clientes:", erro.response?.data || erro);
-                    setErroBusca(erro.response?.data?.message || "Não foi possível carregar os clientes.");
+                    setErroBusca(mensagemErroApi(erro, "Não foi possível carregar os clientes."));
+                    setClientes([]);
+                    setTotalPaginas(0);
                     setCarregando(false);
                 }
             });
     }
 
     useEffect(() => {
-        buscarClientes();
-    }, []);
+        buscarClientes(busca, paginaAtual);
+    }, [busca, paginaAtual, versaoLista]);
 
     useEffect(() => {
-        if (totalPaginas > 0 && paginaAtual > totalPaginas) {
+        if (totalPaginas === 0 && paginaAtual !== 1) {
+            setPaginaAtual(1);
+        } else if (totalPaginas > 0 && paginaAtual > totalPaginas) {
             setPaginaAtual(totalPaginas);
         }
     }, [paginaAtual, totalPaginas]);
+
+    function recarregarClientes() {
+        setVersaoLista((versao) => versao + 1);
+    }
 
     function abrirModalEditar(cliente) {
         setClienteSelecionado(cliente);
@@ -130,7 +141,7 @@ function Clientes() {
         const responseCliente = await api.post("/clientes", dadosCliente);
 
         setPaginaAtual(1);
-        buscarClientes(busca);
+        recarregarClientes();
 
         return responseCliente.data;
     } catch (erro) {
@@ -165,7 +176,7 @@ function Clientes() {
             dadosCliente
         );
 
-        buscarClientes(busca);
+        recarregarClientes();
 
         return responseCliente.data;
 
@@ -183,7 +194,7 @@ function Clientes() {
         return api.delete(`/clientes/${clienteRemocao.id}`)
             .then(() => {
 
-                buscarClientes(busca);
+                recarregarClientes();
 
                 setClienteRemocao(null);
 
@@ -216,7 +227,7 @@ function Clientes() {
             }
         )
             .then(() => {
-                buscarClientes(busca);
+                recarregarClientes();
 
                 setModalConfirmacaoOpen(false);
 
@@ -269,7 +280,6 @@ function Clientes() {
 
                                 setBusca(valor);
                                 setPaginaAtual(1);
-                                buscarClientes(valor);
                             }}
                         />
 
@@ -278,7 +288,7 @@ function Clientes() {
                     {carregando ? (
                         <LoadingState className="clientes-estado" label="Carregando clientes…" />
                     ) : erroBusca ? (
-                        <p className="clientes-estado" role="alert">{erroBusca}</p>
+                        <EstadoErro mensagem={erroBusca} titulo="Não foi possível carregar os clientes" onTentarNovamente={() => buscarClientes(busca, paginaAtual)} />
                     ) : clientesPaginados.length > 0 ? (
                         <TabelaClientes
                             clientes={clientesPaginados}

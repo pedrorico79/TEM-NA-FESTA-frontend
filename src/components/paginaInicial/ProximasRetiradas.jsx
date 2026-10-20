@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { api } from "../../services/api";
 import LoadingState from "../shared/LoadingState";
+import EstadoErro from "../shared/EstadoErro";
 
 import Tabela from "../shared/tabela/Tabela";
 
@@ -481,7 +482,7 @@ function ProximasRetiradas() {
       {carregandoRetiradas ? (
         <LoadingState className="retiradas-vazio loading-state--compact" label="Carregando próximas retiradas…" />
       ) : erroRetiradas ? (
-        <div className="retiradas-vazio" role="alert">Não foi possível carregar as próximas retiradas.</div>
+        <EstadoErro titulo="Não foi possível carregar as próximas retiradas" mensagem="Verifique sua conexão e tente novamente." />
       ) : pedidos.length === 0 ? (
         <div className="retiradas-vazio" role="status">
           <div className="retiradas-sem-dados">

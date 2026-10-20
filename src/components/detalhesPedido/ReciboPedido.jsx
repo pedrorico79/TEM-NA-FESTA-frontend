@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { formatarTelefone } from "../../utils/telefone";
 import LoadingState from "../shared/LoadingState";
+import { notificar } from "../../utils/notificacoes";
 
 function ReciboPedido({
   pedido,
@@ -739,7 +740,7 @@ function ReciboPedido({
         error
       );
 
-      alert(
+      notificar(
         "Não foi possível copiar a imagem do recibo."
       );
     }

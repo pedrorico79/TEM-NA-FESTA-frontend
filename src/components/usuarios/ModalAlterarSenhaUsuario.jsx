@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Modal from "../shared/modal/Modal";
 import { mensagemErroApi } from "../../utils/mensagemErroApi";
+import { notificar } from "../../utils/notificacoes";
 
 function ModalAlterarSenhaUsuario(props) {
     const [novaSenha, setNovaSenha] = useState("");
@@ -21,16 +22,16 @@ function ModalAlterarSenhaUsuario(props) {
         e.preventDefault();
 
         if (!novaSenha.trim()) {
-            alert("A nova senha é obrigatória.");
+            notificar("A nova senha é obrigatória.");
             return;
         }
         if (novaSenha.length < 8 || novaSenha.length > 72) {
-            alert("A senha deve ter entre 8 e 72 caracteres.");
+            notificar("A senha deve ter entre 8 e 72 caracteres.");
             return;
         }
 
         if (novaSenha !== confirmarSenha) {
-            alert("As senhas não coincidem.");
+            notificar("As senhas não coincidem.");
             return;
         }
 
@@ -46,7 +47,7 @@ function ModalAlterarSenhaUsuario(props) {
             })
             .catch((erro) => {
                 console.error(erro);
-                alert(mensagemErroApi(erro, "Erro ao alterar senha do usuário."));
+                notificar(mensagemErroApi(erro, "Erro ao alterar senha do usuário."));
             });
     }
 

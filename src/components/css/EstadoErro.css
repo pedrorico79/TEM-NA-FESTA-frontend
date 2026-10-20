@@ -1,0 +1,49 @@
+.estado-erro-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    margin: 20px 0;
+    padding: 20px 22px;
+    color: #594133;
+    background: #fffdf9;
+    border: 1px solid #e5dcd3;
+    border-radius: 18px;
+    box-sizing: border-box;
+}
+
+.estado-erro-icone {
+    display: grid;
+    place-items: center;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    color: #a33d34;
+    background: #fff0ef;
+    font-size: 24px;
+}
+
+.estado-erro-conteudo { min-width: 0; flex: 1; }
+.estado-erro-conteudo h2 { margin: 0 0 4px; color: #2c2421; font-size: 18px; }
+.estado-erro-conteudo p { margin: 0; line-height: 1.5; overflow-wrap: anywhere; }
+
+.estado-erro-tentar {
+    flex: 0 0 auto;
+    min-height: 42px;
+    padding: 0 16px;
+    border: 1px solid #d9c9bc;
+    border-radius: 12px;
+    background: #fffaf4;
+    color: #594133;
+    font: inherit;
+    cursor: pointer;
+}
+
+.estado-erro-tentar:hover { background: #f8f2eb; }
+
+@media (max-width: 600px) {
+    .estado-erro-card { align-items: flex-start; flex-wrap: wrap; padding: 16px; gap: 12px; }
+    .estado-erro-conteudo { flex-basis: calc(100% - 56px); }
+    .estado-erro-tentar { margin-left: 54px; }
+}
