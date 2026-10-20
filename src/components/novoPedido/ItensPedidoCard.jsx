@@ -6,6 +6,28 @@ import ModalVisualizarProduto from "./ModalVisualizarProduto";
 
 import ModalAdicionarProduto from "./ModalAdicionarProduto";
 
+export function calcularPrecoUnitarioFinal(item = {}) {
+  if (!item || typeof item !== "object") return 0;
+
+  const precoBase = Number(item.produto?.precoVenda ?? item.produto?.preco ?? 0);
+  const quantidade = Number(item.quantidade || 0);
+  if (quantidade <= 0) return 0;
+  return precoBase;
+}
+
+export function calcularAcrescimoItem(item = {}) {
+  if (!item || typeof item !== "object") return 0;
+  const quantidade = Number(item.quantidade || 0);
+  const precoUnitario = calcularPrecoUnitarioFinal(item);
+  const valor = Number(item.acrescimoAjuste?.valor ?? item.acrescimo ?? 0);
+  if (item.acrescimoAjuste) {
+    return item.acrescimoAjuste.tipo === "%"
+      ? Number((precoUnitario * quantidade * valor / 100).toFixed(2))
+      : valor;
+  }
+  return valor;
+}
+
 function truncarTexto(texto, limite) {
   if (!texto) {
     return "-";
@@ -49,61 +71,74 @@ function ItensPedidoCard(props) {
   // TABELA DE ITENS
   // ==========================================
 
-  const data = props.itens.map((item, index) => {
-    const preco = Number(
-      item.produto?.precoVenda ??
-        item.produto?.preco ??
-        0
-    );
+  const itensSeguros = (Array.isArray(props.itens) ? props.itens : [])
+    .map((item, index) => ({ item, indexOriginal: index }))
+    .filter(({ item }) => item && typeof item === "object");
 
+  const data = itensSeguros.map(({ item, indexOriginal }) => {
     const quantidade = Number(
       item.quantidade || 0
     );
 
-    const subtotalBruto =
-      preco * quantidade;
+    const acrescimoTipo = item.acrescimoAjuste?.tipo || "R$";
 
-    const descontoValor = Number(
-      item.desconto?.valor || 0
-    );
-
-    const descontoTipo =
-      item.desconto?.tipo || "%";
-
-    let desconto = 0;
-
-    if (descontoTipo === "%") {
-      desconto =
-        subtotalBruto *
-        (descontoValor / 100);
-    } else {
-      desconto = descontoValor;
-    }
-
-    // Impede o subtotal de ficar negativo
-    const subtotal = Math.max(
-      0,
-      subtotalBruto - desconto
-    );
+    const precoUnitarioFinal = calcularPrecoUnitarioFinal(item);
+    const acrescimo = calcularAcrescimoItem(item);
+    const subtotal = precoUnitarioFinal * quantidade + acrescimo;
 
     return [
       // ==========================================
       // PRODUTO
       // ==========================================
 
-      truncarTexto(
-        item.produto?.nome,
-        25
-      ),
+      <div className="produto-info-item-novo-pedido">
+        <strong title={item.produto?.nome || "Produto"}>
+          {truncarTexto(item.produto?.nome, 35)}
+        </strong>
+        {item.grupoObservacaoId && !item.linhaObservacaoPrincipal && (
+          <span className="item-observacao-variacao-tag">Outra observação do mesmo produto</span>
+        )}
+        <span title={item.descricao || "Sem descrição"}>
+          {item.descricao || "Sem descrição"}
+        </span>
+      </div>,
 
-      // ==========================================
-      // DESCRIÇÃO
-      // ==========================================
-
-      truncarTexto(
-        item.descricao,
-        45
-      ),
+      <div className="observacao-item-acoes-novo-pedido" key={`observacao-${indexOriginal}`}>
+        <input
+          className="observacao-item-novo-pedido"
+          type="text"
+          value={item.observacaoItem || ""}
+          onClick={(event) => event.stopPropagation()}
+          onMouseDown={(event) => event.stopPropagation()}
+          onChange={(event) => props.alterarObservacaoItem(indexOriginal, event.target.value)}
+          placeholder="Adicionar observação"
+          aria-label={`Observação de ${item.produto?.nome || "item"}`}
+        />
+        {quantidade > 1 && <button
+          type="button"
+          className="produto-selecao-dividir"
+          onClick={(event) => {
+            event.stopPropagation();
+            props.dividirItemParaObservacao(indexOriginal);
+          }}
+          onMouseDown={(event) => event.stopPropagation()}
+          title="Separe uma unidade para adicionar outra observação"
+        >
+          + Outra observação
+        </button>}
+        {item.grupoObservacaoId && !item.linhaObservacaoPrincipal && <button
+          type="button"
+          className="item-juntar-variacao-observacao"
+          onClick={(event) => {
+            event.stopPropagation();
+            props.juntarVariacaoObservacao(indexOriginal);
+          }}
+          onMouseDown={(event) => event.stopPropagation()}
+          title="Juntar esta linha à principal e manter a observação principal"
+        >
+          Juntar à linha principal
+        </button>}
+      </div>,
 
       // ==========================================
       // QUANTIDADE
@@ -111,7 +146,7 @@ function ItensPedidoCard(props) {
 
       <div
         className="quantidade-input"
-        key={`quantidade-${index}`}
+        key={`quantidade-${indexOriginal}`}
         onClick={(e) =>
           e.stopPropagation()
         }
@@ -132,13 +167,13 @@ function ItensPedidoCard(props) {
           }
           onChange={(e) =>
             alterarQuantidade(
-              index,
+              indexOriginal,
               e.target.value
             )
           }
           onBlur={(e) =>
             validarQuantidadeAoSair(
-              index,
+              indexOriginal,
               e.target.value
             )
           }
@@ -150,17 +185,17 @@ function ItensPedidoCard(props) {
       // PREÇO UNITÁRIO
       // ==========================================
 
-      `R$${preco
+      `R$${precoUnitarioFinal
         .toFixed(2)
         .replace(".", ",")}`,
 
       // ==========================================
-      // DESCONTO
+      // AJUSTE
       // ==========================================
 
       <div
-        className="desconto-input"
-        key={`desconto-${index}`}
+        className="acrescimo-input ajuste-produto-input"
+        key={`acrescimo-${indexOriginal}`}
         onClick={(e) =>
           e.stopPropagation()
         }
@@ -171,15 +206,9 @@ function ItensPedidoCard(props) {
         <input
           type="number"
           min="0"
-          max={
-            descontoTipo === "%"
-              ? "100"
-              : undefined
-          }
+          max={acrescimoTipo === "%" ? "100" : undefined}
           step="0.01"
-          value={
-            item.desconto?.valor ?? ""
-          }
+          value={item.acrescimoAjuste?.valor ?? ""}
           onClick={(e) =>
             e.stopPropagation()
           }
@@ -187,16 +216,18 @@ function ItensPedidoCard(props) {
             e.stopPropagation()
           }
           onChange={(e) =>
-            props.alterarDesconto(
-              index,
-              e.target.value
-            )
+            props.alterarAcrescimo(indexOriginal, e.target.value)
           }
-          placeholder="0"
+          onBlur={(e) => {
+            if (Number(e.target.value) === 0) {
+              props.alterarAcrescimo(indexOriginal, "");
+            }
+          }}
+          placeholder={acrescimoTipo === "%" ? "0" : "0,00"}
         />
 
         <select
-          value={descontoTipo}
+          value={acrescimoTipo}
           onClick={(e) =>
             e.stopPropagation()
           }
@@ -204,8 +235,8 @@ function ItensPedidoCard(props) {
             e.stopPropagation()
           }
           onChange={(e) =>
-            props.alterarTipoDesconto(
-              index,
+            props.alterarUnidadeAcrescimo(
+              indexOriginal,
               e.target.value
             )
           }
@@ -233,12 +264,12 @@ function ItensPedidoCard(props) {
       // ==========================================
 
       <button
-        key={`remover-${index}`}
+        key={`remover-${indexOriginal}`}
         className="remover-item"
         onClick={(e) => {
           e.stopPropagation();
 
-          props.removerItem(index);
+        props.removerItem(indexOriginal);
         }}
         onMouseDown={(e) =>
           e.stopPropagation()
@@ -256,46 +287,8 @@ function ItensPedidoCard(props) {
   // CALCULA O SUBTOTAL GERAL DOS ITENS
   // ==========================================
 
-  const subtotal = props.itens.reduce(
-    (total, item) => {
-      const preco = Number(
-        item.produto?.precoVenda ??
-          item.produto?.preco ??
-          0
-      );
-
-      const quantidade = Number(
-        item.quantidade || 0
-      );
-
-      const subtotalBruto =
-        preco * quantidade;
-
-      const descontoValor = Number(
-        item.desconto?.valor || 0
-      );
-
-      const descontoTipo =
-        item.desconto?.tipo || "%";
-
-      let desconto = 0;
-
-      if (descontoTipo === "%") {
-        desconto =
-          subtotalBruto *
-          (descontoValor / 100);
-      } else {
-        desconto = descontoValor;
-      }
-
-      return (
-        total +
-        Math.max(
-          0,
-          subtotalBruto - desconto
-        )
-      );
-    },
+  const subtotal = itensSeguros.reduce(
+    (total, { item }) => total + calcularPrecoUnitarioFinal(item) * Number(item.quantidade || 0) + calcularAcrescimoItem(item),
     0
   );
 
@@ -311,10 +304,10 @@ function ItensPedidoCard(props) {
   // TOTAL
   // ==========================================
 
-  const total = Math.max(
-    0,
-    subtotal - entrada
-  );
+  const taxaEntrega = Math.max(0, Number(props.taxaEntrega || 0));
+  const descontoPedido = Math.min(subtotal + taxaEntrega, Math.max(0, Number(props.descontoPedido || 0)));
+  const total = Math.max(0, subtotal + taxaEntrega - descontoPedido);
+  const saldoRestante = Math.max(0, total - entrada);
 
   const formatarValor = (valor) => {
     return `R$${valor
@@ -339,25 +332,31 @@ function ItensPedidoCard(props) {
 
       {/* TABELA */}
 
-      <Tabela
-        columns={[
-          "PRODUTO",
-          "DESCRIÇÃO",
-          "QTD.",
-          "PREÇO UNITÁRIO",
-          "DESCONTO",
-          "SUBTOTAL",
-          ""
-        ]}
-        data={data}
-        onRowClick={(row, index) => {
-          setItemSelecionado(
-            props.itens[index]
-          );
-
-          setModalProdutoAberto(true);
-        }}
-      />
+      <div className="novo-pedido-tabela-itens-wrap">
+        <Tabela
+          columns={[
+            "PRODUTO",
+            "OBSERVAÇÃO",
+            "QTD.",
+            "PREÇO UNITÁRIO",
+            "ACRÉSCIMO",
+            "SUBTOTAL",
+            ""
+          ]}
+          data={data}
+          rowClassName={(index) => {
+            const item = itensSeguros[index]?.item;
+            if (!item?.grupoObservacaoId) return "";
+            return item.linhaObservacaoPrincipal
+              ? "item-observacao-grupo item-observacao-principal"
+              : "item-observacao-grupo item-observacao-variacao";
+          }}
+          onRowClick={(row, index) => {
+            setItemSelecionado(itensSeguros[index]?.item ?? null);
+            setModalProdutoAberto(true);
+          }}
+        />
+      </div>
 
       {/* MODAL VISUALIZAR PRODUTO */}
 
@@ -369,51 +368,9 @@ function ItensPedidoCard(props) {
         quantidade={
           itemSelecionado?.quantidade
         }
-        descontoValor={Number(
-          itemSelecionado?.desconto?.valor ||
-            0
-        )}
-        descontoTipo={
-          itemSelecionado?.desconto?.tipo ||
-          "%"
-        }
-        subtotal={(() => {
-          const preco = Number(
-            itemSelecionado?.produto
-              ?.precoVenda ??
-              itemSelecionado?.produto
-                ?.preco ??
-              0
-          );
-
-          const quantidade = Number(
-            itemSelecionado?.quantidade ||
-              0
-          );
-
-          const descontoValor = Number(
-            itemSelecionado?.desconto
-              ?.valor || 0
-          );
-
-          const descontoTipo =
-            itemSelecionado?.desconto?.tipo ||
-            "%";
-
-          const bruto =
-            preco * quantidade;
-
-          const desconto =
-            descontoTipo === "%"
-              ? bruto *
-                (descontoValor / 100)
-              : descontoValor;
-
-          return Math.max(
-            0,
-            bruto - desconto
-          );
-        })()}
+        acrescimoValor={Number(itemSelecionado?.acrescimoAjuste?.valor || 0)}
+        acrescimoTipo={itemSelecionado?.acrescimoAjuste?.tipo || "R$"}
+        subtotal={calcularPrecoUnitarioFinal(itemSelecionado) * Number(itemSelecionado?.quantidade || 0) + calcularAcrescimoItem(itemSelecionado)}
         onClose={() => {
           setModalProdutoAberto(false);
 
@@ -426,9 +383,9 @@ function ItensPedidoCard(props) {
       <ModalAdicionarProduto
         open={modalAdicionarAberto}
         produtos={props.produtos}
-        itensSelecionados={
-          props.itens
-        }
+        itensExistentes={props.itens}
+        onCriarProduto={props.criarProduto}
+        onCriarProdutoSucesso={props.onCriarProdutoSucesso}
         onClose={() =>
           setModalAdicionarAberto(false)
         }
@@ -467,7 +424,7 @@ function ItensPedidoCard(props) {
 
         <div className="resumo-linha">
           <span className="fonte">
-            Subtotal
+            Subtotal dos itens
           </span>
 
           <span className="subtotal">
@@ -475,34 +432,96 @@ function ItensPedidoCard(props) {
           </span>
         </div>
 
-        {/* SINAL / ENTRADA */}
+        <div className="resumo-linha">
+          <span className="fonte">Taxa de entrega</span>
+          <span className="subtotal">{formatarValor(taxaEntrega)}</span>
+        </div>
+
+        <div className="resumo-linha resumo-desconto-pedido">
+          <label className="fonte" htmlFor="desconto-pedido-total">Desconto no pedido</label>
+          <div className="entrada-input desconto-pedido-controles">
+            <input
+              id="desconto-pedido-total"
+              type="number"
+              min="0"
+              max={props.descontoPedidoAjuste?.tipo === "%" ? "100" : (subtotal + taxaEntrega).toFixed(2)}
+              step="0.01"
+              inputMode="decimal"
+              value={props.descontoPedidoAjuste?.valor ?? ""}
+              onChange={(event) => props.onAlterarDescontoPedido(event.target.value)}
+              placeholder={props.descontoPedidoAjuste?.tipo === "%" ? "0" : "0,00"}
+              aria-label="Valor do desconto do pedido"
+            />
+            <select
+              value={props.descontoPedidoAjuste?.tipo || "R$"}
+              onChange={(event) => props.onAlterarTipoDescontoPedido(event.target.value)}
+              aria-label="Unidade do desconto do pedido"
+            >
+              <option value="R$">R$</option>
+              <option value="%">%</option>
+            </select>
+          </div>
+        </div>
+
+        {/* PAGAMENTO INICIAL */}
 
         <div className="resumo-linha">
           <span className="fonte">
-            Sinal / Entrada
+            Sinal
           </span>
 
-          <div className="entrada-input">
-            <span>
-              R$
-            </span>
-
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={
-                props.entrada ?? ""
-              }
-              onChange={(e) =>
-                props.alterarEntrada(
-                  e.target.value
-                )
-              }
-              placeholder="0,00"
-            />
+          <div className="pagamento-inicial-campos">
+            <div className="entrada-input">
+              <span>R$</span>
+              <input
+                type="number"
+                min="0"
+                max={total.toFixed(2)}
+                step="0.01"
+                inputMode="decimal"
+                value={props.entrada ?? ""}
+                onChange={(event) => props.alterarEntrada(event.target.value)}
+                placeholder="0"
+                aria-label="Valor do pagamento inicial"
+              />
+            </div>
           </div>
         </div>
+
+        {entrada > 0 && (
+          <div className="pagamento-inicial-opcoes">
+            <label className="campo-pagamento-inicial">
+              Forma de pagamento
+              <select
+                className="metodo-pagamento-inicial"
+                value={props.metodoPagamentoId || ""}
+                onChange={(event) => props.onAlterarMetodoPagamento(event.target.value)}
+                disabled={!props.metodosPagamento?.length}
+                aria-label="Método do pagamento inicial"
+              >
+                {(props.metodosPagamento || []).map((metodo) => (
+                  <option key={metodo.id} value={metodo.id}>{metodo.nome}</option>
+                ))}
+              </select>
+            </label>
+            <label className="campo-pagamento-inicial">
+              Situação
+              <select
+                className="status-pagamento-inicial"
+                value={props.statusEntrada || "CONFIRMADO"}
+                onChange={(event) => props.onAlterarStatusEntrada(event.target.value)}
+                aria-label="Situação do pagamento inicial"
+              >
+                <option value="CONFIRMADO">Recebido</option>
+                <option value="PENDENTE">Aguardando confirmação</option>
+              </select>
+            </label>
+          </div>
+        )}
+
+        {Number(props.entrada || 0) > 0 && props.statusEntrada === "PENDENTE" }
+
+        {props.erroMetodosPagamento && <p className="novo-pedido-ajuda-erro" role="alert">{props.erroMetodosPagamento}</p>}
 
         {/* DIVISOR */}
 
@@ -512,12 +531,20 @@ function ItensPedidoCard(props) {
 
         <div className="resumo-linha resumo-total">
           <span className="fonte">
-            Total
+            Total do pedido
           </span>
 
           <strong>
             {formatarValor(total)}
           </strong>
+        </div>
+        {descontoPedido > 0 && <div className="resumo-linha">
+          <span>Desconto aplicado</span>
+          <strong>− {formatarValor(descontoPedido)}</strong>
+        </div>}
+        <div className="resumo-linha resumo-saldo">
+          <span>Saldo após sinal</span>
+          <strong>{formatarValor(saldoRestante)}</strong>
         </div>
       </div>
 
@@ -541,11 +568,21 @@ function ItensPedidoCard(props) {
           onClick={
             props.salvarPedido
           }
+          disabled={props.salvando || Boolean(props.pedidoIncompletoId)}
         >
-          Salvar Pedido
+          {props.salvando ? "Salvando…" : props.pedidoIncompletoId ? "Pedido já criado" : "Salvar Pedido"}
         </button>
 
       </div>
+
+      {props.pedidoIncompletoId && (
+        <div className="novo-pedido-criacao-parcial" role="alert">
+          <span>{props.erroSalvamento}</span>
+          <button type="button" onClick={() => props.abrirPedido(props.pedidoIncompletoId)}>
+            Abrir pedido #{props.pedidoIncompletoId}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

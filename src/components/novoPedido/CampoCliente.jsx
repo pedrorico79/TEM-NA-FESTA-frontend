@@ -4,8 +4,9 @@ import {
   useState
 } from "react";
 
-import ModalNovoCliente from "./ModalNovoCliente";
+import ModalNovoCliente from "../clientes/ModalNovoCliente";
 import { formatarTelefone } from "../../utils/telefone";
+import { api } from "../../services/api";
 
 function CampoCliente(props) {
 
@@ -82,6 +83,41 @@ function CampoCliente(props) {
 
   return encontrouNome || encontrouTelefone;
 });
+
+  async function salvarNovoCliente(cliente) {
+    const enderecoInformado = [
+      cliente.cep,
+      cliente.logradouro,
+      cliente.numero,
+      cliente.complemento,
+      cliente.bairro,
+      cliente.cidade,
+      cliente.estado,
+    ].some((valor) => valor?.trim());
+
+    const dadosCliente = {
+      nome: cliente.nome,
+      telefone: cliente.telefone,
+      whatsapp: cliente.whatsapp,
+      instagram: cliente.instagram,
+      anotacoes: cliente.anotacoes,
+      endereco: enderecoInformado ? {
+        cep: cliente.cep?.replace(/\D/g, ""),
+        logradouro: cliente.logradouro,
+        numero: cliente.numero,
+        complemento: cliente.complemento,
+        bairro: cliente.bairro,
+        cidade: cliente.cidade,
+        estado: cliente.estado,
+      } : null,
+    };
+
+    const response = await api.post("/clientes", dadosCliente);
+    const novoCliente = response.data;
+    props.setClientes((atuais) => [...(Array.isArray(atuais) ? atuais : []), novoCliente]);
+    props.setClienteSelecionado(novoCliente);
+    return novoCliente;
+  }
 
   return (
 
@@ -238,20 +274,9 @@ function CampoCliente(props) {
         onClose={() =>
           setModalNovoCliente(false)
         }
-        onCreate={(novoCliente) => {
-
-          props.setClientes([
-            ...props.clientes,
-            novoCliente,
-          ]);
-
-          props.setClienteSelecionado(
-            novoCliente
-          );
-
-          setModalNovoCliente(false);
-
-        }}
+        onSalvar={salvarNovoCliente}
+        onErro={props.onCriarClienteErro}
+        onSucesso={props.onCriarClienteSucesso}
       />
 
     </div>

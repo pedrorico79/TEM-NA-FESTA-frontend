@@ -17,6 +17,8 @@ function ClienteCard(props) {
   clientes={props.clientes}
 
   setClientes={props.setClientes}
+      onCriarClienteErro={props.onCriarClienteErro}
+      onCriarClienteSucesso={props.onCriarClienteSucesso}
 
   clienteSelecionado={
     props.pedido.cliente

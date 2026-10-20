@@ -20,7 +20,9 @@ function ModalNovoEvento(props) {
         e.preventDefault();
 
         if (!novoEvento.nome.trim() || !novoEvento.dataInicio || !novoEvento.dataFim) {
-            alert("Nome, Data de Início e Data de Fim são obrigatórios.");
+            const mensagem = "Nome, Data de Início e Data de Fim são obrigatórios.";
+            if (props.onErro) props.onErro(mensagem);
+            else alert(mensagem);
             return;
         }
 
@@ -41,7 +43,9 @@ function ModalNovoEvento(props) {
             })
             .catch((erro) => {
                 console.error(erro);
-                alert("Erro ao cadastrar Evento.");
+                const mensagem = erro.response?.data?.message || erro.response?.data?.detail || "Não foi possível cadastrar o evento. Confira os dados e tente novamente.";
+                if (props.onErro) props.onErro(mensagem);
+                else alert(mensagem);
             });
     }
 

@@ -4,8 +4,8 @@ function ModalVisualizarProduto({
 open,
 produto,
 quantidade,
-descontoValor,
-descontoTipo,
+acrescimoValor = 0,
+acrescimoTipo = "R$",
 subtotal,
 onClose
 }) {
@@ -15,7 +15,9 @@ if (!produto) {
     return null;
 }
 
-const preco = Number(produto.preco || 0);
+const preco = Number(produto.precoVenda ?? produto.preco ?? 0);
+const valorAcrescimo = Number(acrescimoValor || 0);
+const acrescimoEmReais = acrescimoTipo === "%" ? preco * valorAcrescimo / 100 : valorAcrescimo;
 
 return (
     <Modal
@@ -54,11 +56,11 @@ return (
             <div className="form-grid">
 
                 <div className="produto-detalhe">
-                    <strong>Desconto</strong>
+                    <strong>Acréscimo</strong>
                     <p>
-                        {descontoValor > 0
-                            ? `${descontoTipo === "%" ? descontoValor + "%" : "R$ " + descontoValor.toFixed(2).replace(".", ",")}`
-                            : "Sem desconto"
+                        {acrescimoValor > 0
+                            ? `${acrescimoTipo === "%" ? `+${acrescimoValor}%` : "+R$ " + Number(acrescimoValor).toFixed(2).replace(".", ",")}`
+                            : "Sem acréscimo"
                         }
                     </p>
                 </div>
@@ -66,7 +68,7 @@ return (
                 <div className="produto-detalhe">
                     <strong>Subtotal</strong>
                     <p>
-                        R$ {Number(subtotal || 0)
+                        R$ {Number(subtotal ?? ((preco + acrescimoEmReais) * Number(quantidade || 0)))
                             .toFixed(2)
                             .replace(".", ",")}
                     </p>
