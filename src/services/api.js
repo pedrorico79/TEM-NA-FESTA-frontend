@@ -1,8 +1,25 @@
 import axios from "axios";
 
+const apiUrlConfigurada = String(import.meta.env.VITE_API_URL || "").trim();
+const apiBaseURL = apiUrlConfigurada || "/api/v1";
+
 export const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || "/api/v1",
+    baseURL: apiBaseURL,
     withCredentials: true
+});
+
+api.interceptors.request.use((config) => {
+    // No Vite, chamadas relativas vão para o próprio servidor de desenvolvimento.
+    // Como ele não encaminha /api, avisamos da configuração ausente antes de gerar
+    // um 404 enganoso da aplicação frontend. Em produção, o caminho relativo usa Nginx.
+    if (import.meta.env.DEV && !apiUrlConfigurada) {
+        const erro = new Error("A URL do backend não está configurada. Defina VITE_API_URL para conectar ao servidor.");
+        erro.name = "ApiUrlNaoConfiguradaError";
+        erro.isApiUnavailable = true;
+        erro.config = config;
+        return Promise.reject(erro);
+    }
+    return config;
 });
 
 function caminhoDaRequisicao(config) {
@@ -102,6 +119,10 @@ api.interceptors.response.use(
     },
     (erro) => {
         const caminho = caminhoDaRequisicao(erro.config);
+        if ([502, 503, 504].includes(erro.response?.status)) {
+            erro.message = "O servidor está indisponível no momento. Verifique sua conexão e tente novamente.";
+            erro.isApiUnavailable = true;
+        }
         if (erro.response?.status === 401
             && caminho !== "/usuarios/login"
             && caminho !== "/auth/login"
