@@ -7,11 +7,13 @@ import CardLembrete from "../paginaInicial/CardLembrete";
 import ProximasRetiradas from "../paginaInicial/ProximasRetiradas";
 
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../../services/api";
 
 import "../css/PaginaInicial.css";
 
 function PaginaInicial() {
+  const navigate = useNavigate();
 
   const [kpis, setKpis] = useState({
     pedidosAtivos: 0,
@@ -124,7 +126,7 @@ function PaginaInicial() {
 
       })
       .catch((erro) => {
-        console.error("Erro ao carregar os indicadores da página inicial:", erro);
+        console.error("Erro ao carregar os indicadores da visão geral:", erro);
       });
 
 
@@ -156,7 +158,10 @@ function PaginaInicial() {
 
           <section className="left-content">
 
-            <KpiSection kpis={kpis} />
+            <KpiSection
+              kpis={kpis}
+              onSelecionar={(filtro) => navigate(`/pedidos?filtro=${encodeURIComponent(filtro)}`)}
+            />
 
             <ProximasRetiradas />
 

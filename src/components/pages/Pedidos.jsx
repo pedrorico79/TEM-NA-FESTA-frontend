@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import Menu from "../shared/menu/Menu";
 import BotaoAdicionar from "../shared/botaoAdicionar/BotaoAdicionar";
@@ -16,12 +16,26 @@ import "../css/Pedidos.css";
 
 function Pedidos() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const filtroDaUrl = searchParams.get("filtro");
+  const filtrosDisponiveis = [
+    "ATIVOS",
+    "PAGAMENTOS_PENDENTES",
+    "AGUARDANDO_SINAL",
+    "CONFIRMADO",
+    "EM_PRODUCAO",
+    "PRONTO_PARA_ENTREGA",
+    "ENTREGUE"
+  ];
 
   const [paginaAtual, setPaginaAtual] = useState(1);
   
 
   const [busca, setBusca] = useState("");
-  const [statusFiltro, setStatusFiltro] = useState("TODOS");
+  const [statusFiltro, setStatusFiltro] = useState(
+    filtrosDisponiveis.includes(filtroDaUrl) ? filtroDaUrl : "TODOS"
+  );
   const [eventoFiltro, setEventoFiltro] = useState("TODOS");
   const [ordem, setOrdem] = useState("PEDIDO");
   const [ordemCrescente, setOrdemCrescente] = useState(true);
@@ -45,6 +59,15 @@ function Pedidos() {
 
   const handleNavigate = (path) => {
     navigate(path);
+  };
+
+  const alterarStatusFiltro = (valor) => {
+    setStatusFiltro(valor);
+    setPaginaAtual(1);
+    const novosParametros = new URLSearchParams(searchParams);
+    novosParametros.delete("filtro");
+    if (valor !== "TODOS") novosParametros.set("filtro", valor);
+    setSearchParams(novosParametros, { replace: true });
   };
 
   useEffect(() => {
@@ -71,7 +94,13 @@ function Pedidos() {
         const params = {};
         const buscaNormalizada = busca.trim().replace(/^#/, "");
         if (buscaNormalizada) params.busca = buscaNormalizada;
-        if (statusFiltro !== "TODOS") params.status = statusFiltro;
+        if (statusFiltro === "PAGAMENTOS_PENDENTES") {
+          params.pagamentoPendente = true;
+        } else if (statusFiltro === "ATIVOS") {
+          params.ativos = true;
+        } else if (statusFiltro !== "TODOS") {
+          params.status = statusFiltro;
+        }
         if (eventoFiltro !== "TODOS") params.evento = eventoFiltro;
         params.page = paginaAtual - 1;
         params.size = itensPorPagina;
@@ -292,10 +321,7 @@ function Pedidos() {
             setPaginaAtual(1);
           }}
           statusFiltro={statusFiltro}
-          setStatusFiltro={(valor) => {
-            setStatusFiltro(valor);
-            setPaginaAtual(1);
-          }}
+          setStatusFiltro={alterarStatusFiltro}
           eventoFiltro={eventoFiltro}
           setEventoFiltro={(valor) => {
             setEventoFiltro(valor);
@@ -303,7 +329,7 @@ function Pedidos() {
           }}
           limparFiltros={() => {
             setBusca("");
-            setStatusFiltro("TODOS");
+            alterarStatusFiltro("TODOS");
             setEventoFiltro("TODOS");
             setOrdem("PEDIDO");
             setOrdemCrescente(true);

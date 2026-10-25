@@ -26,7 +26,7 @@ function Login({ destinoAposLogin }) {
         console.log("Usuário logado!");
 
 
-        navigate(destinoAposLogin || "/pagina-inicial", { replace: true });
+        navigate(destinoAposLogin || "/visao-geral", { replace: true });
 
       })
       .catch((erro) => {

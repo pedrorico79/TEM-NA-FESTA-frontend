@@ -90,9 +90,12 @@ function FiltrosPedidos({
                         label="Filtrar por status"
                         value={statusFiltro}
                         onChange={setStatusFiltro}
+                        className="filtro-status-dropdown"
+                        menuMinWidth={260}
                         options={[
                             { value: "TODOS", label: "Todos os status" },
-                            { value: "RASCUNHO", label: "Rascunho" },
+                            { value: "ATIVOS", label: "Ativos" },
+                            { value: "PAGAMENTOS_PENDENTES", label: "Pagamentos pendentes" },
                             { value: "AGUARDANDO_SINAL", label: "Aguardando sinal" },
                             { value: "CONFIRMADO", label: "Confirmado" },
                             { value: "EM_PRODUCAO", label: "Em Produção" },

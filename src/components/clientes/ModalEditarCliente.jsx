@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import Modal from "../shared/modal/Modal";
-import { aplicarMascaraTelefone, formatarTelefone } from "../../utils/telefone";
+import { formatarTelefonePorPais, normalizarTelefoneParaApi, separarTelefoneComCodigo } from "../../utils/telefone";
 import { aplicarMascaraCep, normalizarCep } from "../../utils/cep";
 import CampoEnderecoPesquisavel from "./CampoEnderecoPesquisavel";
+import CampoTelefone from "./CampoTelefone";
 
 function normalizarTexto(valor = "") {
     return String(valor).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
@@ -26,7 +27,9 @@ function ModalEditarCliente(props) {
     const [clienteEditado, setClienteEditado] = useState({
         nome: "",
         telefone: "",
+        telefonePais: "BR",
         whatsapp: "",
+        whatsappPais: "BR",
         instagram: "",
         anotacoes: "",
         cep: "",
@@ -68,10 +71,14 @@ function ModalEditarCliente(props) {
         setEtapa(1);
         if (!props.open || !props.cliente) return;
 
+        const telefone = separarTelefoneComCodigo(props.cliente.telefone);
+        const whatsapp = separarTelefoneComCodigo(props.cliente.whatsapp);
         setClienteEditado({
             nome: props.cliente.nome || "",
-            telefone: formatarTelefone(props.cliente.telefone),
-            whatsapp: formatarTelefone(props.cliente.whatsapp),
+            telefone: telefone.numero,
+            telefonePais: telefone.pais,
+            whatsapp: whatsapp.numero,
+            whatsappPais: whatsapp.pais,
             instagram: (props.cliente.instagram || "").replace(/^@+/, ""),
             anotacoes: props.cliente.anotacoes || "",
             cep: aplicarMascaraCep(props.cliente.endereco?.cep || ""),
@@ -88,7 +95,7 @@ function ModalEditarCliente(props) {
         setErroFormulario("");
         const { name } = e.target;
         const value = ["telefone", "whatsapp"].includes(name)
-            ? aplicarMascaraTelefone(e.target.value)
+            ? formatarTelefonePorPais(e.target.value, clienteEditado[`${name}Pais`])
             : name === "instagram"
                 ? e.target.value.replace(/^@+/, "")
             : name === "cep"
@@ -128,6 +135,14 @@ function ModalEditarCliente(props) {
                 );
             }, 350);
         }
+    }
+
+    function handlePaisTelefoneChange(nome, pais) {
+        setClienteEditado((atual) => ({
+            ...atual,
+            [`${nome}Pais`]: pais,
+            [nome]: formatarTelefonePorPais(atual[nome], pais),
+        }));
     }
 
     function aplicarEndereco(endereco, cepAtual = endereco.cep) {
@@ -297,8 +312,8 @@ function ModalEditarCliente(props) {
         props.onSalvar({
             id: props.cliente.id,
             nome: clienteEditado.nome,
-            telefone: clienteEditado.telefone,
-            whatsapp: clienteEditado.whatsapp,
+            telefone: normalizarTelefoneParaApi(clienteEditado.telefonePais, clienteEditado.telefone),
+            whatsapp: normalizarTelefoneParaApi(clienteEditado.whatsappPais, clienteEditado.whatsapp),
             anotacoes: clienteEditado.anotacoes,
             instagram: clienteEditado.instagram ? `@${clienteEditado.instagram}` : "",
             ...(!somenteDadosCliente && {
@@ -366,27 +381,11 @@ function ModalEditarCliente(props) {
                         />
                     </div>
 
-                    <div className="form-group">
-                        <label>Telefone</label>
-                        <input
-                            type="tel"
-                            inputMode="tel"
-                            name="telefone"
-                            value={clienteEditado.telefone}
-                            onChange={handleChange}
-                        />
-                    </div>
+                    <CampoTelefone label="Telefone" name="telefone" value={clienteEditado.telefone}
+                        pais={clienteEditado.telefonePais} onChange={handleChange} onPaisChange={handlePaisTelefoneChange} />
 
-                    <div className="form-group">
-                        <label>WhatsApp</label>
-                        <input
-                            type="tel"
-                            inputMode="tel"
-                            name="whatsapp"
-                            value={clienteEditado.whatsapp}
-                            onChange={handleChange}
-                        />
-                    </div>
+                    <CampoTelefone label="WhatsApp" name="whatsapp" value={clienteEditado.whatsapp}
+                        pais={clienteEditado.whatsappPais} onChange={handleChange} onPaisChange={handlePaisTelefoneChange} />
 
                     <div className="form-group">
                         <label>Instagram</label>

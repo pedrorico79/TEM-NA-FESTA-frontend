@@ -1,22 +1,24 @@
 import KPI from "../shared/kpi/Kpi";
 
-function KpiSection(props) {
+function KpiSection({ kpis, onSelecionar }) {
   return (
     <div className="kpis-grid">
       <KPI
         icon="bag-outline"
-        iconColor="#3b82f6"
-        iconBackground="#dbeafe"
+        iconColor="#16a34a"
+        iconBackground="#dcfce7"
         title="PEDIDOS ATIVOS"
-        value={props.kpis.pedidosAtivos}
+        value={kpis.pedidosAtivos}
+        onClick={() => onSelecionar("ATIVOS")}
       />
 
       <KPI
-        icon="hourglass-outline"
-        iconColor="#9a7b6b"
-        iconBackground="#f3ebe6"
-        title="AGUARDANDO PREPARO"
-        value={props.kpis.aguardandoPreparo}
+        icon="checkmark-circle-outline"
+        iconColor="#3b82f6"
+        iconBackground="#dbeafe"
+        title="CONFIRMADOS"
+        value={kpis.aguardandoPreparo}
+        onClick={() => onSelecionar("CONFIRMADO")}
       />
 
       <KPI
@@ -24,7 +26,8 @@ function KpiSection(props) {
         iconColor="#f59e0b"
         iconBackground="#fef3c7"
         title="EM PRODUÇÃO"
-        value={props.kpis.emProducao}
+        value={kpis.emProducao}
+        onClick={() => onSelecionar("EM_PRODUCAO")}
       />
 
       <KPI
@@ -32,7 +35,8 @@ function KpiSection(props) {
         iconColor="#ef4444"
         iconBackground="#fee2e2"
         title="PAGAMENTOS PENDENTES"
-        value={props.kpis.pagamentosPendentes}
+        value={kpis.pagamentosPendentes}
+        onClick={() => onSelecionar("PAGAMENTOS_PENDENTES")}
       />
     </div>
   );

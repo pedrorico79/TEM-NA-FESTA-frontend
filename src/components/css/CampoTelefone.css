@@ -1,0 +1,184 @@
+.cliente-telefone-field {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+  border: 2px solid #e7e0da;
+  border-radius: 14px;
+  background: #fffbf2;
+  overflow: hidden;
+}
+
+.cliente-telefone-field:focus-within {
+  border-color: #b8aba4;
+}
+
+.cliente-telefone-pais {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  min-width: 96px;
+  padding: 0 10px;
+  border: 0;
+  border-right: 1px solid #e7e0da;
+  border-radius: 0;
+  background: transparent;
+  color: #594133;
+  font: inherit;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.cliente-telefone-pais > span:first-child {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.cliente-telefone-pais ion-icon {
+  font-size: 15px;
+}
+
+.form-cliente .cliente-telefone-field input {
+  flex: 1;
+  width: 0;
+  min-width: 0;
+  height: 100%;
+  padding: 0 12px;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #2c2421;
+  font-family: inherit;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.cliente-telefone-paises-menu {
+  position: fixed;
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #e7e0da;
+  border-radius: 14px;
+  background: #fffdf9;
+  box-shadow: 0 10px 30px rgba(46, 28, 22, 0.2);
+}
+
+.cliente-telefone-paises-busca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  height: 48px;
+  padding: 0 16px;
+  border-bottom: 1px solid #e7e0da;
+  background: #fffdf9;
+  box-sizing: border-box;
+}
+
+.cliente-telefone-paises-busca ion-icon {
+  flex: 0 0 auto;
+  color: #8d796d;
+  font-size: 20px;
+}
+
+.cliente-telefone-paises-busca input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #2c2421;
+  font-size: 16px;
+  font-family: inherit;
+  box-sizing: border-box;
+  appearance: none;
+  outline: none;
+  box-shadow: none;
+}
+
+.cliente-telefone-paises-busca input::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
+.cliente-telefone-paises-busca input::placeholder {
+  color: #b6a8a0;
+  opacity: 1;
+}
+
+.cliente-telefone-paises-lista {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px;
+}
+
+.cliente-telefone-paises-lista button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #422f24;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cliente-telefone-paises-lista button:hover,
+.cliente-telefone-paises-lista button.selecionado {
+  background: #f5ede6;
+}
+
+.cliente-telefone-bandeira {
+  flex: 0 0 26px;
+  font-size: 20px;
+  text-align: center;
+}
+
+.cliente-telefone-nomes {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 0;
+  font-size: 14px;
+}
+
+.cliente-telefone-nomes span:first-child {
+  font-weight: 500;
+}
+
+.cliente-telefone-nomes span:last-child {
+  color: #78675d;
+}
+
+.cliente-telefone-codigo {
+  flex: 0 0 auto;
+  color: #78675d;
+  font-size: 14px;
+}
+
+.cliente-telefone-sem-paises {
+  margin: 0;
+  padding: 14px;
+  color: #78675d;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .cliente-telefone-paises-menu {
+    max-width: calc(100vw - 16px);
+  }
+}

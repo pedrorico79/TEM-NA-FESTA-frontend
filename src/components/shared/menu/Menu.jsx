@@ -87,10 +87,10 @@ function Menu(props) {
 
           <nav className="menu-menu">
             <MenuItem
-              icon="home-outline"
-              text="Tela Inicial"
+              icon="clipboard-outline"
+              text="Visão Geral"
               active={props.active === "paginaInicial"}
-              onClick={() => handleNavigate("/pagina-inicial")}
+              onClick={() => handleNavigate("/visao-geral")}
             />
 
             <MenuItem

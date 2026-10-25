@@ -171,6 +171,12 @@
   cursor: pointer;
 }
 
+.filtros-card .filtro-status-dropdown {
+  width: 260px;
+  min-width: 260px;
+  flex: 0 0 260px;
+}
+
 .filtro-dropdown span {
   min-width: 0;
   overflow: hidden;
@@ -213,6 +219,10 @@
 .filtro-dropdown-menu button:hover,
 .filtro-dropdown-menu button.selecionado {
   background: #f7f4f2;
+}
+
+.filtro-status-dropdown-menu button {
+  white-space: nowrap;
 }
 
 .ordenacao {
@@ -705,6 +715,12 @@
   .filtros-card .filtro-dropdown {
     min-width: 0;
   }
+
+  .filtros-card .filtro-status-dropdown {
+    width: 260px;
+    min-width: 0;
+    flex-basis: 260px;
+  }
 }
 
 @media (max-width: 1024px) {
@@ -829,7 +845,7 @@
 
   .filtros-left {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
     gap: 8px;
   }
 
@@ -851,6 +867,12 @@
     height: 36px;
     padding: 0 9px;
     font-size: 13px;
+  }
+
+  .filtros-card .filtro-status-dropdown {
+    width: 100%;
+    min-width: 0;
+    flex: initial;
   }
 
   .ordenacao {

@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import Modal from "../shared/modal/Modal";
-import { aplicarMascaraTelefone } from "../../utils/telefone";
+import { formatarTelefonePorPais, normalizarTelefoneParaApi } from "../../utils/telefone";
 import { aplicarMascaraCep, normalizarCep } from "../../utils/cep";
 import CampoEnderecoPesquisavel from "./CampoEnderecoPesquisavel";
+import CampoTelefone from "./CampoTelefone";
 
 const clienteVazio = {
     nome: "",
     telefone: "",
+    telefonePais: "BR",
     whatsapp: "",
+    whatsappPais: "BR",
     instagram: "",
     anotacoes: "",
     cep: "",
@@ -72,7 +75,7 @@ function ModalNovoCliente(props) {
     function handleChange(e) {
         const { name } = e.target;
         const value = ["telefone", "whatsapp"].includes(name)
-            ? aplicarMascaraTelefone(e.target.value)
+            ? formatarTelefonePorPais(e.target.value, novoCliente[`${name}Pais`])
             : name === "instagram"
                 ? e.target.value.replace(/^@+/, "")
             : name === "cep"
@@ -110,6 +113,14 @@ function ModalNovoCliente(props) {
                 );
             }, 350);
         }
+    }
+
+    function handlePaisTelefoneChange(nome, pais) {
+        setNovoCliente((atual) => ({
+            ...atual,
+            [`${nome}Pais`]: pais,
+            [nome]: formatarTelefonePorPais(atual[nome], pais),
+        }));
     }
 
     function aplicarEndereco(endereco, cepAtual = endereco.cep) {
@@ -269,8 +280,11 @@ function ModalNovoCliente(props) {
             return;
         }
 
+        const { telefonePais, whatsappPais, ...dadosCliente } = novoCliente;
         props.onSalvar({
-            ...novoCliente,
+            ...dadosCliente,
+            telefone: normalizarTelefoneParaApi(telefonePais, novoCliente.telefone),
+            whatsapp: normalizarTelefoneParaApi(whatsappPais, novoCliente.whatsapp),
             instagram: novoCliente.instagram ? `@${novoCliente.instagram}` : "",
         })
             .then(() => {
@@ -316,27 +330,11 @@ function ModalNovoCliente(props) {
                         />
                     </div>
 
-                    <div className="form-group">
-                        <label>Telefone</label>
-                        <input
-                            type="tel"
-                            inputMode="tel"
-                            name="telefone"
-                            value={novoCliente.telefone}
-                            onChange={handleChange}
-                        />
-                    </div>
+                    <CampoTelefone label="Telefone" name="telefone" value={novoCliente.telefone}
+                        pais={novoCliente.telefonePais} onChange={handleChange} onPaisChange={handlePaisTelefoneChange} />
 
-                    <div className="form-group">
-                        <label>WhatsApp</label>
-                        <input
-                            type="tel"
-                            inputMode="tel"
-                            name="whatsapp"
-                            value={novoCliente.whatsapp}
-                            onChange={handleChange}
-                        />
-                    </div>
+                    <CampoTelefone label="WhatsApp" name="whatsapp" value={novoCliente.whatsapp}
+                        pais={novoCliente.whatsappPais} onChange={handleChange} onPaisChange={handlePaisTelefoneChange} />
 
                     <div className="form-group">
                         <label>Instagram</label>

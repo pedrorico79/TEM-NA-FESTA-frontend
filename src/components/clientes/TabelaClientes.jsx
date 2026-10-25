@@ -59,9 +59,9 @@ function TabelaClientes({
             </span>
         </div>,
 
-        truncarTexto(formatarTelefone(cliente.telefone), 15),
+        truncarTexto(formatarTelefone(cliente.telefone), 22),
 
-        truncarTexto(formatarTelefone(cliente.whatsapp), 15),
+        truncarTexto(formatarTelefone(cliente.whatsapp), 22),
 
         truncarTexto(cliente.instagram, 20),
 

@@ -626,6 +626,7 @@ function DetalhesPedido() {
                         <div className="status-pedido-control">
                             <FiltroDropdown
                                 className={`status-pedido-dropdown badge-status ${classeStatusPedido(statusExibido)}`}
+                                menuClassName="status-pedido-dropdown-menu"
                                 value={statusExibido}
                                 onChange={(valor) => {
                                     setStatusSelecionado(valor === pedido.status ? null : valor);

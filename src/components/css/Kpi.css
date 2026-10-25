@@ -11,6 +11,27 @@
   overflow: hidden;
 }
 
+.kpi-card-clickable {
+  appearance: none;
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.kpi-card-clickable:hover {
+  border-color: #c9a895;
+  box-shadow: 0 6px 18px rgba(44, 36, 33, 0.09);
+  transform: translateY(-2px);
+}
+
+.kpi-card-clickable:focus-visible {
+  outline: 3px solid #bc5a6c;
+  outline-offset: 3px;
+}
+
 .kpi-icon {
   width: 32px;
   height: 32px;

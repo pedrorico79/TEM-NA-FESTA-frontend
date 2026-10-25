@@ -27,7 +27,8 @@ export const routes = createBrowserRouter([
   {
     element: <RotaProtegida />,
     children: [
-      { path: "/pagina-inicial", element: <PaginaInicial /> },
+      { path: "/visao-geral", element: <PaginaInicial /> },
+      { path: "/pagina-inicial", element: <Navigate to="/visao-geral" replace /> },
       { path: "/pedidos", element: <Pedidos /> },
       { path: "/produtos", element: <Produtos /> },
       { path: "/novo-pedido", element: <NovoPedido /> },

@@ -29,7 +29,7 @@ function RotaLogin() {
     }
 
     if (autenticado) {
-        return <Navigate to={location.state?.from || "/pagina-inicial"} replace />;
+        return <Navigate to={location.state?.from || "/visao-geral"} replace />;
     }
 
     return <Login destinoAposLogin={location.state?.from} />;

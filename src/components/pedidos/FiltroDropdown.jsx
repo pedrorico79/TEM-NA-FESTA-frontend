@@ -1,13 +1,14 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-function FiltroDropdown({ value, options, onChange, label, className = "", disabled = false }) {
+function FiltroDropdown({ value, options, onChange, label, className = "", menuClassName, menuMinWidth = 0, disabled = false }) {
   const [aberto, setAberto] = useState(false);
   const [posicao, setPosicao] = useState({ top: 0, left: 0, width: 0, maxHeight: 280 });
   const botaoRef = useRef(null);
   const menuRef = useRef(null);
   const id = useId().replace(/:/g, "");
   const opcaoSelecionada = options.find((opcao) => opcao.value === value);
+  const classesMenu = menuClassName ?? (className ? `${className}-menu` : "");
 
   useEffect(() => {
     if (!aberto) return undefined;
@@ -55,7 +56,7 @@ function FiltroDropdown({ value, options, onChange, label, className = "", disab
 
     const retangulo = botao.getBoundingClientRect();
     const altura = Math.min(options.length * 44 + 12, 280);
-    const largura = Math.min(retangulo.width, window.innerWidth - 16);
+    const largura = Math.min(Math.max(retangulo.width, menuMinWidth), window.innerWidth - 16);
     const left = Math.max(8, Math.min(retangulo.left, window.innerWidth - largura - 8));
     const top = retangulo.bottom + altura + 8 <= window.innerHeight
       ? retangulo.bottom + 6
@@ -86,7 +87,7 @@ function FiltroDropdown({ value, options, onChange, label, className = "", disab
         <div
           ref={menuRef}
           id={id}
-          className="filtro-dropdown-menu"
+          className={`filtro-dropdown-menu ${classesMenu}`.trim()}
           role="listbox"
           aria-label={label}
           style={{

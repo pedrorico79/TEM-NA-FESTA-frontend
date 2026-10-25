@@ -381,8 +381,37 @@
 
 .clientes-tabela-wrapper table {
   width: 100%;
+  max-width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   white-space: nowrap;
+}
+
+/* Reserve espaço para o código do país sem aumentar a largura total. */
+.clientes-tabela-wrapper .custom-table th:nth-child(1),
+.clientes-tabela-wrapper .custom-table td:nth-child(1) { width: 12%; }
+.clientes-tabela-wrapper .custom-table th:nth-child(1) { width: 12%; }
+.clientes-tabela-wrapper .custom-table th:nth-child(2),
+.clientes-tabela-wrapper .custom-table td:nth-child(2),
+.clientes-tabela-wrapper .custom-table th:nth-child(3),
+.clientes-tabela-wrapper .custom-table td:nth-child(3) { width: 18%; }
+.clientes-tabela-wrapper .custom-table th:nth-child(4),
+.clientes-tabela-wrapper .custom-table td:nth-child(4),
+.clientes-tabela-wrapper .custom-table th:nth-child(4) { width: 10%; }
+.clientes-tabela-wrapper .custom-table th:nth-child(5),
+.clientes-tabela-wrapper .custom-table td:nth-child(5) { width: 15%; }
+.clientes-tabela-wrapper .custom-table th:nth-child(6),
+.clientes-tabela-wrapper .custom-table td:nth-child(6) { width: 27%; }
+
+.clientes-tabela-wrapper .custom-table th,
+.clientes-tabela-wrapper .custom-table td {
+  padding-right: 10px;
+  padding-left: 10px;
+}
+
+.clientes-tabela-wrapper .custom-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .acoes-cliente {
