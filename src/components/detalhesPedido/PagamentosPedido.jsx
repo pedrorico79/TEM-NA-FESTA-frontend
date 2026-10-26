@@ -17,6 +17,32 @@ function PagamentosPedido({
   onCancelar,
   salvandoPagamentoId,
 }) {
+  function renderAcoesPagamento(pag) {
+    return (
+      <>
+        {pag.statusPagamento === "PENDENTE" && podeConfirmar && (
+          <button
+            type="button"
+            title="Confirmar recebimento"
+            aria-label="Confirmar recebimento"
+            disabled={salvandoPagamentoId === pag.id}
+            onClick={() => onConfirmar(pag)}
+          ><ion-icon name="checkmark-circle-outline"></ion-icon></button>
+        )}
+        {["PENDENTE", "CONFIRMADO"].includes(pag.statusPagamento) && (
+          <button
+            type="button"
+            className="pagamento-cancelar"
+            title="Cancelar pagamento"
+            aria-label="Cancelar pagamento"
+            disabled={salvandoPagamentoId === pag.id}
+            onClick={() => onCancelar(pag)}
+          ><ion-icon name="close-circle-outline"></ion-icon></button>
+        )}
+      </>
+    );
+  }
+
   return (
     <div className="card-padrao pagamentos-pedido-card">
       <div className="secao-header-flex pagamentos-secao-header">
@@ -74,38 +100,38 @@ function PagamentosPedido({
             </tr>
           </thead>
           <tbody>
-            {pagamentos.length ? pagamentos.map((pag) => (
+            {pagamentos.length ? pagamentos.map((pag) => {
+              const temAcaoConfirmar = pag.statusPagamento === "PENDENTE" && podeConfirmar;
+              const temAcaoCancelar = ["PENDENTE", "CONFIRMADO"].includes(pag.statusPagamento);
+              const temDuasAcoes = temAcaoConfirmar && temAcaoCancelar;
+
+              return (
               <tr key={pag.id}>
                 <td><span className="badge-data">{pag.data}</span></td>
-                <td>{moeda(pag.valor)}</td>
+                <td>
+                  {moeda(pag.valor)}
+                  <span className="pagamento-metadados-mobile">
+                    {[pag.metodo || "Não informado", pag.tipoLabel || pag.tipoPagamento || "Não informado"].join(" · ")}
+                  </span>
+                </td>
                 <td>{pag.metodo || "Não informado"}</td>
                 <td>{pag.tipoLabel || pag.tipoPagamento || "Não informado"}</td>
-                <td><span className={`pagamento-status pagamento-status-${String(pag.statusPagamento || "").toLowerCase()}`}>
-                  {pag.statusLabel || pag.statusPagamento || "Não informado"}
-                </span></td>
+                <td>
+                  <div className={`pagamento-situacao-com-acoes ${temDuasAcoes ? "duas-acoes" : temAcaoCancelar ? "acao-unica" : ""}`}>
+                    <span className={`pagamento-status pagamento-status-${String(pag.statusPagamento || "").toLowerCase()}`}>
+                      {pag.statusLabel || pag.statusPagamento || "Não informado"}
+                    </span>
+                    {(temAcaoConfirmar || temAcaoCancelar) && (
+                      <div className="pagamento-acoes-mobile">{renderAcoesPagamento(pag)}</div>
+                    )}
+                  </div>
+                </td>
                 <td className="pagamento-acoes">
-                  {pag.statusPagamento === "PENDENTE" && podeConfirmar && (
-                    <button
-                      type="button"
-                      title="Confirmar recebimento"
-                      aria-label="Confirmar recebimento"
-                      disabled={salvandoPagamentoId === pag.id}
-                      onClick={() => onConfirmar(pag)}
-                    ><ion-icon name="checkmark-circle-outline"></ion-icon></button>
-                  )}
-                  {["PENDENTE", "CONFIRMADO"].includes(pag.statusPagamento) && (
-                    <button
-                      type="button"
-                      className="pagamento-cancelar"
-                      title="Cancelar pagamento"
-                      aria-label="Cancelar pagamento"
-                      disabled={salvandoPagamentoId === pag.id}
-                      onClick={() => onCancelar(pag)}
-                    ><ion-icon name="close-circle-outline"></ion-icon></button>
-                  )}
+                  {renderAcoesPagamento(pag)}
                 </td>
               </tr>
-            )) : (
+              );
+            }) : (
               <tr><td colSpan="6" className="pagamentos-vazio">Nenhum pagamento registrado.</td></tr>
             )}
           </tbody>

@@ -1,10 +1,11 @@
 import FiltroDropdown from "./FiltroDropdown";
+import FiltroStatusPedidos from "./FiltroStatusPedidos";
 
 function FiltrosPedidos({
     busca,
     setBusca,
-    statusFiltro,
-    setStatusFiltro,
+    statusFiltros,
+    setStatusFiltros,
     eventoFiltro,
     setEventoFiltro,
     limparFiltros,
@@ -17,7 +18,7 @@ function FiltrosPedidos({
     eventosDisponiveis = []
 }) {
     const temFiltrosAtivos = Boolean(busca.trim()) ||
-        statusFiltro !== "TODOS" ||
+        statusFiltros.length > 0 ||
         eventoFiltro !== "TODOS" ||
         ordem !== "PEDIDO" ||
         !ordemCrescente;
@@ -86,16 +87,15 @@ function FiltrosPedidos({
 
                     </div>
 
-                    <FiltroDropdown
+                    <FiltroStatusPedidos
                         label="Filtrar por status"
-                        value={statusFiltro}
-                        onChange={setStatusFiltro}
-                        className="filtro-status-dropdown"
-                        menuMinWidth={260}
-                        options={[
+                        valores={statusFiltros}
+                        onChange={setStatusFiltros}
+                        opcoes={[
                             { value: "TODOS", label: "Todos os status" },
                             { value: "ATIVOS", label: "Ativos" },
                             { value: "PAGAMENTOS_PENDENTES", label: "Pagamentos pendentes" },
+                            { value: "ATRASADOS", label: "Atrasados" },
                             { value: "AGUARDANDO_SINAL", label: "Aguardando sinal" },
                             { value: "CONFIRMADO", label: "Confirmado" },
                             { value: "EM_PRODUCAO", label: "Em Produção" },

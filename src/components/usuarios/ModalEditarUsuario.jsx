@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Modal from "../shared/modal/Modal";
+import FiltroDropdown from "../pedidos/FiltroDropdown";
 import { nomePerfilUsuario } from "../../utils/perfilUsuario";
 import { mensagemErroApi } from "../../utils/mensagemErroApi";
 import { notificar } from "../../utils/notificacoes";
@@ -28,6 +29,10 @@ function ModalEditarUsuario(props) {
             ...UsuarioEditado,
             [name]: value,
         });
+    }
+
+    function alterarPerfil(perfilId) {
+        setUsuarioEditado((atual) => ({ ...atual, perfilId }));
     }
 
     function salvar(e) {
@@ -98,25 +103,26 @@ function ModalEditarUsuario(props) {
                     {!props.bloquearPerfil && (
                         <div className="form-group">
                             <label>Perfil de acesso *</label>
-                            <div className="usuario-select-wrap">
-                                <select
-                                    className="usuario-perfil-select"
-                                    name="perfilId"
-                                    value={UsuarioEditado.perfilId}
-                                    onChange={handleChange}
-                                    required
-                                >
-                                    <option value="">Selecione um perfil</option>
-                                    {(props.perfis || []).map((perfil) => (
-                                        <option key={perfil.id} value={perfil.id}>
-                                            {nomePerfilUsuario(perfil)}
-                                        </option>
-                                    ))}
-                                    {UsuarioEditado.perfilId && !(props.perfis || []).some((perfil) => String(perfil.id) === UsuarioEditado.perfilId) && (
-                                        <option value={UsuarioEditado.perfilId}>{nomePerfilUsuario(props.Usuario?.perfil) || `Perfil ${UsuarioEditado.perfilId}`}</option>
-                                    )}
-                                </select>
-                            </div>
+                            <FiltroDropdown
+                                className="usuario-perfil-dropdown"
+                                menuClassName="usuario-perfil-dropdown-menu"
+                                label="Perfil de acesso"
+                                value={UsuarioEditado.perfilId}
+                                onChange={alterarPerfil}
+                                options={[
+                                    { value: "", label: "Selecione um perfil" },
+                                    ...(props.perfis || []).map((perfil) => ({
+                                        value: String(perfil.id),
+                                        label: nomePerfilUsuario(perfil),
+                                    })),
+                                    ...(UsuarioEditado.perfilId && !(props.perfis || []).some((perfil) => String(perfil.id) === UsuarioEditado.perfilId)
+                                        ? [{
+                                            value: UsuarioEditado.perfilId,
+                                            label: nomePerfilUsuario(props.Usuario?.perfil) || `Perfil ${UsuarioEditado.perfilId}`,
+                                        }]
+                                        : []),
+                                ]}
+                            />
                         </div>
                     )}
 

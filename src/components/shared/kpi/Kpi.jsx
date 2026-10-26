@@ -18,7 +18,7 @@ return (
 
       <h2>{props.value}</h2>
 
-      {props.description && <p>{props.description}</p>}
+      {props.description != null && <p className={props.descriptionClassName}>{props.description}</p>}
     </Container>
   );
 }

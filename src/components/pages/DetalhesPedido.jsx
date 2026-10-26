@@ -29,11 +29,14 @@ function dataEntregaParaAtualizacao(dataEntrega) {
 
 function dataEstaAtrasada(dataEntrega) {
     if (!dataEntrega) return false;
-    const entrega = new Date(dataEntrega);
     const hoje = new Date();
-    entrega.setHours(0, 0, 0, 0);
-    hoje.setHours(0, 0, 0, 0);
-    return entrega < hoje;
+    const hojeLocal = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}-${String(hoje.getDate()).padStart(2, "0")}`;
+    const dataRetiradaLocal = String(dataEntrega).slice(0, 10);
+    return /^\d{4}-\d{2}-\d{2}$/.test(dataRetiradaLocal) && dataRetiradaLocal < hojeLocal;
+}
+
+function statusPedidoOperacional(status) {
+    return ["AGUARDANDO_SINAL", "CONFIRMADO", "EM_PRODUCAO", "PRONTO_PARA_ENTREGA"].includes(status);
 }
 
 function mensagemErroPedido(error, fallback) {
@@ -134,9 +137,11 @@ function DetalhesPedido() {
     const timeoutNotificacaoErro = useRef(null);
     const [statusAtualizando, setStatusAtualizando] = useState(false);
     const [statusSelecionado, setStatusSelecionado] = useState(null);
+    const [notificarCliente, setNotificarCliente] = useState(false);
     const [unidadeAjusteItens, setUnidadeAjusteItens] = useState("R$");
     const [metodosPagamento, setMetodosPagamento] = useState([]);
     const [modalAdicionarPagamentoOpen, setModalAdicionarPagamentoOpen] = useState(false);
+    const [pagamentoParaConfirmar, setPagamentoParaConfirmar] = useState(null);
     const [pagamentoParaCancelar, setPagamentoParaCancelar] = useState(null);
     const [salvandoPagamentoId, setSalvandoPagamentoId] = useState(null);
     const [eventos, setEventos] = useState([]);
@@ -341,13 +346,15 @@ function DetalhesPedido() {
         window.setTimeout(() => setMensagemSucesso(""), 3000);
     }
 
-    async function confirmarPagamento(pagamento) {
-        setSalvandoPagamentoId(pagamento.id);
+    async function confirmarPagamento() {
+        if (!pagamentoParaConfirmar) return;
+        setSalvandoPagamentoId(pagamentoParaConfirmar.id);
         try {
             const response = await api.patch(
-                `/pedidos/${pedidoApi.id}/pagamentos/${pagamento.id}/confirmar`
+                `/pedidos/${pedidoApi.id}/pagamentos/${pagamentoParaConfirmar.id}/confirmar`
             );
             aplicarPedidoComPagamentos(response.data);
+            setPagamentoParaConfirmar(null);
             setMensagemSucesso("Pagamento confirmado com sucesso!");
             window.setTimeout(() => setMensagemSucesso(""), 3000);
         } catch (error) {
@@ -495,6 +502,7 @@ function DetalhesPedido() {
             const response = await api.patch(`/pedidos/${pedidoApi.id}/status`, {
                 novoStatus,
                 observacao: "",
+                notificarCliente,
             });
             setPedidoApi((atual) => ({ ...atual, ...response.data }));
             setPedido((atual) => ({
@@ -503,13 +511,20 @@ function DetalhesPedido() {
                 statusProducao: response.data.statusProducao,
             }));
             setStatusSelecionado(null);
-            setMensagemErroNotificacao("");
-            setMensagemSucesso("Status do pedido atualizado com sucesso!");
-            window.setTimeout(() => setMensagemSucesso(""), 3000);
+            setNotificarCliente(false);
+            if (response.headers?.["x-notificacao-cliente"] === "falhou") {
+                mostrarErroNotificacao("O status foi atualizado, mas não foi possível enviar a mensagem ao cliente. O cliente não foi notificado.");
+            } else {
+                window.clearTimeout(timeoutNotificacaoErro.current);
+                setMensagemErroNotificacao("");
+                setMensagemSucesso("Status do pedido atualizado com sucesso!");
+                window.setTimeout(() => setMensagemSucesso(""), 3000);
+            }
         } catch (error) {
             console.error("Erro ao atualizar status do pedido:", error);
             const mensagem = mensagemErroStatusPedido(error);
             setStatusSelecionado(null);
+            setNotificarCliente(false);
             setMensagemSucesso("");
             mostrarErroNotificacao(mensagem);
         } finally {
@@ -583,7 +598,7 @@ function DetalhesPedido() {
         && pedido.statusProducao !== "CANCELADO";
     const podeAdicionarPagamento = podeExibirAcaoPagamento && saldoDisponivel > 0;
     const pedidoAtrasado = dataEstaAtrasada(pedido.dataEntrega)
-        && !["ENTREGUE", "CANCELADO"].includes(pedido.statusProducao);
+        && statusPedidoOperacional(pedido.statusProducao);
     const podeEditarDataRetirada = !pedido.deletado
         && !["ENTREGUE", "CANCELADO"].includes(pedido.statusProducao);
     const podeEditarDadosPedido = !pedidoAtrasado && !pedido.deletado
@@ -629,6 +644,7 @@ function DetalhesPedido() {
                                 menuClassName="status-pedido-dropdown-menu"
                                 value={statusExibido}
                                 onChange={(valor) => {
+                                    setNotificarCliente(false);
                                     setStatusSelecionado(valor === pedido.status ? null : valor);
                                 }}
                                 disabled={statusAtualizando || !pedidoApi || !proximosStatusPermitidos(pedido.status).length}
@@ -665,13 +681,9 @@ function DetalhesPedido() {
                                     </span>
 
                                     <div className="data-retirada-valor">
-                                        <span className="dado-valor">
+                                        <span className={`dado-valor ${pedidoAtrasado ? "data-retirada-atrasada" : ""}`}>
                                             {pedido.datas.dataRetirada}
                                         </span>
-                                        {pedidoAtrasado && <span className="pedido-aviso-atrasado" title="A retirada deste pedido está atrasada">
-                                            <ion-icon name="alert-circle-outline"></ion-icon>
-                                            Atrasado
-                                        </span>}
                                         {podeEditarDataRetirada && <button
                                             type="button"
                                             className="btn-editar-data-retirada"
@@ -739,7 +751,7 @@ function DetalhesPedido() {
                             onAdicionar={() => {
                                 setModalAdicionarPagamentoOpen(true);
                             }}
-                            onConfirmar={confirmarPagamento}
+                            onConfirmar={(pagamento) => setPagamentoParaConfirmar(pagamento)}
                             onCancelar={(pagamento) => setPagamentoParaCancelar(pagamento)}
                             salvandoPagamentoId={salvandoPagamentoId}
                         />
@@ -818,10 +830,35 @@ function DetalhesPedido() {
             <ModalConfirmacao
                 open={Boolean(statusSelecionado && statusSelecionado !== pedido.status)}
                 titulo="Confirmar alteração de status"
-                onClose={() => setStatusSelecionado(null)}
+                onClose={() => {
+                    setStatusSelecionado(null);
+                    setNotificarCliente(false);
+                }}
                 onConfirmar={confirmarAlteracaoStatus}
                 confirmando={statusAtualizando}
                 mensagem={`Deseja alterar o status de “${formatarStatus(pedido.status)}” para “${formatarStatus(statusSelecionado)}”?`}
+                conteudoAdicional={(
+                    <label className="pedido-notificar-cliente">
+                        <input
+                            type="checkbox"
+                            checked={notificarCliente}
+                            onChange={(event) => setNotificarCliente(event.target.checked)}
+                            disabled={statusAtualizando}
+                        />
+                        <span>Quero notificar o cliente</span>
+                    </label>
+                )}
+            />
+
+            <ModalConfirmacao
+                open={Boolean(pagamentoParaConfirmar)}
+                titulo="Confirmar recebimento"
+                onClose={() => setPagamentoParaConfirmar(null)}
+                onConfirmar={confirmarPagamento}
+                confirmando={Boolean(salvandoPagamentoId)}
+                mensagem={pagamentoParaConfirmar
+                    ? `Deseja confirmar o recebimento de ${Number(pagamentoParaConfirmar.valor ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}?`
+                    : "Deseja confirmar este pagamento?"}
             />
 
             <ModalConfirmacao

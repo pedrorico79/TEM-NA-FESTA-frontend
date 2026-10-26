@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import Tabela from "../shared/tabela/Tabela";
+import FiltroDropdown from "../pedidos/FiltroDropdown";
 
 import ModalVisualizarProduto from "./ModalVisualizarProduto";
 
@@ -226,29 +227,15 @@ function ItensPedidoCard(props) {
           placeholder={acrescimoTipo === "%" ? "0" : "0,00"}
         />
 
-        <select
+        <FiltroDropdown
           value={acrescimoTipo}
-          onClick={(e) =>
-            e.stopPropagation()
-          }
-          onMouseDown={(e) =>
-            e.stopPropagation()
-          }
-          onChange={(e) =>
-            props.alterarUnidadeAcrescimo(
-              indexOriginal,
-              e.target.value
-            )
-          }
-        >
-          <option value="%">
-            %
-          </option>
-
-          <option value="R$">
-            R$
-          </option>
-        </select>
+          options={[{ value: "R$", label: "R$" }, { value: "%", label: "%" }]}
+          onChange={(valor) => props.alterarUnidadeAcrescimo(indexOriginal, valor)}
+          label="Unidade do acréscimo"
+          className="unidade-ajuste-dropdown"
+          menuClassName="unidade-ajuste-dropdown-menu"
+          menuMinWidth={76}
+        />
       </div>,
 
       // ==========================================
@@ -452,14 +439,15 @@ function ItensPedidoCard(props) {
               placeholder={props.descontoPedidoAjuste?.tipo === "%" ? "0" : "0,00"}
               aria-label="Valor do desconto do pedido"
             />
-            <select
+            <FiltroDropdown
               value={props.descontoPedidoAjuste?.tipo || "R$"}
-              onChange={(event) => props.onAlterarTipoDescontoPedido(event.target.value)}
-              aria-label="Unidade do desconto do pedido"
-            >
-              <option value="R$">R$</option>
-              <option value="%">%</option>
-            </select>
+              options={[{ value: "R$", label: "R$" }, { value: "%", label: "%" }]}
+              onChange={props.onAlterarTipoDescontoPedido}
+              label="Unidade do desconto do pedido"
+              className="unidade-ajuste-dropdown"
+              menuClassName="unidade-ajuste-dropdown-menu"
+              menuMinWidth={76}
+            />
           </div>
         </div>
 
@@ -492,29 +480,36 @@ function ItensPedidoCard(props) {
           <div className="pagamento-inicial-opcoes">
             <label className="campo-pagamento-inicial">
               Forma de pagamento
-              <select
-                className="metodo-pagamento-inicial"
+              <FiltroDropdown
+                className="campo-pagamento-inicial-dropdown"
+                menuClassName="campo-pagamento-inicial-dropdown-menu"
+                label="Método do pagamento inicial"
                 value={props.metodoPagamentoId || ""}
-                onChange={(event) => props.onAlterarMetodoPagamento(event.target.value)}
+                onChange={props.onAlterarMetodoPagamento}
                 disabled={!props.metodosPagamento?.length}
-                aria-label="Método do pagamento inicial"
-              >
-                {(props.metodosPagamento || []).map((metodo) => (
-                  <option key={metodo.id} value={metodo.id}>{metodo.nome}</option>
-                ))}
-              </select>
+                options={[
+                  { value: "", label: "Selecione" },
+                  ...(props.metodosPagamento || []).map((metodo) => ({
+                    value: String(metodo.id),
+                    label: metodo.nome,
+                  })),
+                ]}
+              />
             </label>
             <label className="campo-pagamento-inicial">
               Situação
-              <select
-                className="status-pagamento-inicial"
+              <FiltroDropdown
+                className="campo-pagamento-inicial-dropdown"
+                menuClassName="campo-pagamento-inicial-dropdown-menu"
+                label="Situação do pagamento inicial"
                 value={props.statusEntrada || "CONFIRMADO"}
-                onChange={(event) => props.onAlterarStatusEntrada(event.target.value)}
-                aria-label="Situação do pagamento inicial"
-              >
-                <option value="CONFIRMADO">Recebido</option>
-                <option value="PENDENTE">Aguardando confirmação</option>
-              </select>
+                onChange={props.onAlterarStatusEntrada}
+                menuMinWidth={220}
+                options={[
+                  { value: "CONFIRMADO", label: "Recebido" },
+                  { value: "PENDENTE", label: "Aguardando confirmação" },
+                ]}
+              />
             </label>
           </div>
         )}

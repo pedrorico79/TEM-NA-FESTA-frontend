@@ -21,6 +21,109 @@
   margin-top: 30px;
 }
 
+.pedidos-header {
+  min-width: 0;
+}
+
+.pedidos-header .titulo-pagina {
+  margin: 0 0 12px;
+}
+
+.pedidos-resumo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pedido-resumo-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 142px;
+  padding: 8px 12px;
+  border: 1px solid #e5dcd3;
+  border-radius: 14px;
+  background: #fffffc;
+}
+
+button.pedido-resumo-item {
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+button.pedido-resumo-item:hover,
+button.pedido-resumo-item.selecionado {
+  border-color: #b78c74;
+  box-shadow: 0 0 0 2px rgba(111, 67, 42, 0.08);
+}
+
+button.pedido-resumo-item:focus-visible {
+  outline: 2px solid #9b6547;
+  outline-offset: 2px;
+}
+
+.pedido-resumo-icone {
+  display: flex;
+  flex: 0 0 34px;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+}
+
+.pedido-resumo-icone ion-icon {
+  font-size: 19px;
+}
+
+.pedido-resumo-item.producao .pedido-resumo-icone {
+  color: #f59e0b;
+  background: #fef3c7;
+}
+
+.pedido-resumo-item.atrasados .pedido-resumo-icone,
+.pedido-resumo-item.pagamentos .pedido-resumo-icone {
+  color: #ef4444;
+  background: #fee2e2;
+}
+
+.pedido-resumo-texto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  gap: 2px;
+  color: #594133;
+  text-align: center;
+  line-height: 1.15;
+}
+
+.pedido-resumo-texto.sem-subtitulo {
+  transform: translateY(5px);
+}
+
+.pedido-resumo-texto > span {
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.pedido-resumo-texto strong {
+  color: #2c2421;
+  font-family: "DM Serif Display", serif;
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.pedido-resumo-texto small {
+  color: #805b1c;
+  font-size: 10px;
+  line-height: 1.1;
+  min-height: 1.1em;
+  white-space: nowrap;
+}
+
 .titulo-pagina {
   font-size: 45px;
   font-family: "DM Serif Display", serif;
@@ -225,6 +328,41 @@
   white-space: nowrap;
 }
 
+.filtro-status-multiplo-menu {
+  gap: 2px;
+}
+
+.filtro-status-multiplo-menu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 8px 10px;
+  white-space: normal;
+}
+
+.filtro-status-multiplo-check {
+  display: flex;
+  flex: 0 0 18px;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid #c9b9ae;
+  border-radius: 5px;
+  background: #fffdf9;
+  color: #fff;
+}
+
+.filtro-status-multiplo-check.marcado {
+  border-color: #6f432a;
+  background: #6f432a;
+}
+
+.filtro-status-multiplo-check ion-icon {
+  font-size: 14px;
+}
+
 .ordenacao {
   padding-left: 26px;
   border-left: 2px solid #e6ddd8;
@@ -302,6 +440,14 @@
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.pedido-status-grupo {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  min-width: 0;
 }
 
 .pedido-top-right ion-icon {
@@ -404,6 +550,24 @@
   flex-wrap: wrap;
 }
 
+.pedido-prazo {
+  color: #806d63;
+}
+
+.pedido-infos .pedido-prazo.atrasado {
+  width: fit-content;
+  padding: 3px 8px;
+  border: 1px solid #f2b8b5;
+  border-radius: 7px;
+  background: #fff0ef;
+  color: #a52b24;
+  font-weight: 700;
+}
+
+.pedido-infos .pedido-prazo.atrasado ion-icon {
+  color: #b42318;
+}
+
 .pedido-retirada-tabela {
   display: flex;
   flex-direction: column;
@@ -425,6 +589,51 @@
   font-weight: 700;
   line-height: 1.2;
   white-space: nowrap;
+}
+
+.pedido-aviso-pagamento {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 4px 8px;
+  border: 1px solid #f2b8b5;
+  border-radius: 7px;
+  background: #fff0ef;
+  color: #a52b24;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.pedido-aviso-pagamento ion-icon {
+  flex: 0 0 auto;
+  color: #b42318 !important;
+  font-size: 15px;
+}
+
+.pedido-aviso-pagamento-card {
+  margin: -2px 0 10px;
+}
+
+.pedido-status-lista {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.pedido-aviso-pagamento-desktop {
+  max-width: 96px;
+  align-self: flex-start;
+  white-space: normal;
+  overflow-wrap: normal;
+}
+
+.pedido-aviso-pagamento-mobile {
+  display: none;
 }
 
 .pedido-infos .pedido-aviso-atrasado ion-icon,
@@ -512,6 +721,27 @@
   white-space: nowrap;
 }
 
+@media (min-width: 701px) {
+  .tabela-pedidos-wrapper .custom-table {
+    table-layout: fixed;
+  }
+
+  .tabela-pedidos-wrapper .custom-table th:nth-child(1),
+  .tabela-pedidos-wrapper .custom-table td:nth-child(1) { width: 8%; }
+  .tabela-pedidos-wrapper .custom-table th:nth-child(2),
+  .tabela-pedidos-wrapper .custom-table td:nth-child(2) { width: 17%; }
+  .tabela-pedidos-wrapper .custom-table th:nth-child(3),
+  .tabela-pedidos-wrapper .custom-table td:nth-child(3) { width: 22%; }
+  .tabela-pedidos-wrapper .custom-table th:nth-child(4),
+  .tabela-pedidos-wrapper .custom-table td:nth-child(4) { width: 8%; }
+  .tabela-pedidos-wrapper .custom-table th:nth-child(5),
+  .tabela-pedidos-wrapper .custom-table td:nth-child(5) { width: 14%; }
+  .tabela-pedidos-wrapper .custom-table th:nth-child(6),
+  .tabela-pedidos-wrapper .custom-table td:nth-child(6) { width: 12%; }
+  .tabela-pedidos-wrapper .custom-table th:nth-child(7),
+  .tabela-pedidos-wrapper .custom-table td:nth-child(7) { width: 14%; }
+}
+
 .tabela-pedidos-wrapper .custom-table thead tr th:first-child {
   border-top-left-radius: 16px;
 }
@@ -531,10 +761,10 @@
 }
 
 .tabela-pedidos-wrapper .custom-table tbody tr td:last-child {
-  width: 45px;
+  width: 32px;
   text-align: center;
-  padding-left: 8px;
-  padding-right: 18px;
+  padding-left: 4px;
+  padding-right: 4px;
 }
 
 .tabela-pedidos-wrapper .pedido-status {
@@ -738,6 +968,14 @@
   .pedidos-top {
     align-items: flex-start;
     gap: 16px;
+  }
+
+  .pedidos-resumo {
+    gap: 8px;
+  }
+
+  .pedido-resumo-item {
+    min-width: 132px;
   }
 
   .pedidos-top > .botao-adicionar {
@@ -1004,8 +1242,8 @@
 
   .tabela-pedidos-wrapper .custom-table th:last-child,
   .tabela-pedidos-wrapper .custom-table td:last-child {
-    width: 32px;
-    padding-right: 6px;
+    width: 28px;
+    padding-right: 2px;
     padding-left: 2px;
   }
 
@@ -1019,6 +1257,46 @@
 }
 
 @media (max-width: 480px) {
+  .pedidos-top {
+    flex-wrap: wrap;
+  }
+
+  .pedidos-header {
+    width: 100%;
+  }
+
+  .pedidos-resumo {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .pedido-resumo-item {
+    min-width: 0;
+    gap: 6px;
+    padding: 7px 6px;
+    border-radius: 12px;
+  }
+
+  .pedido-resumo-icone {
+    flex-basis: 27px;
+    width: 27px;
+    height: 27px;
+  }
+
+  .pedido-resumo-icone ion-icon {
+    font-size: 16px;
+  }
+
+  .pedido-resumo-texto > span {
+    font-size: 9px;
+    white-space: normal;
+  }
+
+  .pedido-resumo-texto strong {
+    font-size: 17px;
+  }
+
   .tabela-pedidos-wrapper .custom-table th:nth-child(5),
   .tabela-pedidos-wrapper .custom-table td:nth-child(5),
   .tabela-pedidos-wrapper .custom-table th:nth-child(7),
@@ -1055,10 +1333,10 @@
 
   .pedido-mobile-meta {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     flex-wrap: wrap;
-    align-items: center;
-    gap: 6px 8px;
+    align-items: flex-start;
+    gap: 6px;
     color: #9b7d71;
     font-size: 11px;
     line-height: 1.2;
@@ -1109,6 +1387,16 @@
     max-width: 100%;
     padding: 0 5px;
     font-size: 10px;
+  }
+
+  .pedido-aviso-pagamento-mobile {
+    display: inline-flex;
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+
+  .pedido-aviso-pagamento-desktop {
+    display: none;
   }
 
   .tabela-pedidos-wrapper .custom-table th:last-child,
@@ -1163,6 +1451,11 @@
     padding: 0 7px;
   }
 
+  .pedido-top-right .pedido-aviso-pagamento {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+
   .pedido-cliente {
     margin: 10px 0 12px;
     font-size: clamp(16px, 4.6vw, 20px);
@@ -1178,8 +1471,15 @@
     font-size: 12px;
   }
 
-  .pedido-infos span:nth-child(3) {
-    display: none;
+  .pedido-card.com-pagamento-pendente .pedido-infos {
+    margin-bottom: 0;
+  }
+
+  .pedido-card.com-pagamento-pendente .pedido-aviso-pagamento-card {
+    margin: 0 0 2px;
+    padding: 2px 6px;
+    font-size: 10px;
+    line-height: 1.1;
   }
 
   .pedido-footer {

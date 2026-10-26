@@ -14,14 +14,48 @@ import { api } from "../../services/api";
 
 import "../css/Pedidos.css";
 
+const STATUS_PEDIDOS_OPERACIONAIS = [
+  "AGUARDANDO_SINAL",
+  "CONFIRMADO",
+  "EM_PRODUCAO",
+  "PRONTO_PARA_ENTREGA",
+];
+
+function pedidoEstaAtrasado(pedido) {
+  if (!pedido?.dataEntrega || !STATUS_PEDIDOS_OPERACIONAIS.includes(pedido.statusProducao)) return false;
+  const hoje = new Date();
+  const hojeLocal = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}-${String(hoje.getDate()).padStart(2, "0")}`;
+  const dataRetiradaLocal = String(pedido.dataEntrega).slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(dataRetiradaLocal) && dataRetiradaLocal < hojeLocal;
+}
+
+function pedidoTemPagamentoPendente(pedido) {
+  if (pedido?.statusProducao !== "ENTREGUE") return false;
+  const total = Number(pedido.valorTotal ?? 0);
+  const recebido = (Array.isArray(pedido.pagamentos) ? pedido.pagamentos : [])
+    .filter((pagamento) => pagamento.statusPagamento === "CONFIRMADO")
+    .reduce((soma, pagamento) => soma + Number(pagamento.valor ?? 0), 0);
+  return total > recebido;
+}
+
+function calcularDiasAteEntrega(dataEntrega) {
+  const data = String(dataEntrega ?? "").slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(data)) return null;
+  const [ano, mes, dia] = data.split("-").map(Number);
+  const entregaUtc = Date.UTC(ano, mes - 1, dia);
+  const hoje = new Date();
+  const hojeUtc = Date.UTC(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+  return Math.round((entregaUtc - hojeUtc) / 86400000);
+}
+
 function Pedidos() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const filtroDaUrl = searchParams.get("filtro");
   const filtrosDisponiveis = [
     "ATIVOS",
     "PAGAMENTOS_PENDENTES",
+    "ATRASADOS",
     "AGUARDANDO_SINAL",
     "CONFIRMADO",
     "EM_PRODUCAO",
@@ -33,9 +67,10 @@ function Pedidos() {
   
 
   const [busca, setBusca] = useState("");
-  const [statusFiltro, setStatusFiltro] = useState(
-    filtrosDisponiveis.includes(filtroDaUrl) ? filtroDaUrl : "TODOS"
-  );
+  const [statusFiltros, setStatusFiltros] = useState(() => {
+    const filtrosDaUrl = searchParams.getAll("filtro");
+    return filtrosDaUrl.filter((filtro) => filtrosDisponiveis.includes(filtro));
+  });
   const [eventoFiltro, setEventoFiltro] = useState("TODOS");
   const [ordem, setOrdem] = useState("PEDIDO");
   const [ordemCrescente, setOrdemCrescente] = useState(true);
@@ -54,6 +89,7 @@ function Pedidos() {
   const [clientes, setClientes] = useState({});
   const [eventos, setEventos] = useState({});
   const [opcoesEventos, setOpcoesEventos] = useState([]);
+  const [resumoPedidos, setResumoPedidos] = useState({ emProducao: null, atrasados: null, pagamentosPendentes: null, pagamentosPendentesEntregues: null });
   const [carregando, setCarregando] = useState(true);
   const [erroPedidos, setErroPedidos] = useState("");
 
@@ -61,12 +97,13 @@ function Pedidos() {
     navigate(path);
   };
 
-  const alterarStatusFiltro = (valor) => {
-    setStatusFiltro(valor);
+  const alterarStatusFiltros = (valores) => {
+    const filtrosValidos = [...new Set(valores)].filter((filtro) => filtrosDisponiveis.includes(filtro));
+    setStatusFiltros(filtrosValidos);
     setPaginaAtual(1);
     const novosParametros = new URLSearchParams(searchParams);
     novosParametros.delete("filtro");
-    if (valor !== "TODOS") novosParametros.set("filtro", valor);
+    filtrosValidos.forEach((filtro) => novosParametros.append("filtro", filtro));
     setSearchParams(novosParametros, { replace: true });
   };
 
@@ -86,6 +123,44 @@ function Pedidos() {
 
   useEffect(() => {
     let ativa = true;
+
+    api.get("/pedidos/count-by-status")
+      .then((response) => {
+        const contagens = response.data;
+        if (!ativa || !contagens || typeof contagens !== "object") return;
+        setResumoPedidos((atual) => ({
+          ...atual,
+          emProducao: Number(contagens.EM_PRODUCAO ?? 0),
+          pagamentosPendentes: Number(contagens.PAGAMENTOS_PENDENTES ?? 0),
+        }));
+      })
+      .catch((error) => console.error("Erro ao carregar o resumo dos pedidos:", error));
+
+    api.get("/pedidos", { params: { atrasados: true, page: 0, size: 1 } })
+      .then((response) => {
+        if (!ativa) return;
+        setResumoPedidos((atual) => ({
+          ...atual,
+          atrasados: Number(response.data?.totalElements ?? 0),
+        }));
+      })
+      .catch((error) => console.error("Erro ao carregar a contagem de pedidos atrasados:", error));
+
+    api.get("/pedidos", { params: { status: "ENTREGUE", pagamentoPendente: true, page: 0, size: 1 } })
+      .then((response) => {
+        if (!ativa) return;
+        setResumoPedidos((atual) => ({
+          ...atual,
+          pagamentosPendentesEntregues: Number(response.data?.totalElements ?? 0),
+        }));
+      })
+      .catch((error) => console.error("Erro ao contar pedidos entregues com pagamento pendente:", error));
+
+    return () => { ativa = false; };
+  }, []);
+
+  useEffect(() => {
+    let ativa = true;
     const timer = setTimeout(async () => {
       try {
         setCarregando(true);
@@ -94,18 +169,34 @@ function Pedidos() {
         const params = {};
         const buscaNormalizada = busca.trim().replace(/^#/, "");
         if (buscaNormalizada) params.busca = buscaNormalizada;
-        if (statusFiltro === "PAGAMENTOS_PENDENTES") {
-          params.pagamentoPendente = true;
-        } else if (statusFiltro === "ATIVOS") {
-          params.ativos = true;
-        } else if (statusFiltro !== "TODOS") {
-          params.status = statusFiltro;
-        }
+        const filtrosEspeciais = new Set(["ATIVOS", "PAGAMENTOS_PENDENTES", "ATRASADOS"]);
+        const statusSelecionados = statusFiltros.filter((filtro) => !filtrosEspeciais.has(filtro));
+        // O endpoint recebe uma lista de enums. Parâmetros repetidos evitam
+        // depender da conversão de uma string CSV pelo Spring.
+        if (statusSelecionados.length) params.status = statusSelecionados;
+        if (statusFiltros.includes("PAGAMENTOS_PENDENTES")) params.pagamentoPendente = true;
+        if (statusFiltros.includes("ATIVOS")) params.ativos = true;
+        if (statusFiltros.includes("ATRASADOS")) params.atrasados = true;
         if (eventoFiltro !== "TODOS") params.evento = eventoFiltro;
         params.page = paginaAtual - 1;
         params.size = itensPorPagina;
 
-        const response = await api.get("/pedidos", { params });
+        const response = await api.get("/pedidos", {
+          params,
+          paramsSerializer: {
+            serialize: (valores) => {
+              const query = new URLSearchParams();
+              Object.entries(valores).forEach(([chave, valor]) => {
+                if (Array.isArray(valor)) {
+                  valor.forEach((item) => query.append(chave, String(item)));
+                } else if (valor != null) {
+                  query.append(chave, String(valor));
+                }
+              });
+              return query.toString();
+            },
+          },
+        });
         const paginaResposta = response.data;
         const pedidosRecebidos = Array.isArray(paginaResposta?.content)
           ? paginaResposta.content
@@ -169,7 +260,7 @@ function Pedidos() {
       ativa = false;
       clearTimeout(timer);
     };
-  }, [busca, statusFiltro, eventoFiltro, paginaAtual, itensPorPagina]);
+  }, [busca, statusFiltros, eventoFiltro, paginaAtual, itensPorPagina]);
 
   useEffect(() => {
     if (totalPaginas === 0 && paginaAtual !== 1) {
@@ -190,22 +281,16 @@ function Pedidos() {
     return `${dia}/${mes}`;
   };
 
-  const calcularRestante = (dataEntrega) => {
-    if (!dataEntrega) return "";
+  const calcularRestante = (pedido) => {
+    if (["ENTREGUE", "CANCELADO"].includes(pedido.statusProducao)) return "";
 
-    const hoje = new Date();
-    const entrega = new Date(dataEntrega);
-
-    hoje.setHours(0, 0, 0, 0);
-    entrega.setHours(0, 0, 0, 0);
-
-    const diferenca =
-      Math.ceil(
-        (entrega - hoje) / (1000 * 60 * 60 * 24)
-      );
+    const dataEntrega = pedido.dataEntrega;
+    const diferenca = calcularDiasAteEntrega(dataEntrega);
+    if (diferenca == null) return "";
 
     if (diferenca < 0) {
-      return `${Math.abs(diferenca)}d atrasado`;
+      const dias = Math.abs(diferenca);
+      return `Atrasado há ${dias} ${dias === 1 ? "dia" : "dias"}`;
     }
 
     if (diferenca === 0) {
@@ -213,15 +298,6 @@ function Pedidos() {
     }
 
     return `${diferenca}d restante`;
-  };
-
-  const pedidoEstaAtrasado = (pedido) => {
-    if (!pedido.dataEntrega || ["ENTREGUE", "CANCELADO"].includes(pedido.statusProducao)) return false;
-    const hoje = new Date();
-    const entrega = new Date(pedido.dataEntrega);
-    hoje.setHours(0, 0, 0, 0);
-    entrega.setHours(0, 0, 0, 0);
-    return entrega < hoje;
   };
 
   const formatarValor = (valor) => {
@@ -262,7 +338,11 @@ function Pedidos() {
 
       atrasado: pedidoEstaAtrasado(pedido),
 
-      restante: calcularRestante(pedido.dataEntrega),
+      diasAtraso: Math.max(0, -calcularDiasAteEntrega(pedido.dataEntrega)),
+
+      restante: calcularRestante(pedido),
+
+      pagamentoPendente: pedidoTemPagamentoPendente(pedido),
 
       total: formatarValor(pedido.valorTotal),
 
@@ -303,7 +383,15 @@ function Pedidos() {
 
       <main className="pedidos-content">
         <div className="pedidos-top">
-          <HeaderPedidos />
+          <HeaderPedidos
+            resumo={resumoPedidos}
+            filtrosSelecionados={statusFiltros}
+            onFiltrar={(filtro) => alterarStatusFiltros(
+              statusFiltros.includes(filtro)
+                ? statusFiltros.filter((atual) => atual !== filtro)
+                : [...statusFiltros, filtro]
+            )}
+          />
 
           <BotaoAdicionar
             text="Novo Pedido"
@@ -320,8 +408,8 @@ function Pedidos() {
             setBusca(valor);
             setPaginaAtual(1);
           }}
-          statusFiltro={statusFiltro}
-          setStatusFiltro={alterarStatusFiltro}
+          statusFiltros={statusFiltros}
+          setStatusFiltros={alterarStatusFiltros}
           eventoFiltro={eventoFiltro}
           setEventoFiltro={(valor) => {
             setEventoFiltro(valor);
@@ -329,7 +417,7 @@ function Pedidos() {
           }}
           limparFiltros={() => {
             setBusca("");
-            alterarStatusFiltro("TODOS");
+            alterarStatusFiltros([]);
             setEventoFiltro("TODOS");
             setOrdem("PEDIDO");
             setOrdemCrescente(true);

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Modal from "../shared/modal/Modal";
+import FiltroDropdown from "../pedidos/FiltroDropdown";
 import CampoEnderecoPesquisavel from "../clientes/CampoEnderecoPesquisavel";
 import { aplicarMascaraCep, normalizarCep } from "../../utils/cep";
 
@@ -333,16 +334,24 @@ function ModalEditarDadosPedido({ open, pedido, enderecoPadrao, eventos = [], er
 
         {secao === "resumo" && <>
           <div className="form-group">
-            <label htmlFor="pedido-evento">Evento</label>
-            <select id="pedido-evento" name="eventoId" value={form.eventoId} onChange={alterar}>
-              <option value="">Sem evento</option>
-              {form.eventoId && !eventos.some((evento) => String(evento.id) === form.eventoId) && pedido?.eventoNome && (
-                <option value={form.eventoId}>{pedido.eventoNome} (atual)</option>
-              )}
-              {eventos.map((evento) => (
-                <option key={evento.id} value={evento.id}>{evento.nome}{!evento.ativo ? " (inativo)" : ""}</option>
-              ))}
-            </select>
+            <label>Evento</label>
+            <FiltroDropdown
+              className="evento-edicao-dropdown"
+              menuClassName="evento-edicao-dropdown-menu"
+              label="Evento do pedido"
+              value={form.eventoId}
+              onChange={(value) => alterar({ target: { name: "eventoId", value } })}
+              options={[
+                { value: "", label: "Sem evento" },
+                ...(form.eventoId && !eventos.some((evento) => String(evento.id) === form.eventoId) && pedido?.eventoNome
+                  ? [{ value: form.eventoId, label: `${pedido.eventoNome} (atual)` }]
+                  : []),
+                ...eventos.map((evento) => ({
+                  value: String(evento.id),
+                  label: `${evento.nome}${!evento.ativo ? " (inativo)" : ""}`,
+                })),
+              ]}
+            />
           </div>
           {erroEventos && <p className="erro-edicao-pedido" role="status">{erroEventos}</p>}
           <div className="form-group">

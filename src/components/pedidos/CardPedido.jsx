@@ -38,7 +38,7 @@ function CardPedido({ pedido }) {
 
     return (
         <div
-            className={`pedido-card ${isDesativado ? "desativado" : ""}`}
+            className={`pedido-card ${isDesativado ? "desativado" : ""} ${pedido.pagamentoPendente ? "com-pagamento-pendente" : ""}`}
             onClick={handleClick}
             role="button"
             tabIndex={0}
@@ -84,20 +84,21 @@ function CardPedido({ pedido }) {
                 <span className="pedido-data-retirada-card">
                     <ion-icon name="calendar-outline"></ion-icon>
                     {pedido.retirada}
-                    {pedido.atrasado && (
-                        <span className="pedido-aviso-atrasado" title="A retirada deste pedido está atrasada">
-                            <ion-icon name="alert-circle-outline"></ion-icon>
-                            Atrasado
-                        </span>
-                    )}
                 </span>
 
-                <span>
-                    <ion-icon name="time-outline"></ion-icon>
+                {pedido.restante && <span className={`pedido-prazo ${pedido.atrasado ? "atrasado" : ""}`}>
+                    <ion-icon name={pedido.atrasado ? "alert-circle-outline" : "time-outline"}></ion-icon>
                     {pedido.restante}
-                </span>
+                </span>}
 
             </div>
+
+            {pedido.pagamentoPendente && (
+                <span className="pedido-aviso-pagamento pedido-aviso-pagamento-card" title="Este pedido foi entregue e ainda tem pagamento pendente">
+                    <ion-icon name="cash-outline"></ion-icon>
+                    Pagamento pendente
+                </span>
+            )}
 
             <div className="pedido-footer">
 

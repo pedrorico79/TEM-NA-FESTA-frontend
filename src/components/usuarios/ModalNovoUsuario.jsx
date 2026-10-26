@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Modal from "../shared/modal/Modal";
+import FiltroDropdown from "../pedidos/FiltroDropdown";
 import { nomePerfilUsuario } from "../../utils/perfilUsuario";
 import { mensagemErroApi } from "../../utils/mensagemErroApi";
 import { notificar } from "../../utils/notificacoes";
@@ -25,6 +26,10 @@ function ModalNovoUsuario(props) {
             ...novoUsuario,
             [name]: value,
         });
+    }
+
+    function alterarPerfil(perfilId) {
+        setNovoUsuario((atual) => ({ ...atual, perfilId }));
     }
 
     function salvar(e) {
@@ -116,23 +121,21 @@ function ModalNovoUsuario(props) {
                     </div>
                     <div className="form-group">
                         <label>Perfil *</label>
-                        <div className="usuario-select-wrap">
-                            <select
-                                className="usuario-perfil-select"
-                                name="perfilId"
-                                value={novoUsuario.perfilId}
-                                onChange={handleChange}
-                                disabled={!props.perfis?.length}
-                                required
-                            >
-                                <option value="">Selecione um perfil</option>
-                                {(props.perfis || []).map((perfil) => (
-                                    <option key={perfil.id} value={perfil.id}>
-                                        {nomePerfilUsuario(perfil)}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                        <FiltroDropdown
+                            className="usuario-perfil-dropdown"
+                            menuClassName="usuario-perfil-dropdown-menu"
+                            label="Perfil de acesso"
+                            value={novoUsuario.perfilId}
+                            onChange={alterarPerfil}
+                            disabled={!props.perfis?.length}
+                            options={[
+                                { value: "", label: "Selecione um perfil" },
+                                ...(props.perfis || []).map((perfil) => ({
+                                    value: String(perfil.id),
+                                    label: nomePerfilUsuario(perfil),
+                                })),
+                            ]}
+                        />
                     </div>
                 </div>
 

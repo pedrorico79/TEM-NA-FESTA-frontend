@@ -10,18 +10,18 @@ import Tabela from "../shared/tabela/Tabela";
 
 import Paginacao from "../shared/paginacao/Paginacao";
 
-function pedidoEstaAtrasado(dataEntrega) {
+function pedidoEstaAtrasado(dataEntrega, statusProducao) {
+  if (!["AGUARDANDO_SINAL", "CONFIRMADO", "EM_PRODUCAO", "PRONTO_PARA_ENTREGA"].includes(statusProducao)) {
+    return false;
+  }
   if (!dataEntrega) {
     return false;
   }
 
   const hoje = new Date();
-  const data = new Date(dataEntrega);
-
-  hoje.setHours(0, 0, 0, 0);
-  data.setHours(0, 0, 0, 0);
-
-  return data < hoje;
+  const hojeLocal = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}-${String(hoje.getDate()).padStart(2, "0")}`;
+  const dataRetiradaLocal = String(dataEntrega).slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(dataRetiradaLocal) && dataRetiradaLocal < hojeLocal;
 }
 
 function ProximasRetiradas() {
@@ -320,7 +320,7 @@ function ProximasRetiradas() {
   const formattedSections = (pedidosDaPagina ?? []).reduce(
   (acc, pedido) => {
     const titulo = tituloDaSecao(pedido.dataEntrega);
-    const atrasada = pedidoEstaAtrasado(pedido.dataEntrega);
+    const atrasada = pedidoEstaAtrasado(pedido.dataEntrega, pedido.statusProducao);
 
     let secao = acc.find(
       (s) => s.sectionKey === titulo
@@ -367,7 +367,7 @@ function ProximasRetiradas() {
     <div className="status-mobile">
       {getStatus(pedido.statusProducao)}
 
-      {pedidoEstaAtrasado(pedido.dataEntrega) && (
+      {pedidoEstaAtrasado(pedido.dataEntrega, pedido.statusProducao) && (
         <span
           className="aviso-atrasado"
           title="A retirada deste pedido está atrasada"
@@ -386,7 +386,7 @@ function ProximasRetiradas() {
   <div className="status-desktop">
     {getStatus(pedido.statusProducao)}
 
-    {pedidoEstaAtrasado(pedido.dataEntrega) && (
+    {pedidoEstaAtrasado(pedido.dataEntrega, pedido.statusProducao) && (
       <span
         className="aviso-atrasado"
         title="A retirada deste pedido está atrasada"

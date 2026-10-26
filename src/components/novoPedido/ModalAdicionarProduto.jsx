@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import Tabela from "../shared/tabela/Tabela";
+import FiltroDropdown from "../pedidos/FiltroDropdown";
 
 import Modal from "../shared/modal/Modal";
 
@@ -509,14 +510,15 @@ function ModalAdicionarProduto({
                                                 onChange={(event) => atualizarAcrescimoLinha(produto.id, linha, "valor", event.target.value)}
                                                 onBlur={(event) => atualizarAcrescimoLinha(produto.id, linha, "valor", valorAcrescimoVisivel(event.target.value))}
                                             />
-                                            <select
-                                                aria-label={`Unidade do acréscimo da linha ${indice + 1} de ${produto.nome}`}
+                                            <FiltroDropdown
+                                                label={`Unidade do acréscimo da linha ${indice + 1} de ${produto.nome}`}
                                                 value={unidade}
-                                                onChange={(event) => atualizarAcrescimoLinha(produto.id, linha, "tipo", event.target.value)}
-                                            >
-                                                <option value="R$">R$</option>
-                                                <option value="%">%</option>
-                                            </select>
+                                                options={[{ value: "R$", label: "R$" }, { value: "%", label: "%" }]}
+                                                onChange={(valor) => atualizarAcrescimoLinha(produto.id, linha, "tipo", valor)}
+                                                className="unidade-ajuste-dropdown"
+                                                menuClassName="unidade-ajuste-dropdown-menu"
+                                                menuMinWidth={76}
+                                            />
                                         </div>
                                     </div>
                                 </div>

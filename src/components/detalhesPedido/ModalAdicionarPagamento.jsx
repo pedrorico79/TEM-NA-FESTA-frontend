@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Modal from "../shared/modal/Modal";
+import FiltroDropdown from "../pedidos/FiltroDropdown";
 import { mensagemErroApi } from "../../utils/mensagemErroApi";
 
 function criarChaveIdempotencia() {
@@ -102,42 +103,49 @@ function ModalAdicionarPagamento({ open, onClose, onSalvar, metodos, saldoDispon
                         />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="pagamento-metodo">Método de pagamento *</label>
-                        <select
-                            id="pagamento-metodo"
+                        <label>Método de pagamento *</label>
+                        <FiltroDropdown
+                            className="pagamento-form-dropdown"
+                            menuClassName="pagamento-form-dropdown-menu"
+                            label="Método de pagamento"
                             value={metodoPagamentoId}
-                            onChange={(event) => alterar(setMetodoPagamentoId, event.target.value)}
-                            required
+                            onChange={(value) => alterar(setMetodoPagamentoId, value)}
                             disabled={!metodos?.length}
-                        >
-                            <option value="">Selecione</option>
-                            {(metodos || []).map((metodo) => (
-                                <option key={metodo.id} value={metodo.id}>{metodo.nome}</option>
-                            ))}
-                        </select>
+                            options={[
+                                { value: "", label: "Selecione" },
+                                ...(metodos || []).map((metodo) => ({ value: String(metodo.id), label: metodo.nome })),
+                            ]}
+                        />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="pagamento-tipo">Tipo *</label>
-                        <select
-                            id="pagamento-tipo"
+                        <label>Tipo *</label>
+                        <FiltroDropdown
+                            className="pagamento-form-dropdown"
+                            menuClassName="pagamento-form-dropdown-menu"
+                            label="Tipo de pagamento"
                             value={tipoPagamento}
-                            onChange={(event) => alterar(setTipoPagamento, event.target.value)}
-                        >
-                            <option value="SINAL">Sinal</option>
-                            <option value="QUITACAO">Quitação</option>
-                            <option value="INTEGRAL">Integral</option>
-                        </select>
+                            onChange={(value) => alterar(setTipoPagamento, value)}
+                            options={[
+                                { value: "SINAL", label: "Sinal" },
+                                { value: "QUITACAO", label: "Quitação" },
+                                { value: "INTEGRAL", label: "Integral" },
+                            ]}
+                        />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="pagamento-status">Situação *</label>
-                        <select
-                            id="pagamento-status"
+                        <label>Situação *</label>
+                        <FiltroDropdown
+                            className="pagamento-form-dropdown"
+                            menuClassName="pagamento-form-dropdown-menu"
+                            label="Situação do pagamento"
                             value={statusPagamento}
-                            onChange={(event) => alterar(setStatusPagamento, event.target.value)}
-                        >
-                            <option value="CONFIRMADO">Recebido</option>
-                            <option value="PENDENTE">Aguardando confirmação</option>
-                        </select>
+                            onChange={(value) => alterar(setStatusPagamento, value)}
+                            menuMinWidth={220}
+                            options={[
+                                { value: "CONFIRMADO", label: "Recebido" },
+                                { value: "PENDENTE", label: "Aguardando confirmação" },
+                            ]}
+                        />
                     </div>
                 </div>
                 {(erro || erroMetodos) && <p className="pagamento-form-erro" role="alert">{erro || erroMetodos}</p>}

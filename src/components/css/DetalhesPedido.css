@@ -731,7 +731,16 @@
   white-space: nowrap;
 }
 
-.pagamento-acoes button {
+.pagamento-acoes-mobile {
+  display: none;
+}
+
+.pagamento-situacao-com-acoes {
+  display: block;
+}
+
+.pagamento-acoes button,
+.pagamento-acoes-mobile button {
   width: 34px;
   height: 34px;
   margin-left: 4px;
@@ -742,16 +751,19 @@
   cursor: pointer;
 }
 
-.pagamento-acoes button ion-icon {
+.pagamento-acoes button ion-icon,
+.pagamento-acoes-mobile button ion-icon {
   font-size: 19px;
   vertical-align: middle;
 }
 
-.pagamento-acoes button.pagamento-cancelar {
+.pagamento-acoes button.pagamento-cancelar,
+.pagamento-acoes-mobile button.pagamento-cancelar {
   color: #bc5a6c;
 }
 
-.pagamento-acoes button:disabled {
+.pagamento-acoes button:disabled,
+.pagamento-acoes-mobile button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -761,10 +773,64 @@
   color: #786b62;
 }
 
+.pagamento-metadados-mobile {
+  display: none;
+}
+
 .pagamento-form-erro {
   margin: 0;
   color: #b42318;
   font-size: 14px;
+}
+
+.modal-content .pagamento-form-dropdown {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid #e7e0da;
+  border-radius: 14px;
+  background: #fffbf2;
+  color: #2c2421;
+  font: inherit;
+  font-size: 16px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.modal-content .pagamento-form-dropdown:focus-visible {
+  outline: 2px solid #b8aba4;
+  outline-offset: 2px;
+}
+
+.pagamento-form-dropdown-menu button {
+  white-space: nowrap;
+}
+
+.modal-content .evento-edicao-dropdown {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+  padding: 0 14px;
+  border: 2px solid #e7e0da;
+  border-radius: 14px;
+  background: #fff;
+  color: #2c2421;
+  font: inherit;
+  font-size: 16px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.modal-content .evento-edicao-dropdown:focus-visible {
+  outline: 2px solid #b8aba4;
+  outline-offset: 2px;
 }
 
 .pagamento-saldo-disponivel {
@@ -840,23 +906,9 @@
   opacity: 0.45;
 }
 
-.data-retirada-valor .pedido-aviso-atrasado {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  width: fit-content;
-  padding: 3px 8px;
-  border-radius: 6px;
-  background: #ffe1e1;
+.data-retirada-valor .dado-valor.data-retirada-atrasada {
   color: #b42318;
-  font-size: 11px;
   font-weight: 700;
-  line-height: 1.2;
-  white-space: nowrap;
-}
-
-.data-retirada-valor .pedido-aviso-atrasado ion-icon {
-  font-size: 14px;
 }
 
 .endereco-pedido-card {
@@ -1102,6 +1154,71 @@
 .erro-edicao-pedido {
   margin: 12px 0 0;
   color: #b42318;
+}
+
+.pedido-notificar-cliente {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  margin-top: 20px;
+  color: #6f432a;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pedido-notificar-opcional {
+  margin-left: 2px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: #f3ece5;
+  color: #756b67;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.pedido-notificar-cliente input {
+  appearance: none;
+  display: grid;
+  place-content: center;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  border: 1.5px solid #8b6b57;
+  border-radius: 4px;
+  background: #fffdf9;
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pedido-notificar-cliente input::before {
+  content: "";
+  width: 5px;
+  height: 9px;
+  border: solid #fffdf9;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0);
+  transition: transform 0.12s ease;
+}
+
+.pedido-notificar-cliente input:checked {
+  border-color: #6f432a;
+  background: #6f432a;
+}
+
+.pedido-notificar-cliente input:checked::before {
+  transform: rotate(45deg) scale(1);
+}
+
+.pedido-notificar-cliente input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(111, 67, 42, 0.16);
+}
+
+.pedido-notificar-cliente input:disabled {
+  cursor: default;
 }
 
 .item-pedido-edicao {
@@ -1810,6 +1927,49 @@
   cursor: pointer;
 }
 
+/* Seletor R$/% compacto integrado aos campos de ajuste. */
+.unidade-ajuste-dropdown {
+  display: flex;
+  flex: 0 0 52px;
+  align-items: center;
+  justify-content: space-evenly;
+  width: 52px;
+  min-width: 52px;
+  height: 100%;
+  min-height: 0;
+  padding: 0 3px;
+  border: 0;
+  border-left: 1px solid #e7e0da;
+  border-radius: 0;
+  background: #fffdf9;
+  color: #594133;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.unidade-ajuste-dropdown:focus-visible {
+  outline: 2px solid #9b6547;
+  outline-offset: -2px;
+}
+
+.unidade-ajuste-dropdown ion-icon {
+  flex: 0 0 auto;
+  margin: 0 0 0 2px;
+  font-size: 13px;
+}
+
+.unidade-ajuste-dropdown-menu {
+  min-width: 76px;
+}
+
+.modal-content form.modal-editar-itens-pedido .desconto-edicao-controle .unidade-ajuste-dropdown,
+.modal-content form.modal-editar-itens-pedido .valor-ajuste-item-edicao .unidade-ajuste-dropdown,
+.modal-overlay:has(.produtos-selecao-wrapper) .ajuste-selecao-valor .unidade-ajuste-dropdown {
+  height: 100%;
+  min-height: 0;
+}
+
 .produto-item-edicao {
   display: block;
   overflow: hidden;
@@ -2188,12 +2348,109 @@
   }
 
   .tabela-pagamentos-pedido {
-    min-width: 560px;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    table-layout: fixed;
   }
 
+  .tabela-pagamentos-wrapper {
+    overflow-x: hidden;
+  }
+
+  .tabela-pagamentos-pedido th,
+  .tabela-pagamentos-pedido td {
+    min-width: 0;
+    padding: 8px 4px;
+    font-size: 11px;
+    overflow-wrap: anywhere;
+  }
+
+  .tabela-pagamentos-pedido th {
+    font-size: 10px;
+    line-height: 1.2;
+  }
+
+  .tabela-pagamentos-pedido th:nth-child(1),
+  .tabela-pagamentos-pedido td:nth-child(1) { width: 24%; }
+  .tabela-pagamentos-pedido th:nth-child(2),
+  .tabela-pagamentos-pedido td:nth-child(2) { width: 30%; }
+  .tabela-pagamentos-pedido th:nth-child(5),
+  .tabela-pagamentos-pedido td:nth-child(5) { width: 46%; }
+
+  .tabela-pagamentos-pedido th:nth-child(3),
+  .tabela-pagamentos-pedido td:nth-child(3),
   .tabela-pagamentos-pedido th:nth-child(4),
-  .tabela-pagamentos-pedido td:nth-child(4) {
+  .tabela-pagamentos-pedido td:nth-child(4),
+  .tabela-pagamentos-pedido th:nth-child(6),
+  .tabela-pagamentos-pedido td:nth-child(6) {
     display: none;
+  }
+
+  .tabela-pagamentos-pedido .pagamento-status {
+    max-width: 100%;
+    white-space: normal;
+    padding: 3px 5px;
+    font-size: 10px;
+  }
+
+  .tabela-pagamentos-pedido .badge-data {
+    padding: 3px 4px;
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+
+  .tabela-pagamentos-pedido .pagamento-situacao-com-acoes {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tabela-pagamentos-pedido .pagamento-situacao-com-acoes.duas-acoes {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tabela-pagamentos-pedido .pagamento-situacao-com-acoes.acao-unica {
+    justify-content: space-between;
+  }
+
+  .tabela-pagamentos-pedido .pagamento-situacao-com-acoes.acao-unica .pagamento-status {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .tabela-pagamentos-pedido .pagamento-situacao-com-acoes.acao-unica .pagamento-acoes-mobile {
+    width: auto;
+    flex: 0 0 auto;
+  }
+
+  .tabela-pagamentos-pedido .pagamento-acoes-mobile {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .tabela-pagamentos-pedido .pagamento-acoes-mobile button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    margin: 0;
+    border-radius: 10px;
+  }
+
+  .tabela-pagamentos-pedido .pagamento-metadados-mobile {
+    display: block;
+    margin-top: 3px;
+    color: #756b67;
+    font-size: 10px;
+    line-height: 1.25;
+    white-space: normal;
   }
 }
 

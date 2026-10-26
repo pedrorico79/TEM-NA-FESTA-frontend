@@ -19,7 +19,8 @@ function PaginaInicial() {
     pedidosAtivos: 0,
     aguardandoPreparo: 0,
     emProducao: 0,
-    pagamentosPendentes: 0
+    pagamentosPendentes: 0,
+    pagamentosPendentesEntregues: null
   });
 
   const [lembretes, setLembretes] = useState([]);
@@ -113,7 +114,8 @@ function PaginaInicial() {
     api.get("/pedidos/count-by-status")
       .then((res) => {
 
-        setKpis({
+        setKpis((atual) => ({
+          ...atual,
           pedidosAtivos:
             (res.data?.AGUARDANDO_SINAL || 0) +
             (res.data?.CONFIRMADO || 0) +
@@ -122,11 +124,24 @@ function PaginaInicial() {
           aguardandoPreparo: res.data?.CONFIRMADO || 0,
           emProducao: res.data?.EM_PRODUCAO || 0,
           pagamentosPendentes: res.data?.PAGAMENTOS_PENDENTES || 0
-        });
+        }));
 
       })
       .catch((erro) => {
         console.error("Erro ao carregar os indicadores da visão geral:", erro);
+      });
+
+    api.get("/pedidos", {
+      params: { status: "ENTREGUE", pagamentoPendente: true, page: 0, size: 1 }
+    })
+      .then((res) => {
+        setKpis((atual) => ({
+          ...atual,
+          pagamentosPendentesEntregues: Number(res.data?.totalElements ?? 0)
+        }));
+      })
+      .catch((erro) => {
+        console.error("Erro ao contar pedidos entregues com pagamento pendente:", erro);
       });
 
 

@@ -1,6 +1,8 @@
 import KPI from "../shared/kpi/Kpi";
 
 function KpiSection({ kpis, onSelecionar }) {
+  const pagamentosPendentesEntregues = Number(kpis.pagamentosPendentesEntregues ?? 0);
+
   return (
     <div className="kpis-grid">
       <KPI
@@ -36,6 +38,10 @@ function KpiSection({ kpis, onSelecionar }) {
         iconBackground="#fee2e2"
         title="PAGAMENTOS PENDENTES"
         value={kpis.pagamentosPendentes}
+        description={pagamentosPendentesEntregues > 0
+          ? `${pagamentosPendentesEntregues} já entregue${pagamentosPendentesEntregues === 1 ? "" : "s"}`
+          : "\u00a0"}
+        descriptionClassName="kpi-subtitulo-pagamentos"
         onClick={() => onSelecionar("PAGAMENTOS_PENDENTES")}
       />
     </div>

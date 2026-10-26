@@ -5,6 +5,7 @@ function ModalConfirmacao({
     onClose,
     onConfirmar,
     mensagem,
+    conteudoAdicional,
     erro,
     confirmando = false,
     titulo = "Confirmar alteração"
@@ -17,6 +18,7 @@ function ModalConfirmacao({
         >
             <div className="produto-confirmacao-conteudo">
                 <p>{mensagem}</p>
+                {conteudoAdicional}
                 {erro && <p className="erro-edicao-pedido" role="alert">{erro}</p>}
 
                 <div className="modal-actions">

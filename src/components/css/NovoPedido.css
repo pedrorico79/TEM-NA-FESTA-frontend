@@ -1294,6 +1294,42 @@
     font-size: 17px;
 }
 
+/* Mantém o seletor de unidade integrado ao campo numérico, usando o menu padrão do site. */
+.unidade-ajuste-dropdown {
+    display: flex;
+    flex: 0 0 52px;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 52px;
+    min-width: 52px;
+    height: 100%;
+    min-height: 0;
+    padding: 0 3px;
+    border: 0;
+    border-left: 1px solid #e7e0da;
+    border-radius: 0;
+    background: #fffdf9;
+    color: #594133;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.unidade-ajuste-dropdown:focus-visible {
+    outline: 2px solid #9b6547;
+    outline-offset: -2px;
+}
+
+.unidade-ajuste-dropdown ion-icon {
+    flex: 0 0 auto;
+    margin: 0 0 0 2px;
+    font-size: 13px;
+}
+
+.unidade-ajuste-dropdown-menu {
+    min-width: 76px;
+}
+
 button.criar-evento-button{
     margin-top: -6px;
 }
@@ -1545,7 +1581,10 @@ button.criar-evento-button{
     font-size: 12px;
 }
 
-.campo-pagamento-inicial select {
+.campo-pagamento-inicial .campo-pagamento-inicial-dropdown {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     width: 100%;
     min-width: 0;
     height: 40px;
@@ -1554,13 +1593,20 @@ button.criar-evento-button{
     border: 1px solid #e7e0da;
     border-radius: 10px;
     background: #fff;
+    color: #594133;
     font: inherit;
     font-size: 13px;
+    text-align: left;
+    cursor: pointer;
 }
 
-.campo-pagamento-inicial .status-pagamento-inicial {
-    color: #594133;
-    cursor: pointer;
+.campo-pagamento-inicial .campo-pagamento-inicial-dropdown:focus-visible {
+    outline: 2px solid #b8aba4;
+    outline-offset: 2px;
+}
+
+.campo-pagamento-inicial-dropdown-menu button {
+    white-space: nowrap;
 }
 
 .novo-pedido-ajuda-erro {

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Modal from "../shared/modal/Modal";
 import Tabela from "../shared/tabela/Tabela";
+import FiltroDropdown from "../pedidos/FiltroDropdown";
 import ModalAdicionarProduto from "../novoPedido/ModalAdicionarProduto";
 import { api } from "../../services/api";
 
@@ -365,15 +366,15 @@ function ModalEditarItensPedido({ open, itens, descontoPedido = 0, taxaEntrega =
             onBlur={(event) => alterarItem(item.chave, "valorAjuste", valorAjusteVisivel(event.target.value))}
             onMouseDown={(event) => event.stopPropagation()}
           />
-          <select
-            aria-label="Unidade do acréscimo"
+          <FiltroDropdown
+            label="Unidade do acréscimo"
             value={item.unidadeAjuste}
-            onChange={(event) => alterarItem(item.chave, "unidadeAjuste", event.target.value)}
-            onMouseDown={(event) => event.stopPropagation()}
-          >
-            <option value="R$">R$</option>
-            <option value="%">%</option>
-          </select>
+            options={[{ value: "R$", label: "R$" }, { value: "%", label: "%" }]}
+            onChange={(valor) => alterarItem(item.chave, "unidadeAjuste", valor)}
+            className="unidade-ajuste-dropdown"
+            menuClassName="unidade-ajuste-dropdown-menu"
+            menuMinWidth={76}
+          />
         </div>
       </div>,
       `R$ ${subtotal.toFixed(2).replace(".", ",")}`,
@@ -471,14 +472,15 @@ function ModalEditarItensPedido({ open, itens, descontoPedido = 0, taxaEntrega =
                 onChange={(event) => setDescontoAjuste((atual) => ({ ...atual, valor: event.target.value }))}
                 onBlur={(event) => setDescontoAjuste((atual) => ({ ...atual, valor: valorAjusteVisivel(event.target.value) }))}
               />
-              <select
-                aria-label="Unidade do desconto do pedido"
+              <FiltroDropdown
+                label="Unidade do desconto do pedido"
                 value={descontoAjuste.tipo}
-                onChange={(event) => setDescontoAjuste((atual) => ({ ...atual, tipo: event.target.value }))}
-              >
-                <option value="R$">R$</option>
-                <option value="%">%</option>
-              </select>
+                options={[{ value: "R$", label: "R$" }, { value: "%", label: "%" }]}
+                onChange={(valor) => setDescontoAjuste((atual) => ({ ...atual, tipo: valor }))}
+                className="unidade-ajuste-dropdown"
+                menuClassName="unidade-ajuste-dropdown-menu"
+                menuMinWidth={76}
+              />
             </div>
             <strong className="desconto-edicao-valor-final">
               {descontoAjuste.tipo === "%"

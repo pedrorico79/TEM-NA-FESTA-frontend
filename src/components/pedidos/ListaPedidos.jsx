@@ -80,11 +80,17 @@ function ListaPedidos({ pedidos, modoVisualizacao }) {
           <span className="pedido-mobile-retirada">
           <ion-icon name="calendar-outline"></ion-icon>
           {pedido.retirada}
-          {pedido.atrasado && <span className="pedido-aviso-atrasado">
+          {pedido.atrasado && <span className="pedido-aviso-atrasado" title="A retirada deste pedido está atrasada">
             <ion-icon name="alert-circle-outline"></ion-icon>
-            Atrasado
+            Atrasado há {pedido.diasAtraso} {pedido.diasAtraso === 1 ? "dia" : "dias"}
           </span>}
           </span>
+          {pedido.pagamentoPendente && (
+            <span className="pedido-aviso-pagamento pedido-aviso-pagamento-mobile" title="Pedido entregue com pagamento pendente">
+              <ion-icon name="cash-outline"></ion-icon>
+              Pagamento pendente
+            </span>
+          )}
         </div>
       </div>,
 
@@ -102,20 +108,24 @@ function ListaPedidos({ pedidos, modoVisualizacao }) {
         {pedido.atrasado && (
           <span className="pedido-aviso-atrasado" title="A retirada deste pedido está atrasada">
             <ion-icon name="alert-circle-outline"></ion-icon>
-            Atrasado
+            Atrasado há {pedido.diasAtraso} {pedido.diasAtraso === 1 ? "dia" : "dias"}
+          </span>
+        )}
+        {pedido.pagamentoPendente && (
+          <span className="pedido-aviso-pagamento pedido-aviso-pagamento-desktop" title="Pedido entregue com pagamento pendente">
+            <ion-icon name="cash-outline"></ion-icon>
+            Pagamento pendente
           </span>
         )}
       </div>,
 
       pedido.total,
 
-      <span
-        className={`pedido-status ${getStatusClass(
-          pedido.status
-        )}`}
-      >
-        {getStatusText(pedido.status)}
-      </span>,
+      <div className="pedido-status-lista">
+        <span className={`pedido-status ${getStatusClass(pedido.status)}`}>
+          {getStatusText(pedido.status)}
+        </span>
+      </div>,
 
       <ion-icon
         name="chevron-forward-outline"

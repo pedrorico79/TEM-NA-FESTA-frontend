@@ -72,3 +72,10 @@
   font-size: 15px;
   margin: 0;
 }
+
+.kpi-card p.kpi-subtitulo-pagamentos {
+  color: #805b1c;
+  font-size: 11px;
+  line-height: 1.1;
+  min-height: 1.1em;
+}
