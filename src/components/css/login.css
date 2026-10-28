@@ -80,6 +80,32 @@
     padding: clamp(36px, 6vw, 80px) clamp(24px, 4vw, 50px);
 }
 
+.login-mensagem-erro {
+    position: fixed;
+    z-index: 9999;
+    top: 20px;
+    right: 20px;
+    width: max-content;
+    max-width: min(460px, calc(100vw - 40px));
+    padding: 12px 20px;
+    border-radius: 8px;
+    background: #b42318;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.45;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 600px) {
+    .login-mensagem-erro {
+        top: 12px;
+        right: 12px;
+        max-width: calc(100vw - 24px);
+        padding: 14px;
+    }
+}
+
 .input-container {
     display: flex;
     flex-direction: column;
