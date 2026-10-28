@@ -7,6 +7,7 @@ import Menu from "../shared/menu/Menu";
 import FiltrosRelatorio from "../relatorios/FiltrosRelatorio";
 import GraficosRelatorio from "../relatorios/GraficosRelatorio";
 import LoadingState from "../shared/LoadingState";
+import { formatarMoeda, formatarPercentual } from "../relatorios/formatarPercentual";
 
 import "../css/Relatorios.css";
 
@@ -455,7 +456,7 @@ function Relatorios() {
                     <Kpi
                         icon="time-outline"
                         title="TAXA DE CONCLUSÃO"
-                        value={`${kpis?.taxaConclusaoPorcentagem ?? 0}%`}
+                        value={`${formatarPercentual(kpis?.taxaConclusaoPorcentagem)}%`}
                         description={`${kpis?.totalEntregues ?? 0} de ${kpis?.totalPedidos ?? 0} pedidos entregues`}
                         iconColor="#f59e0b"
                         iconBackground="#fef3c7"
@@ -464,7 +465,7 @@ function Relatorios() {
                     <Kpi
                         icon="checkmark-circle"
                         title="FATURAMENTO"
-                        value={`R$ ${kpis?.faturamentoTotal ?? 0}`}
+                        value={formatarMoeda(kpis?.faturamentoTotal)}
                         description={tipoFiltro === "evento"
                             ? "Vendas pelo valor dos pedidos deste evento"
                             : "Vendas pelo valor dos pedidos no período"}

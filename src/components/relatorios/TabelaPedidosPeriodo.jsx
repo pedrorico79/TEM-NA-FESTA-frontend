@@ -1,4 +1,5 @@
 import Tabela from "../shared/tabela/Tabela";
+import { formatarMoeda } from "./formatarPercentual";
 
 function TabelaPedidosPeriodo(props) {
 
@@ -14,7 +15,7 @@ function TabelaPedidosPeriodo(props) {
         pedido.id,
         pedido.clienteNome,
         pedido.eventoNome,
-        `R$ ${pedido.valorTotal}`,
+        formatarMoeda(pedido.valorTotal),
         pedido.statusNome
     ]);
 

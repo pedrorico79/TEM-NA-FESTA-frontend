@@ -1,4 +1,5 @@
 import Tabela from "../shared/tabela/Tabela";
+import { formatarMoeda, formatarPercentual } from "./formatarPercentual";
 
 function TabelaProdutosVendidos(props) {
 
@@ -14,8 +15,8 @@ function TabelaProdutosVendidos(props) {
         index + 1,
         <span className="relatorio-produto-item" title={produto.item}>{produto.item}</span>,
         produto.qtdeVendida,
-        `R$ ${produto.faturamento}`,
-        `${produto.porcentagemDoTotal}%`
+        formatarMoeda(produto.faturamento),
+        `${formatarPercentual(produto.porcentagemDoTotal)}%`
     ]);
 
     return (

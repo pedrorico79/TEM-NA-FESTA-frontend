@@ -1,4 +1,5 @@
 import Tabela from "../shared/tabela/Tabela";
+import { formatarMoeda } from "./formatarPercentual";
 
 function TabelaComparativoEventos(props) {
 
@@ -16,14 +17,8 @@ function TabelaComparativoEventos(props) {
             {props.modoEvento ? evento.periodo : evento.evento}
         </span>,
         evento.pedidosTotais,
-        evento.faturamento?.toLocaleString("pt-BR", {
-            style: "currency",
-            currency: "BRL"
-        }) ?? "R$ 0,00",
-        evento.ticketMedio?.toLocaleString("pt-BR", {
-            style: "currency",
-            currency: "BRL"
-        }) ?? "R$ 0,00"
+        formatarMoeda(evento.faturamento),
+        formatarMoeda(evento.ticketMedio)
     ]);
 
     return (
